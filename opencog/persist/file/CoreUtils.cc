@@ -1,10 +1,11 @@
 /*
- * opencog/persist/file/CompositeRenumber.cc
+ * opencog/perist/file/CoreUtils.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
  *
- * Written by Welter Silva <welter@vettalabs.com>
+ * Written by Thiago Maia <thiago@vettatech.com>
+ *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,25 +23,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdlib.h>
-
-#include <opencog/util/platform.h>
-
-#include "CompositeRenumber.h"
 #include "CoreUtils.h"
+
+#include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
 
-void CompositeRenumber::updateVersionHandles(CompositeTruthValue &ctv,
-                                             HandleMap<Atom *> *handles)
+/* Module for including any core-specific common utilities */
+void CoreUtils::updateHandle(Handle *handle, HandleMap<Atom *> *handles) throw (RuntimeException)
 {
-    VersionedTruthValueMap newVersionedTVs;
-    for (VersionedTruthValueMap::const_iterator itr = ctv.versionedTVs.begin();
-            itr != ctv.versionedTVs.end(); itr++) {
-        VersionHandle key = itr->first;
-        CoreUtils::updateHandle(&(key.substantive), handles);
-        newVersionedTVs[key] = itr->second;
+    //printf("CoreUtils::updateHandle(%p)\n", *handle);
+    //if (TLB::isInvalidHandle(*handle)) return;
+
+    Atom *a  = handles->get(*handle);
+    // Assume that the HandleMap stores <Handle, Atom *> pairs ....
+    Handle newH = TLB::getHandle(a);
+    if (TLB::isValidHandle(newH)) {
+        *handle = newH;
+    } else {
+        newH = TLB::addAtom(a);
+        if (TLB::isValidHandle(newH)) {
+            *handle = newH;
+        } else {
+            throw RuntimeException(TRACE_INFO, "CoreUtils::updateHandle: unknown handle %p", handle->value());
+        }
     }
-    ctv.versionedTVs = newVersionedTVs;
 }
+

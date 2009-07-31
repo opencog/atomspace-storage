@@ -1,10 +1,11 @@
 /*
- * opencog/persist/file/CompositeRenumber.h
+ * opencog/persist/file/CoreUtils.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
  *
- * Written by Welter Silva <welter@vettalabs.com>
+ * Written by Thiago Maia <thiago@vettatech.com>
+ *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,28 +23,38 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG__COMPOSITE_RENUMBER_H_
-#define _OPENCOG__COMPOSITE_RENUMBER_H_
+#ifndef _OPENCOG_CORE_UTILS_H_
+#define _OPENCOG_CORE_UTILS_H_
 
-#include <opencog/util/platform.h>
-
+#include <opencog/atomspace/types.h>
 #include <opencog/atomspace/HandleMap.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 
 namespace opencog
 {
 
-class CompositeRenumber
+class Atom;
+
+/** Module for including any core-specific common utilities */
+class CoreUtils
 {
+
 public:
+
     /**
-     * Updates all VersionHandles of the versioned TVs in this object
-     * using the HandleMap passed as argument.
-     * @param A HandleMap that maps old Handles to new ones.
+     * This method is used to translate an old handle to a new one mapped
+     * in a hash table.
+     *
+     * Handle-remapping is very specific of the save-to-file, 
+     * restore-from-file persistence code.  It does potentially 
+     * dangerous things with UUID's, and can easily trash a perfectly
+     * good hypergraph if misused. Its hard to debug. Caution!
+     *
+     * @param Handle which will be translated.
+     * @param Table that maps from old to new handles.
      */
-    static void updateVersionHandles(CompositeTruthValue&, HandleMap<Atom *> *handles);
+    static void updateHandle(Handle *, HandleMap<Atom *> *) throw (RuntimeException);
 };
 
 } // namespace opencog
 
-#endif // _OPENCOG__COMPOSITE_RENUMBER_H_
+#endif // _OPENCOG_CORE_UTILS_H_
