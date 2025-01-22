@@ -1,22 +1,59 @@
+AtomSpace I/O: The StorageNode API
+----------------------------------
+This
+[AtomSpace](https://github.com/opencog/atomspace)
+module contains the base class, called the
+[StorageNode](https://wiki.opencog.org/w/StorageNode)
+for many/most forms of I/O storage and movement of
+[Atoms](https://wiki.opencog.org/w/Atom) into, out of and between
+AtomSpaces. It is mandatory for the
+[RocksStorageNode](https://github.com/opencog/atomspace-rocks)
+which stores Atoms and AtomSpaces to disk, via RocksDB, and to
+[CogStorageNode](https://github.com/opencog/atomspace-cog), which
+moves Atoms between AtomSpaces on different network nodes, and
+[ProxyNodes](https://wiki.opencog.org/w/ProxyNode) which provides
+mirroring, routing, caching and filtering between AtomSpaces.
+An assortment of other interesting odds and ends can be found here.
 
-AtomSpace I/O and Persistence
------------------------------
+### Alternatives
+The `StorageNode` API is the original, primary API for moving Atoms
+around. It's 'mature': full-featured, fully debugged, heavily used,
+stable, complete.
 
-This directory contains code for reading, writing, storing, sending
-AtomSpace contents to files, databases or network.  This repo provides
-the core API, a file backend, and other bits & pieces. Other git repos
-provide a RocksDB backend (`atomspace-rocks`) and a network backend
-(`atomspace-cog`). The old Postgres backend has been moved to the
-`atomspace-pgres` git repo.
+Just like any mature API, it works great, but we wish it did some
+things differently. Towards that end, a new I/O paradigm is being
+actively researched, called
+[sensory](https://github.com/opencog/sensory)
+and
+[motor](https://github.com/opencog/motor)
+As the names suggest, this new research effort attempts to take an
+agent-centric view of the world: of an "inside" and an "outside",
+with the "inside" being able to look out explore and manipulate the
+"outside" world. Data (Atoms and
+[Values](https://wiki.opencog.org/w/Value) flow in and flow out,
+with the "agent" "inside" being able to actively open, close, read,
+write datastreams, instead of passively being force-fed data-streams
+via some external pipeline or harness.
 
+In principle, the sensori-motor system should someday be able to do
+everything the `StorageNode` does, and a lot more. For now, however,
+it is an active research & development project, unstable, incomplete
+and buggy.
+
+New subsystems that were "needed yesterday" and have to be absolutely
+100% stable and rock-solid out the gate should be developed using the
+StorageNode API. If you want to explore a weird and strange different
+world, take a look at the sensori-motor system.
+
+### Contents
+The directory naming scheme here follows that in all other AtomSpace
+projects. The main code is in [opencog/persist](opencog/persist).
 Local subdirectories include:
 
 * api      -- The generic StorageNode API.
               It provides open, close, load and store primitives that
-              work for any of the I/O back-ends, including those not
-              in this repo (there are at several others, including one
-              for RocksDB and one that allows AtomSpaces to trade
-              Atoms over the network.)
+              work for any of the standard I/O back-ends, including
+              RocksDB and the CogServer.
 
 * csv      -- Load Values from CSV/TSV files. These are "delimiter
               separated values" -- ordinary tables. Each column in the
