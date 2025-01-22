@@ -135,6 +135,24 @@ Local subdirectories include:
               if you think you really really want this, well, here it is.
 
 
+Build and Install
+-----------------
+The module builds and isntalls just like all other AtomSpace modules.
+There are no prerequistes, other than the AtomSpac itself. The general
+instructions are:
+```
+cd /where/ever/you/cloned/this/to
+rm -rf build
+git checkout master
+git pull
+mkdir build
+cd build
+cmake ..
+make -j
+sudo make install
+```
+The unit tests can be run by saying `make check`. They should all pass.
+
 Interesting Reading
 -------------------
 There are some interesting comments about (distributed) storage in the
