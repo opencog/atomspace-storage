@@ -10,7 +10,7 @@ set(ATOMSPACE_STORAGE_LIBRARIES
 	persist-flow
 	persist-proxy
 	storage-types
-	load_scm
+	fast_load_scm
 	sexpr
 	sexcom
 	persist
