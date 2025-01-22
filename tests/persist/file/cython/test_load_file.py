@@ -55,3 +55,40 @@ class UtilitiesTest(TestCase):
             new_space1 = AtomSpace()
             load_file(tmp_file, new_space1)
             self.assertTrue(len(new_space1) == 4)
+
+
+def gen_name():
+    tmp = []
+    ascii = [chr(x) for x in range(32, 127)]
+    for _ in range(10):
+        char = random.choice(ascii)
+        if char == '"':
+            char = '\\"'
+        if char == '\\':
+            char = ''
+        tmp.append(char)
+    return ''.join(tmp)
+
+
+def gen_atoms(atomspace, num=100000):
+    predicates = [
+        atomspace.add_node(types.PredicateNode, f'predicate{str(x)}')
+        for x in range(1)
+    ]
+    concepts = [
+        atomspace.add_node(types.ConceptNode, f'concept{gen_name()}')
+        for _ in range(1000)
+    ]
+    link_types = [types.ListLink, types.InheritanceLink, types.MemberLink]
+    while(len(atomspace) < num):
+        c1 = random.choice(concepts)
+        c2 = random.choice(concepts)
+        if c1 == c2:
+            continue
+        link_type = random.choice(link_types)
+        arg = atomspace.add_link(link_type, [c1, c2])
+        predicate = random.choice(predicates)
+        atomspace.add_link(types.EvaluationLink,
+                [predicate,
+                arg])
+    return atomspace
