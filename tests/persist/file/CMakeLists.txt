@@ -1,2 +1,22 @@
 
 ADD_GUILE_TEST(SCMLoadFile scm-load-file.scm)
+
+# -----------------------
+## Python gorp
+
+# "PYTHONPATH=???"
+set(TEST_ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
+   "PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
+   "GUILE_LOAD_PATH=${GUILE_LOAD_PATH}")
+
+IF (HAVE_NOSETESTS)
+
+   ADD_TEST(CythonUtilities ${NOSETESTS_EXECUTABLE} -vs
+      ${CMAKE_SOURCE_DIR}/tests/persist/file/cython/)
+   SET_PROPERTY(TEST CythonUtilities
+      PROPERTY DEPENDS atomspace_cython)
+   SET_PROPERTY(TEST CythonUtilities
+      APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
+
+
+ENDIF (HAVE_NOSETESTS)
