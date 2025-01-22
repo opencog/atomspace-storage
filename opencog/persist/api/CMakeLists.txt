@@ -28,7 +28,7 @@ ADD_GUILE_MODULE (FILES
 #	COMPILE
 )
 
-INSTALL (TARGETS persist EXPORT AtomSpaceTargets
+INSTALL (TARGETS persist EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

@@ -22,7 +22,7 @@ TARGET_LINK_LIBRARIES(persist-flow
 # module.
 ADD_GUILE_EXTENSION(SCM_CONFIG persist-flow "opencog-ext-path-persist-flow")
 
-INSTALL (TARGETS persist-flow EXPORT AtomSpaceTargets
+INSTALL (TARGETS persist-flow EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

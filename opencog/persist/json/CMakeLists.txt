@@ -7,8 +7,6 @@ ADD_LIBRARY (json
 	JsonEval.cc
 )
 
-ADD_DEPENDENCIES(json opencog_atom_types)
-
 TARGET_LINK_LIBRARIES(json
 	atomspace
 	execution
@@ -16,7 +14,7 @@ TARGET_LINK_LIBRARIES(json
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS json EXPORT AtomSpaceTargets
+INSTALL (TARGETS json EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

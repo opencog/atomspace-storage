@@ -9,7 +9,7 @@ TARGET_LINK_LIBRARIES(tlb
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS tlb EXPORT AtomSpaceTargets
+INSTALL (TARGETS tlb EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

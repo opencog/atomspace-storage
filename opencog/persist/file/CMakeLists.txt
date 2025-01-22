@@ -11,7 +11,7 @@ TARGET_LINK_LIBRARIES(load_scm
 	sexpr
 )
 
-INSTALL (TARGETS load_scm EXPORT AtomSpaceTargets
+INSTALL (TARGETS load_scm EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
@@ -45,7 +45,7 @@ ADD_GUILE_MODULE (FILES
 #  COMPILE
 )
 
-INSTALL (TARGETS persist-file EXPORT AtomSpaceTargets
+INSTALL (TARGETS persist-file EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

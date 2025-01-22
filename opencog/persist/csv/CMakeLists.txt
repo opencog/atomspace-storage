@@ -5,15 +5,13 @@ ADD_LIBRARY (csv
 	table_read.cc
 )
 
-ADD_DEPENDENCIES(csv opencog_atom_types)
-
 TARGET_LINK_LIBRARIES(csv
 	atomspace
 	atombase
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS csv EXPORT AtomSpaceTargets
+INSTALL (TARGETS csv EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
@@ -36,7 +34,7 @@ TARGET_LINK_LIBRARIES(csv-table
 
 ADD_GUILE_EXTENSION(SCM_CONFIG csv-table "opencog-ext-path-csv-table")
 
-INSTALL (TARGETS csv-table EXPORT AtomSpaceTargets
+INSTALL (TARGETS csv-table EXPORT AtomSpaceStorageTargets
    DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

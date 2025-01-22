@@ -6,15 +6,13 @@ ADD_LIBRARY (sexpr
 	ValueSexpr.cc
 )
 
-ADD_DEPENDENCIES(sexpr opencog_atom_types)
-
 TARGET_LINK_LIBRARIES(sexpr
 	atomspace
 	atombase
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS sexpr EXPORT AtomSpaceTargets
+INSTALL (TARGETS sexpr EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

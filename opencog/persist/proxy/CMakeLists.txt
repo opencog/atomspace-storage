@@ -29,7 +29,7 @@ TARGET_LINK_LIBRARIES(persist-proxy
 # module.
 ADD_GUILE_EXTENSION(SCM_CONFIG persist-proxy "opencog-ext-path-persist-proxy")
 
-INSTALL (TARGETS persist-proxy EXPORT AtomSpaceTargets
+INSTALL (TARGETS persist-proxy EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

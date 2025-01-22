@@ -5,8 +5,6 @@ ADD_LIBRARY(datalog
 	EncodeProlog.cc
 )
 
-ADD_DEPENDENCIES(datalog opencog_atom_types)
-
 TARGET_LINK_LIBRARIES(datalog
 	atomspace
 	execution
@@ -14,7 +12,7 @@ TARGET_LINK_LIBRARIES(datalog
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS datalog EXPORT AtomSpaceTargets
+INSTALL (TARGETS datalog EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

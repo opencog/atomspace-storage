@@ -6,7 +6,6 @@ ADD_LIBRARY (sexcom
 	SexprEval.cc
 )
 
-ADD_DEPENDENCIES(sexcom opencog_atom_types)
 ADD_DEPENDENCIES(sexcom storage_types)
 
 TARGET_LINK_LIBRARIES(sexcom
@@ -19,7 +18,7 @@ TARGET_LINK_LIBRARIES(sexcom
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS sexcom EXPORT AtomSpaceTargets
+INSTALL (TARGETS sexcom EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
