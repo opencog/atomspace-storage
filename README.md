@@ -109,26 +109,30 @@ Local subdirectories include:
               clauses as Atomese.
 
 * proxy    -- Implements a hierarchy of StorageNodes that act as agents.
-              This includes a ReadThruProxy and a WriteThruProxy, that
-              will pass storage I/O requests on to other StorageNodes.
+              This includes a
+              [ReadThruProxy](https://wiki.opencog.org/w/ReadThruProxy)
+              and a
+              [WriteThruProxy](https://wiki.opencog.org/w/WriteThruProxy),
+              These pass storage I/O requests on to other StorageNodes.
               This is useful for configuring complex I/O pipelines
               in Atomese.
 
 * sexpr    -- Read and write Atomese s-expressions as UTF-8 strings.
-              Used both by the `FileStorageNode` and by `CogStorageNode`,
-              which works in conjunction with the CogServer to provide
-              network-distributed AtomSpaces.
+              Used both by the `FileStorageNode` and by `CogStorageNode`.
+              The latter works in conjunction with the
+              [CogServer](https://github.com/opencog/cogserver)
+              to provide network-distributed AtomSpaces.
 
 * sexcom   -- Respond to a very special set of 17 s-expression commands.
               These are used to provide high-speed network I/O for the
-              CogServer to provide network-distributed AtomSpaces.
+              CogServer, to provide network-distributed AtomSpaces.
 
 * tlb      -- Implements a table that issues a unique integer ID for an
               Atom. Useful, if you think your code needs to substitute
               integer ID's for Atoms. Note that doing this consumes both
-              RAM, to store the table, and CPU, to perform lookup. So it
-              is probably not a good idea, in general. But if you really
-              really need this, well, here it is.
+              RAM, to store the table, and CPU, to perform the lookup.
+              So using it is almost surely a bad idea, in general. But
+              if you think you really really want this, well, here it is.
 
 
 Interesting Reading
@@ -142,16 +146,5 @@ most promising backend would seem to be "blazegraph":
 http://sourceforge.net/projects/bigdata/ (GPLv2)
 http://www.blazegraph.com/
 
-Future directions
------------------
-The `StorageNode` user API is implemented in about a dozen different
-scheme (and python) functions.  This is great, if you are a human
-writing ordinary code. Not so hot, if you're an algorithm trying to
-get things done.  Therefore, it is anticipated that an API based on
-the [sensori-motor system](https://github.com/opencog/sensory) will
-be provided at some point in the future (i.e. when it becomes urgent
-to do so.)
-
-In the sensori-motor system all things external to the AtomSpace are
-described by Atomese, and are accessible via pure Atomese. The goal is
-to open up the external world to algorithms.
+Please open new discussions, issues or pull requests if you think there
+are other interesting things worth mentioning.
