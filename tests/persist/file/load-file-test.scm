@@ -26,7 +26,7 @@
 ; Hack filename to go to the correct directory for the unit tests.
 ; This test runs in the build dir, and the file to load is in the
 ; source dir.
-(load-file "../../../tests/persist/file/load-file-test-data.scm")
+(load-file "../../../../tests/persist/file/load-file-test-data.scm")
 
 (define names (map cog-name (cog-get-atoms "ConceptNode")))
 
