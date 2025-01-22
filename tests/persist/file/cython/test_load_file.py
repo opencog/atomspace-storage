@@ -7,7 +7,8 @@ from unittest import TestCase
 
 from opencog.type_constructors import *
 from opencog.atomspace import AtomSpace
-from opencog.utilities import initialize_opencog, finalize_opencog, load_file
+from opencog.utilities import initialize_opencog, finalize_opencog
+from opencog.storage import load_file
 
 __author__ = 'Curtis Faith'
 
