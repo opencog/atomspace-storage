@@ -54,8 +54,14 @@ def store_atomspace() :
 	cdef cHandle zilch  # cHandle.UNDEFINED
 	dflt_store_atomspace(zilch)
 
-from opencog.storage cimport c_load_file
+# -----------------------------------------
+# Unrelated stuff
+
+from opencog.atomspace cimport AtomSpace
+# from opencog.storage cimport c_load_file
 
 def load_file(path, AtomSpace atomspace):
 	cdef string p = path.encode('utf-8')
 	c_load_file(p, deref(atomspace.atomspace))
+
+# -----------------------------------------
