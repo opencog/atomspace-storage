@@ -1,7 +1,7 @@
 
 # Generic Comma-Seperated Value (CSV) decoding.
 # Also TSV (tab-seperated)
-ADD_LIBRARY (csv
+ADD_LIBRARY (csv SHARED
 	table_read.cc
 )
 
@@ -22,7 +22,7 @@ INSTALL (FILES
 
 # -------------------------------
 
-ADD_LIBRARY (csv-table
+ADD_LIBRARY (csv-table SHARED
    TableSCM.cc
 )
 

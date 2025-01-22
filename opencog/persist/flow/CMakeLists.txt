@@ -2,7 +2,7 @@
 # The storage_types.h file is written to the build directory
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
-ADD_LIBRARY (persist-flow
+ADD_LIBRARY (persist-flow SHARED
 	FetchValueOfLink.cc
 	StoreValueOfLink.cc
 )
@@ -12,8 +12,7 @@ ADD_DEPENDENCIES(persist-flow storage_types)
 
 TARGET_LINK_LIBRARIES(persist-flow
 	persist
-	atomcore
-	atombase
+	${ATOMSPACE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 )
 

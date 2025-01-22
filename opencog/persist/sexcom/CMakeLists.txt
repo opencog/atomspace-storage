@@ -1,6 +1,6 @@
 
 # S-expression command dispatcher
-ADD_LIBRARY (sexcom
+ADD_LIBRARY (sexcom SHARED
 	Commands.cc
 	Dispatcher.cc
 	SexprEval.cc

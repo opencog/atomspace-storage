@@ -1,6 +1,6 @@
 
 # Generic S-expression decoding.
-ADD_LIBRARY (sexpr
+ADD_LIBRARY (sexpr SHARED
 	AtomSexpr.cc
 	FrameSexpr.cc
 	ValueSexpr.cc

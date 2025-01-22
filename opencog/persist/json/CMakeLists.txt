@@ -1,6 +1,6 @@
 
 # Generic JSON decoding.
-ADD_LIBRARY (json
+ADD_LIBRARY (json SHARED
 	DecodeJson.cc
 	EncodeJson.cc
 	JSCommands.cc

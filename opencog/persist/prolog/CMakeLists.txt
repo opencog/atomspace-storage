@@ -1,6 +1,6 @@
 
 # Generic Datalog/prolog decoding.
-ADD_LIBRARY(datalog
+ADD_LIBRARY(datalog SHARED
 	DecodeProlog.cc
 	EncodeProlog.cc
 )

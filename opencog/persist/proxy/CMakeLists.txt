@@ -2,7 +2,7 @@
 # The storage_types.h file is written to the build directory
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
-ADD_LIBRARY (persist-proxy
+ADD_LIBRARY (persist-proxy SHARED
 	CachingProxy.cc
 	DynamicDataProxy.cc
 	NullProxy.cc

@@ -4,7 +4,7 @@ IF (HAVE_CYTHON)
 	ADD_SUBDIRECTORY (cython)
 ENDIF (HAVE_CYTHON)
 
-ADD_LIBRARY (persist
+ADD_LIBRARY (persist SHARED
 	BackingQuery.cc
 	BackingStore.cc
 	PersistSCM.cc

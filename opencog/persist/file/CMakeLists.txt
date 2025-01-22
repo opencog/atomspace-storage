@@ -2,7 +2,7 @@
 # -------------------------------
 # File-specific code.
 
-ADD_LIBRARY (load_scm
+ADD_LIBRARY (load_scm SHARED
 	fast_load.cc
 )
 
@@ -22,7 +22,7 @@ INSTALL (FILES
 
 # -------------------------------
 
-ADD_LIBRARY (persist-file
+ADD_LIBRARY (persist-file SHARED
 	FileStorage.cc
 	PersistFileSCM.cc
 )
