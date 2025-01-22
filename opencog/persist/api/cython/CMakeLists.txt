@@ -40,7 +40,7 @@ TARGET_LINK_LIBRARIES(storage_cython
 	# ${NO_AS_NEEDED}
 	persist
 	storage-types
-	atomspace
+	${ATOMSPACE_LIBRARIES}
 	${PYTHON_LIBRARIES}
 )
 
