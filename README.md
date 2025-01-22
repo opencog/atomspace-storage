@@ -38,9 +38,9 @@ to another). "Moving" doesn't have to involve literal arms and legs
 and wheels (although it could. Physical robot control is one of the
 goals.)
 
-Similarly one can "look at" a file in a file system, "look at" (listen
+Similarly, one can "look at" a file in a file system, "look at" (listen
 to?) a chat conversation, or "look at" a data stream flowing out of some
-science experiment (Kamiokande neutrino detector, Vera Rubintelescope,
+science experiment (Kamiokande neutrino detector, Vera Rubin telescope,
 ...) Again, "looking and seeing" does not need to be literally video
 and audio.  Note that "looking" does have a motor aspect: the looker
 does need to actively change the focus of attention in order to "look"
