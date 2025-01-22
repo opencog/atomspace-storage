@@ -101,6 +101,15 @@ ENDIF (NOT CXXTEST_FOUND)
 include(OpenCogFindGuile)
 include(OpenCogFindPython)
 
+# Hackalicious. The AtomSpace cython bindings require boost
+# but the dependency is somehow bungled, so we make up for it here.
+# See /usr/local/lib/cmake/AtomSpace/AtomSpaceTargets.cmake:229
+# set_target_properties
+# The link interface of target "PythonEval" contains:
+#    Boost::system
+# but the target was not found.
+FIND_PACKAGE(Boost REQUIRED COMPONENTS system)
+
 # ===================================================================
 # Include configuration.
 

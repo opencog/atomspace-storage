@@ -22,7 +22,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include "PersistCython.h"
-#include "opencog/cython/opencog/Utilities.h"
+#include <opencog/cython/opencog/Utilities.h>
 
 using namespace opencog;
 
