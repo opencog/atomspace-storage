@@ -5,7 +5,7 @@
 (define-module (opencog csv-table))
 
 (use-modules (opencog))
-(use-modules (opencog as-config))
+(use-modules (opencog as-storage-config))
 (load-extension
 	(string-append opencog-ext-path-csv-table "libcsv-table")
 	"opencog_csv_table_init")

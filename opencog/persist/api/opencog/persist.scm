@@ -8,7 +8,7 @@
 (use-modules (ice-9 optargs)) ; for define*-public
 
 (use-modules (opencog))
-(use-modules (opencog as-config))
+(use-modules (opencog as-storage-config))
 (load-extension (string-append opencog-ext-path-persist "libpersist")
 	"opencog_persist_init")
 
