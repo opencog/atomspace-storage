@@ -1,5 +1,5 @@
 
-ADD_GUILE_TEST(SCMLoadFile scm-load-file.scm)
+ADD_GUILE_TEST(LoadFileTest load-file-test.scm)
 
 # -----------------------
 ## Python gorp

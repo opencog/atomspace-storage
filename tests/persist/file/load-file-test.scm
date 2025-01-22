@@ -1,9 +1,18 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
 (use-modules (opencog exec))
+(use-modules (opencog test-runner))
+
+; Unit test fails if run by hand, and this module is not
+; installed. So avoid that annoyance, and twinkle the module
+; load path.
+(if (resolve-module (list 'opencog 'persist) #:ensure #f)
+	#t
+	(add-to-load-path "../../../build/opencog/scm"))
+(format #t "Load path is: ~A\n" %load-path)
+
 (use-modules (opencog persist))
 (use-modules (opencog persist-file))
-(use-modules (opencog test-runner))
 
 (opencog-test-runner)
 
@@ -17,7 +26,7 @@
 ; Hack filename to go to the correct directory for the unit tests.
 ; This test runs in the build dir, and the file to load is in the
 ; source dir.
-(load-file "../../../tests/scm/scm-load-file-test-data.scm")
+(load-file "../../../tests/persist/file/load-file-test-data.scm")
 
 (define names (map cog-name (cog-get-atoms "ConceptNode")))
 

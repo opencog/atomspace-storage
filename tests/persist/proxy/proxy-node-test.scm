@@ -9,8 +9,8 @@
 ; installed. So avoid that annoyance, and twinkle the module
 ; load path.
 (if (resolve-module (list 'opencog 'persist) #:ensure #f)
-       #t
-       (add-to-load-path "../../../build/opencog/scm"))
+	#t
+	(add-to-load-path "../../../build/opencog/scm"))
 (format #t "Load path is: ~A\n" %load-path)
 
 (use-modules (opencog persist))
