@@ -34,3 +34,7 @@ cdef extern from "PersistCython.h" namespace "opencog":
 	cdef void dflt_set_proxy(const cHandle& h)
 #	cdef std::string dflt_monitor()
 	cdef cHandle current_storage()
+
+
+cdef extern from "opencog/persist/file/fast_load.h" namespace "opencog":
+	void c_load_file "opencog::load_file" (const string path, cAtomSpace & atomspace);
