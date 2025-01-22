@@ -1,4 +1,4 @@
-LINK_LIBRARIES(atomspace load_scm)
+LINK_LIBRARIES(atomspace fast_load_scm)
 
 ADD_CXXTEST(FastLoadUTest)
 ADD_CXXTEST(CommandsUTest)

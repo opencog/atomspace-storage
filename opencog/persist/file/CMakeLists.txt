@@ -2,16 +2,16 @@
 # -------------------------------
 # File-specific code.
 
-ADD_LIBRARY (load_scm SHARED
+ADD_LIBRARY (fast_load_scm SHARED
 	fast_load.cc
 )
 
-TARGET_LINK_LIBRARIES(load_scm
+TARGET_LINK_LIBRARIES(fast_load_scm
 	sexcom
 	sexpr
 )
 
-INSTALL (TARGETS load_scm EXPORT AtomSpaceStorageTargets
+INSTALL (TARGETS fast_load_scm EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
@@ -30,7 +30,7 @@ ADD_LIBRARY (persist-file SHARED
 TARGET_LINK_LIBRARIES(persist-file
 	persist
 	storage-types
-	load_scm
+	fast_load_scm
 	sexcom
 	sexpr
 	atomspace

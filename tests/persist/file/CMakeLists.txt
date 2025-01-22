@@ -4,17 +4,16 @@ ADD_GUILE_TEST(LoadFileTest load-file-test.scm)
 # -----------------------
 ## Python gorp
 
-# "PYTHONPATH=???"
 set(TEST_ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
-	"PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
+	"PROJECT_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+#	"LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/opencog/persist/api/"
+	"PYTHONPATH=${CMAKE_BINARY_DIR}/opencog/persist/api/cython"
 	"GUILE_LOAD_PATH=${GUILE_LOAD_PATH}")
 
 IF (HAVE_NOSETESTS)
 
 	ADD_TEST(CythonLoadFile ${NOSETESTS_EXECUTABLE} -vs
 		${CMAKE_SOURCE_DIR}/tests/persist/file/cython/)
-	SET_PROPERTY(TEST CythonLoadFile
-		PROPERTY DEPENDS atomspace_cython)
 	SET_PROPERTY(TEST CythonLoadFile
 		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 

@@ -8,7 +8,10 @@ from unittest import TestCase
 from opencog.type_constructors import *
 from opencog.atomspace import AtomSpace
 from opencog.utilities import initialize_opencog, finalize_opencog
-from opencog.storage import load_file
+
+# Argh. The build dir isn't set up right
+# from opencog.storage import load_file
+from storage import load_file
 
 __author__ = 'Curtis Faith'
 

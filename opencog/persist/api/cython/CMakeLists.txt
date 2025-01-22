@@ -14,7 +14,7 @@ INCLUDE_DIRECTORIES(
 
 # Need to be able to find opencog/atomspace.pxd
 # and so the location of that goes in the -I flag
-# XX Should be CMKAE_INSTALL_DIR or something...
+# XXX Should be CMAKE_INSTALL_DIR or something...
 SET(CYTHON_FLAGS "-3" "-f" "-Wextra"
 	"-I/usr/local/include/opencog/cython/")
 
@@ -35,7 +35,8 @@ ADD_LIBRARY(storage_cython SHARED
 ADD_DEPENDENCIES(storage_cython storage_types)
 
 TARGET_LINK_LIBRARIES(storage_cython
-	utilities_cython
+	# utilities_cython
+	fast_load_scm
 	# ${NO_AS_NEEDED}
 	persist
 	storage-types
