@@ -25,20 +25,40 @@ things differently. Towards that end, a new I/O paradigm is being
 actively researched, called
 [sensory](https://github.com/opencog/sensory)
 and
-[motor](https://github.com/opencog/motor)
+[motor](https://github.com/opencog/motor).
 As the names suggest, this new research effort attempts to take an
 agent-centric view of the world: of an "inside" and an "outside",
-with the "inside" being able to look out explore and manipulate the
-"outside" world. Data (Atoms and
-[Values](https://wiki.opencog.org/w/Value) flow in and flow out,
-with the "agent" "inside" being able to actively open, close, read,
-write datastreams, instead of passively being force-fed data-streams
-via some external pipeline or harness.
+with the "inside" being able to look out and explore and manipulate
+the "outside" world. The agent works directly with
+[Atomese](https://wiki.opencog.org/w/Atomese) to control what it
+"sees", and to "move around" in the "external world". These words
+are in quotes, because they are metaphorical: one can move around
+through a file system, or 'surf the net' (moving from one website
+to another). "Moving" doesn't have to involve literal arms and legs
+and wheels (although it could. Physical robot control is one of the
+goals.)
+
+Similarly one can "look at" a file in a file system, "look at" (listen
+to?) a chat conversation, or "look at" a data stream flowing out of some
+science experiment (Kamiokande neutrino detector, Vera Rubintelescope,
+...) Again, "looking and seeing" does not need to be literally video
+and audio.  Note that "looking" does have a motor aspect: the looker
+does need to actively change the focus of attention in order to "look"
+at something. Thus sensori- is coupled to -motor, unless you plan to
+put your agent in prison and have them stare out all day.
+
+The sensori-motor interface is not magic: to some large degree, its
+old-fahsioned open, close, read, write. What makes it different is that
+it is expressed in [Atomese](https://wiki.opencog.org/w/Atomese).
+This is what provides the agent with deliberative, intentional
+abilities and control. The agent gains autonomy over it's actions,
+instead of being passively force-fed some data-stream outside of it's
+control.
 
 In principle, the sensori-motor system should someday be able to do
-everything the `StorageNode` does, and a lot more. For now, however,
-it is an active research & development project, unstable, incomplete
-and buggy.
+everything that the `StorageNode` does, and a lot more. For now,
+however, it is an active research & development project, unstable,
+incomplete and buggy.
 
 New subsystems that were "needed yesterday" and have to be absolutely
 100% stable and rock-solid out the gate should be developed using the
