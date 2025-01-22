@@ -1,9 +1,19 @@
 ;
 ; proxy-node-test.scm -- Unit test for basic ProxyNode syntax.
 ;
-(use-modules (opencog) (opencog persist))
+(use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog test-runner))
+
+; Unit test fails if run by hand, and this module is not
+; installed. So avoid that annoyance, and twinkle the module
+; load path.
+(if (resolve-module (list 'opencog 'persist) #:ensure #f)
+       #t
+       (add-to-load-path "../../../build/opencog/scm"))
+(format #t "Load path is: ~A\n" %load-path)
+
+(use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
 (opencog-test-runner)
