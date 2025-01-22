@@ -14,7 +14,9 @@ INCLUDE_DIRECTORIES(
 
 # Need to be able to find opencog/atomspace.pxd
 # and so the location of that goes in the -I flag
-SET(CYTHON_FLAGS "-3" "-f" "-Wextra" "-I${CMAKE_CURRENT_SOURCE_DIR}/../../../cython/")
+# XX Should be CMKAE_INSTALL_DIR or something...
+SET(CYTHON_FLAGS "-3" "-f" "-Wextra"
+	"-I/usr/local/include/opencog/cython/")
 
 # The python module name is taken from the pyx filename. Thus, the file
 # storage.pyx means that module name will be 'opencog.storage'. This will
@@ -23,8 +25,7 @@ SET(CYTHON_FLAGS "-3" "-f" "-Wextra" "-I${CMAKE_CURRENT_SOURCE_DIR}/../../../cyt
 CYTHON_ADD_MODULE_PYX(storage
 	"storage.pxd"
 	"../../storage/storage_types.pyx"
-	"../../storage/storage_types.h"
-	"../../../cython/opencog/atomspace.pxd")
+	"../../storage/storage_types.h")
 
 ADD_LIBRARY(storage_cython SHARED
 	PersistCython.cc
