@@ -32,6 +32,7 @@ def cog_close(Atom stonode) :
 def cog_connected(Atom stonode) :
 	return storage_connected(deref(stonode.handle))
 
+# Utility, used below.
 cdef pfromh(cHandle result) :
 	if result == result.UNDEFINED: return None
 	atom = create_python_value_from_c_value(<cValuePtr&>result)
@@ -46,6 +47,9 @@ def store_atom(Atom atm) :
 def fetch_incoming_set(Atom atm) :
 	return pfromh (dflt_fetch_incoming_set(deref(atm.handle)))
 
+def fetch_incoming_by_type(Atom atm, Type t) :
+	return pfromh (dflt_fetch_incoming_by_type(deref(atm.handle), t))
+
 def load_atomspace() :
 	cdef cHandle zilch  # cHandle.UNDEFINED
 	dflt_load_atomspace(zilch)
@@ -53,6 +57,35 @@ def load_atomspace() :
 def store_atomspace() :
 	cdef cHandle zilch  # cHandle.UNDEFINED
 	dflt_store_atomspace(zilch)
+
+def load_type() :
+	return None
+
+def fetch_value() :
+	return None
+
+def store_value() :
+	return None
+
+def update_value() :
+	return None
+
+def fetch_query() :
+	return None
+
+def proxy_open() :
+	return None
+
+def proxy_close() :
+	return None
+
+def monitor() :
+	return None
+
+def curr_storage() :
+	return None
+
+
 
 # -----------------------------------------
 # Unrelated stuff
