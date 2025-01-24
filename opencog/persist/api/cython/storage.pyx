@@ -82,8 +82,13 @@ def store_value(Atom atm, Atom key) :
 def update_value(Atom atm, Atom key, Value delta) :
 	dflt_update_value(deref(atm.handle), deref(key.handle), delta.get_c_value_ptr())
 
-def fetch_query() :
-	return None
+def fetch_query(Atom qry, Atom key) :
+	return pfromh (dflt_fetch_query2(deref(qry.handle), deref(key.handle)))
+
+# XXX FIXME, this should be just fetch_query() with additional
+# optional args, but I'm too lazy to figure that out right now.
+def fetch_query4(Atom qry, Atom key, Atom meta, bool fresh) :
+	return pfromh (dflt_fetch_query4(deref(qry.handle), deref(key.handle), deref(meta.handle), fresh))
 
 def proxy_open() :
 	dflt_proxy_open()
