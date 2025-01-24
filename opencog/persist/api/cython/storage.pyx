@@ -58,40 +58,38 @@ def store_atomspace() :
 	cdef cHandle zilch  # cHandle.UNDEFINED
 	dflt_store_atomspace(zilch)
 
-def delete (Atom atm) :
+def delete(Atom atm) :
 	return dflt_delete(deref(atm.handle))
 
-def delete_recursive (Atom atm) :
+def delete_recursive(Atom atm) :
 	return dflt_delete_recursive(deref(atm.handle))
 
 def barrier() :
-	return dflt_barrier()
+	dflt_barrier()
 
 def erase() :
-	return dflt_erase()
+	dflt_erase()
 
-def load_type() :
-	return None
+def load_type(Type t) :
+	dflt_load_type(t)
 
-def fetch_value() :
-	return None
+def fetch_value(Atom atm, Atom key) :
+	return pfromh(dflt_fetch_value(deref(atm.handle), deref(key.handle)))
 
-def store_value() :
-	return None
+def store_value(Atom atm, Atom key) :
+	dflt_store_value(deref(atm.handle), deref(key.handle))
 
-def update_value() :
-	return None
+#def update_value(Atom atm, Atom key, Value delta) :
+	# dflt_update_value(deref(atm.handle), deref(key.handle), ...)
 
 def fetch_query() :
 	return None
 
 def proxy_open() :
 	dflt_proxy_open()
-	return None
 
 def proxy_close() :
 	dflt_proxy_close()
-	return None
 
 def monitor() :
 	return dflt_monitor()
