@@ -14,7 +14,7 @@ from opencog.atomspace import regenerate_types
 from opencog.utilities import add_node, add_link
 
 from opencog.atomspace cimport cValuePtr, cHandle, cAtomSpace
-from opencog.atomspace cimport Atom
+from opencog.atomspace cimport Atom, Value
 from opencog.atomspace cimport create_python_value_from_c_value
 
 # The list of Atom Types that python knows about has to be rebuilt,
@@ -79,8 +79,8 @@ def fetch_value(Atom atm, Atom key) :
 def store_value(Atom atm, Atom key) :
 	dflt_store_value(deref(atm.handle), deref(key.handle))
 
-#def update_value(Atom atm, Atom key, Value delta) :
-	# dflt_update_value(deref(atm.handle), deref(key.handle), ...)
+def update_value(Atom atm, Atom key, Value delta) :
+	dflt_update_value(deref(atm.handle), deref(key.handle), delta.get_c_value_ptr())
 
 def fetch_query() :
 	return None
