@@ -1,6 +1,9 @@
 
 from libcpp cimport bool
+from libcpp.string cimport string
 from opencog.atomspace cimport cValuePtr, cHandle, cAtomSpace
+
+ctypedef short Type
 
 cdef extern from "PersistCython.h" namespace "opencog":
 # cdef extern from "PersistCython.h" :
@@ -13,13 +16,13 @@ cdef extern from "PersistCython.h" namespace "opencog":
 
 	cdef cHandle dflt_fetch_value(const cHandle&, const cHandle&)
 	cdef cHandle dflt_fetch_incoming_set(const cHandle&)
-#	cdef cHandle dflt_fetch_incoming_by_type(const cHandle&, cType t)
+	cdef cHandle dflt_fetch_incoming_by_type(const cHandle&, Type t)
 	cdef cHandle dflt_fetch_query2(const cHandle& query, const cHandle& key)
 	cdef cHandle dflt_fetch_query4(const cHandle& query, const cHandle& key,
                                 cHandle meta, bool fresh)
 	cdef void dflt_store_value(const cHandle& h, const cHandle& key)
 	cdef void dflt_update_value(const cHandle& h, const cHandle& key, cValuePtr delta)
-#	cdef void dflt_load_type(Type t)
+	cdef void dflt_load_type(Type t)
 	cdef void dflt_load_atomspace(const cHandle& space)
 	cdef void dflt_store_atomspace(const cHandle& space)
 #	cdef cHandleSeq dflt_load_frames()
@@ -32,13 +35,11 @@ cdef extern from "PersistCython.h" namespace "opencog":
 	cdef void dflt_proxy_open()
 	cdef void dflt_proxy_close()
 	cdef void dflt_set_proxy(const cHandle& h)
-#	cdef std::string dflt_monitor()
+	cdef string dflt_monitor()
 	cdef cHandle current_storage()
 
 # ----------------------------------------------------------------
 # Unrelated stuff
-
-from libcpp.string cimport string
 
 cdef extern from "opencog/persist/file/fast_load.h" namespace "opencog":
 	void c_load_file "opencog::load_file" (const string path, cAtomSpace & atomspace);
