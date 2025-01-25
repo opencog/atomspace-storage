@@ -30,7 +30,8 @@
 
 #include <opencog/atoms/join/JoinLink.h>
 #include <opencog/atoms/pattern/QueryLink.h>
-#include <opencog/atoms/value/QueueValue.h>
+#include <opencog/atoms/value/ContainerValue.h>
+#include <opencog/atoms/value/SetValue.h>
 #include <opencog/query/Implicator.h>
 #include <opencog/query/Satisfier.h>
 
@@ -55,8 +56,9 @@ class BackingImplicator : public Implicator
 		BackingStore* _store;
 		AtomSpace* _ras;
 	public:
-		BackingImplicator(BackingStore* sto, AtomSpace* as, QueueValuePtr& qvp) :
-			Implicator(as, qvp), _store(sto), _ras(as) {}
+		BackingImplicator(BackingStore* sto, AtomSpace* as,
+		                  ContainerValuePtr& cvp) :
+			Implicator(as, cvp), _store(sto), _ras(as) {}
 		virtual ~BackingImplicator() {}
 		virtual IncomingSet get_incoming_set(const Handle&, Type);
 		virtual Handle get_link(const Handle&, Type, HandleSeq&&);
@@ -67,8 +69,9 @@ class BackingSatisfyingSet : public SatisfyingSet
 {
 		BackingStore* _store;
 	public:
-		BackingSatisfyingSet(BackingStore* sto, AtomSpace* as, QueueValuePtr& qvp) :
-			SatisfyingSet(as, qvp), _store(sto) {}
+		BackingSatisfyingSet(BackingStore* sto, AtomSpace* as,
+		                     ContainerValuePtr& cvp) :
+			SatisfyingSet(as, cvp), _store(sto) {}
 		virtual ~BackingSatisfyingSet() {}
 		virtual IncomingSet get_incoming_set(const Handle&, Type);
 		virtual Handle get_link(const Handle&, Type, HandleSeq&&);
@@ -224,27 +227,29 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 	{
 		QueryLinkPtr qlp(QueryLinkCast(query));
 
-		QueueValuePtr qvp = createQueueValue();
-		qvp->close();
+		SetValuePtr svp(createSetValue());
+		svp->close();
+		ContainerValuePtr cvp(svp);
 
 		AtomSpace* tas = grab_transient_atomspace(as);
-		BackingImplicator impl(this, tas, qvp);
+		BackingImplicator impl(this, tas, cvp);
 		impl.implicand = qlp->get_implicand();
 		impl.satisfy(qlp);
 
-		qv = qvp;
+		qv = svp;
 		release_transient_atomspace(tas);
 	}
 	else if (nameserver().isA(qt, MEET_LINK))
 	{
-		QueueValuePtr qvp = createQueueValue();
-		qvp->close();
+		SetValuePtr svp(createSetValue());
+		svp->close();
+		ContainerValuePtr cvp(svp);
 
 		AtomSpace* tas = grab_transient_atomspace(as);
-		BackingSatisfyingSet sater(this, tas, qvp);
+		BackingSatisfyingSet sater(this, tas, cvp);
 		sater.satisfy(PatternLinkCast(query));
 
-		qv = qvp;
+		qv = svp;
 		release_transient_atomspace(tas);
 	}
 	else if (nameserver().isA(qt, JOIN_LINK))
