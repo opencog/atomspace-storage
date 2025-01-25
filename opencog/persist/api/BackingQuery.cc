@@ -30,13 +30,14 @@
 
 #include <opencog/atoms/join/JoinLink.h>
 #include <opencog/atoms/pattern/QueryLink.h>
+#include <opencog/atoms/value/QueueValue.h>
 #include <opencog/query/Implicator.h>
 #include <opencog/query/Satisfier.h>
 
 #include <opencog/persist/api/BackingStore.h>
 
 // This is in a C file, not a header file,
-// because no else one should touch this.
+// because no one else should touch these private parts.
 namespace opencog
 {
 
@@ -54,8 +55,8 @@ class BackingImplicator : public Implicator
 		BackingStore* _store;
 		AtomSpace* _ras;
 	public:
-		BackingImplicator(BackingStore* sto, AtomSpace* as) :
-			Implicator(as), _store(sto), _ras(as) {}
+		BackingImplicator(BackingStore* sto, AtomSpace* as, QueueValuePtr& qvp) :
+			Implicator(as, qvp), _store(sto), _ras(as) {}
 		virtual ~BackingImplicator() {}
 		virtual IncomingSet get_incoming_set(const Handle&, Type);
 		virtual Handle get_link(const Handle&, Type, HandleSeq&&);
@@ -66,8 +67,8 @@ class BackingSatisfyingSet : public SatisfyingSet
 {
 		BackingStore* _store;
 	public:
-		BackingSatisfyingSet(BackingStore* sto, AtomSpace* as) :
-			SatisfyingSet(as), _store(sto) {}
+		BackingSatisfyingSet(BackingStore* sto, AtomSpace* as, QueueValuePtr& qvp) :
+			SatisfyingSet(as, qvp), _store(sto) {}
 		virtual ~BackingSatisfyingSet() {}
 		virtual IncomingSet get_incoming_set(const Handle&, Type);
 		virtual Handle get_link(const Handle&, Type, HandleSeq&&);
@@ -223,21 +224,27 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 	{
 		QueryLinkPtr qlp(QueryLinkCast(query));
 
+		QueueValuePtr qvp = createQueueValue();
+		qvp->close();
+
 		AtomSpace* tas = grab_transient_atomspace(as);
-		BackingImplicator impl(this, tas);
+		BackingImplicator impl(this, tas, qvp);
 		impl.implicand = qlp->get_implicand();
 		impl.satisfy(qlp);
 
-		qv = impl.get_result_queue();
+		qv = qvp;
 		release_transient_atomspace(tas);
 	}
 	else if (nameserver().isA(qt, MEET_LINK))
 	{
+		QueueValuePtr qvp = createQueueValue();
+		qvp->close();
+
 		AtomSpace* tas = grab_transient_atomspace(as);
-		BackingSatisfyingSet sater(this, tas);
+		BackingSatisfyingSet sater(this, tas, qvp);
 		sater.satisfy(PatternLinkCast(query));
 
-		qv = sater.get_result_queue();
+		qv = qvp;
 		release_transient_atomspace(tas);
 	}
 	else if (nameserver().isA(qt, JOIN_LINK))
