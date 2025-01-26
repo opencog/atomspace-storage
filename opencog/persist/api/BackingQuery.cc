@@ -233,7 +233,6 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 
 		AtomSpace* tas = grab_transient_atomspace(as);
 		BackingImplicator impl(this, tas, cvp);
-		impl.implicand = qlp->get_implicand();
 		impl.satisfy(qlp);
 
 		qv = svp;
