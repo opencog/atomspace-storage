@@ -31,7 +31,7 @@
 #include <opencog/atoms/join/JoinLink.h>
 #include <opencog/atoms/pattern/QueryLink.h>
 #include <opencog/atoms/value/ContainerValue.h>
-#include <opencog/atoms/value/SetValue.h>
+#include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/query/Implicator.h>
 #include <opencog/query/Satisfier.h>
 
@@ -227,7 +227,7 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 	{
 		QueryLinkPtr qlp(QueryLinkCast(query));
 
-		SetValuePtr svp(createSetValue());
+		UnisetValuePtr svp(createUnisetValue());
 		svp->close();
 		ContainerValuePtr cvp(svp);
 
@@ -241,7 +241,7 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 	}
 	else if (nameserver().isA(qt, MEET_LINK))
 	{
-		SetValuePtr svp(createSetValue());
+		UnisetValuePtr svp(createUnisetValue());
 		svp->close();
 		ContainerValuePtr cvp(svp);
 
