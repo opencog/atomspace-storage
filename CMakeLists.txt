@@ -77,16 +77,6 @@ include(Summary)
 # ===================================================================
 # Check for existance of various required, optional packages.
 
-# AtomSpace
-FIND_PACKAGE(AtomSpace 5.0.3 CONFIG REQUIRED)
-IF (ATOMSPACE_FOUND)
-	MESSAGE(STATUS "AtomSpace found.")
-	ADD_DEFINITIONS(-DHAVE_ATOMSPACE)
-	SET(HAVE_ATOMSPACE 1)
-ELSE (ATOMSPACE_FOUND)
-	MESSAGE(FATAL_ERROR "AtomSpace missing: it is needed!")
-ENDIF (ATOMSPACE_FOUND)
-
 # ----------------------------------------------------------
 # Needed for unit tests
 
@@ -108,7 +98,22 @@ include(OpenCogFindPython)
 # The link interface of target "PythonEval" contains:
 #    Boost::system
 # but the target was not found.
-FIND_PACKAGE(Boost REQUIRED COMPONENTS system)
+# FIND_PACKAGE(Boost REQUIRED COMPONENTS system)
+
+# ----------------------------------------------------------
+# Search for AtomSpace AFTER searching for python, as otherwise
+# HAVE_CYTHON will not be set and the libraries will be calculated
+# incorrectly
+
+# AtomSpace
+FIND_PACKAGE(AtomSpace 5.0.3 CONFIG REQUIRED)
+IF (ATOMSPACE_FOUND)
+	MESSAGE(STATUS "AtomSpace found.")
+	ADD_DEFINITIONS(-DHAVE_ATOMSPACE)
+	SET(HAVE_ATOMSPACE 1)
+ELSE (ATOMSPACE_FOUND)
+	MESSAGE(FATAL_ERROR "AtomSpace missing: it is needed!")
+ENDIF (ATOMSPACE_FOUND)
 
 # ===================================================================
 # Include configuration.
