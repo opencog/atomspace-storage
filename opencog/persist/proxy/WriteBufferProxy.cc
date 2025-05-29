@@ -22,6 +22,7 @@
 
 #include <chrono>
 #include <math.h>
+#include <unistd.h>
 
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/persist/proxy/WriteBufferProxy.h>
