@@ -91,14 +91,18 @@ ENDIF (NOT CXXTEST_FOUND)
 include(OpenCogFindGuile)
 include(OpenCogFindPython)
 
-# Hackalicious. The AtomSpace cython bindings require boost
-# but the dependency is somehow bungled, so we make up for it here.
-# See /usr/local/lib/cmake/AtomSpace/AtomSpaceTargets.cmake:229
-# set_target_properties
-# The link interface of target "PythonEval" contains:
-#    Boost::system
-# but the target was not found.
-# FIND_PACKAGE(Boost REQUIRED COMPONENTS system)
+
+# Check for boost. We need dynamic-linked, threaded libs by default.
+# This is use for the file backend.
+SET(Boost_USE_STATIC_LIBS OFF)
+SET(Boost_USE_MULTITHREADED ON)
+
+FIND_PACKAGE(Boost) ### OPTIONAL_COMPONENTS system)
+IF (Boost_FOUND)
+	SET(HAVE_BOOST 1)
+	ADD_DEFINITIONS(-DHAVE_BOOST)
+	INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+ENDIF (Boost_FOUND)
 
 # ----------------------------------------------------------
 # Search for AtomSpace AFTER searching for python, as otherwise
@@ -240,6 +244,7 @@ FIND_PACKAGE(Doxygen)
 # Show a summary of what we found, what we will do.
 
 SUMMARY_ADD("AtomSpace Storage" "AtomSpace persistence backend" HAVE_ATOMSPACE)
+SUMMARY_ADD("CSV support"      "CSV Table support (requires Boost)" BOOST_FOUND)
 SUMMARY_ADD("Doxygen"    "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 
