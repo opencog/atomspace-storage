@@ -103,13 +103,13 @@ static std::string reterr(const std::string& cmd)
 	ValuePtr v = Json::decode_value(cmd, pos, epos); \
 	if (nullptr == v) return "false";
 
-#define RETURN(RV) \
+#define RETURN(RV) { \
 	if (js_mode) return RV "\n"; \
-	return "{\"success\": true, \"result\": " RV "}"
+	return "{\"success\": true, \"result\": " RV "}"; }
 
-#define RETURNSTR(RV) \
+#define RETURNSTR(RV) { \
 	if (js_mode) return RV + "\n"; \
-	return "{\"success\": true, \"result\": " + RV + "}"
+	return "{\"success\": true, \"result\": " + RV + "}"; }
 
 /// The cogserver provides a network API to send/receive Atoms, encoded
 /// as JSON, over the internet. This is NOT as efficient as the
