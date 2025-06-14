@@ -200,9 +200,9 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	}
 	else
 	{
-		cpos = cmd.find("\"tool\": ", cpos);
+		cpos = cmd.find("\"tool\":", cpos);
 		if (std::string::npos == cpos) return reterr(cmd);
-		cpos += 8; // 8 == strlen("\"tool\": ");
+		cpos += 7; // 7 == strlen("\"tool\":");
 
 		cpos = cmd.find_first_not_of("\" \n\t", cpos);
 		if (std::string::npos == cpos) return reterr(cmd);
@@ -216,9 +216,9 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 		// OK, so now pos and tool_end bracket the tool name.
 		// Advance cpos past the params.
-		pos = cmd.find("\"params\": ", tool_end);
+		pos = cmd.find("\"params\":", tool_end);
 		if (std::string::npos == pos) return reterr(cmd);
-		pos += 10; // 10 == strlen("\"params\": ");
+		pos += 9; // 9 == strlen("\"params\":");
 
 		// For MCP mode, find the closing } of the params object
 		// We need to find the matching } for the { that comes after "params":
