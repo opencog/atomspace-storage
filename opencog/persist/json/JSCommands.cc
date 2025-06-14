@@ -219,6 +219,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getSuperTypes("ListLink")
 	// AtomSpace.getSuperTypes("ListLink", true)
 	// AtomSpace.getSuperTypes({ "type": "ListLink", "recursive": true})
+	// AtomSpace.getSuperTypes({ "type": "ListLink"})
 	if (gtsup == act)
 	{
 		CHK_CMD;
@@ -263,17 +264,36 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (haven == act)
 	{
 		CHK_CMD;
-		GET_TYPE;
 
-		if (not nameserver().isA(t, NODE))
-			return "Type is not a Node type: " + cmd.substr(epos);
+		// Check if we have JSON object format by looking ahead
+		size_t check_pos = pos;
+		check_pos = cmd.find_first_not_of(" \n\t", check_pos);
+		bool is_json_object = (check_pos != std::string::npos && cmd[check_pos] == '{');
 
-		pos = cmd.find_first_not_of(",) \n\t", pos);
-		std::string name = Json::get_node_name_arg(cmd, pos, epos);
-		Handle h = as->get_node(t, std::move(name));
+		if (is_json_object)
+		{
+			// For JSON object, we need to parse the whole object at once
+			Handle h = Json::decode_atom(cmd, pos, epos);
+			if (nullptr == h) return "false\n";
+			h = as->get_atom(h);
+			if (nullptr == h) return "false\n";
+			return "true\n";
+		}
+		else
+		{
+			// Original format: type followed by name
+			GET_TYPE;
 
-		if (nullptr == h) return "false\n";
-		return "true\n";
+			if (not nameserver().isA(t, NODE))
+				return "Type is not a Node type: " + cmd.substr(epos);
+
+			pos = cmd.find_first_not_of(",) \n\t", pos);
+			std::string name = Json::get_node_name(cmd, pos, epos);
+			Handle h = as->get_node(t, std::move(name));
+
+			if (nullptr == h) return "false\n";
+			return "true\n";
+		}
 	}
 
 	// -----------------------------------------------
