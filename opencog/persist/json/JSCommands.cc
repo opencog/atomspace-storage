@@ -103,6 +103,14 @@ static std::string reterr(const std::string& cmd)
 	ValuePtr v = Json::decode_value(cmd, pos, epos); \
 	if (nullptr == v) return "false";
 
+#define RETURN(RV) \
+	if (js_mode) return RV "\n"; \
+	return "{\"success\": true, \"result\": " RV "}"
+
+#define RETURNSTR(RV) \
+	if (js_mode) return RV + "\n"; \
+	return "{\"success\": true, \"result\": " + RV + "}"
+
 /// The cogserver provides a network API to send/receive Atoms, encoded
 /// as JSON, over the internet. This is NOT as efficient as the
 /// s-expression API, but is more convenient for web developers.
@@ -191,7 +199,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (versn == act)
 	{
 		CHK_CMD;
-		return ATOMSPACE_VERSION_STRING;
+		RETURN(ATOMSPACE_VERSION_STRING);
 	}
 
 	// -----------------------------------------------
@@ -211,7 +219,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			nameserver().getChildrenRecursive(t, std::back_inserter(vect));
 		else
 			nameserver().getChildren(t, std::back_inserter(vect));
-		return Json::encode_type_list(vect);
+		RETURNSTR(Json::encode_type_list(vect));
 	}
 
 	// -----------------------------------------------
@@ -231,7 +239,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			nameserver().getParentsRecursive(t, std::back_inserter(vect));
 		else
 			nameserver().getParents(t, std::back_inserter(vect));
-		return Json::encode_type_list(vect);
+		RETURNSTR(Json::encode_type_list(vect));
 	}
 
 	// -----------------------------------------------
@@ -254,8 +262,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			if (not first) { rv += ",\n"; } else { first = false; }
 			rv += Json::encode_atom(h, "  ");
 		}
-		rv += "]\n";
-		return rv;
+		rv += "]";
+		RETURNSTR(rv);
 	}
 
 	// -----------------------------------------------
@@ -274,10 +282,10 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		{
 			// For JSON object, we need to parse the whole object at once
 			Handle h = Json::decode_atom(cmd, pos, epos);
-			if (nullptr == h) return "false\n";
+			if (nullptr == h) RETURN("false");
 			h = as->get_atom(h);
-			if (nullptr == h) return "false\n";
-			return "true\n";
+			if (nullptr == h) RETURN("false");
+			RETURN("true");
 		}
 		else
 		{
@@ -291,8 +299,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			std::string name = Json::get_node_name(cmd, pos, epos);
 			Handle h = as->get_node(t, std::move(name));
 
-			if (nullptr == h) return "false\n";
-			return "true\n";
+			if (nullptr == h) RETURN("false");
+			RETURN("true");
 		}
 	}
 
@@ -342,7 +350,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			if (l == std::string::npos || cmd[l] == ']') break;
 
 			Handle ho = Json::decode_atom(cmd, l, r);
-			if (nullptr == ho) return "false\n";
+			if (nullptr == ho) RETURN("false");
 			hs.push_back(ho);
 
 			// Look for the comma
@@ -353,8 +361,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		}
 		Handle h = as->get_link(t, std::move(hs));
 
-		if (nullptr == h) return "false\n";
-		return "true\n";
+		if (nullptr == h) RETURN("false");
+		RETURN("true");
 	}
 
 	// -----------------------------------------------
@@ -363,7 +371,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		CHK_CMD;
 		GET_ATOM("false\n");
-		return "true\n";
+		RETURN("true");
 	}
 
 	// -----------------------------------------------
@@ -372,7 +380,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		CHK_CMD;
 		ADD_ATOM;
-		return "true\n";
+		RETURN("true");
 	}
 
 	// -----------------------------------------------
@@ -383,7 +391,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		CHK_CMD;
 		pos = cmd.find_first_not_of(" \n\t", pos);
-		if ('[' != cmd[pos]) return "false\n";
+		if ('[' != cmd[pos]) RETURN("false");
 		pos++;
 		while (epos != cmd.npos)
 		{
@@ -391,21 +399,21 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			pos = epos;
 
 			// We expect a comma or a close-bracket.
-			if  (cmd.npos == pos) return "false\n";
+			if  (cmd.npos == pos) RETURN("false");
 
 			// Skip whitespace
 			pos = cmd.find_first_not_of(" \n\t", pos);
-			if  (cmd.npos == pos) return "false\n";
+			if  (cmd.npos == pos) RETURN("false");
 
 			// If end of list, we are done.
 			if (']' == cmd[pos]) break;
 
 			// If not end of list, we expect a comma.
-			if (',' != cmd[pos]) return "false\n";
+			if (',' != cmd[pos]) RETURN("false");
 			pos++;
 			epos = cmd.size();
 		}
-		return "true\n";
+		RETURN("true");
 	}
 
 	// -----------------------------------------------
@@ -441,8 +449,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			if (not first) { alist += ",\n"; } else { first = false; }
 			alist += Json::encode_atom(hi, "");
 		}
-		alist += "]\n";
-		return alist;
+		alist += "]";
+		RETURNSTR(alist);
 	}
 
 	// -----------------------------------------------
@@ -466,7 +474,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_VALUE;
 
 		as->set_value(h, k, v);
-		return "true\n";
+		RETURN("true");
 	}
 
 	// -----------------------------------------------
@@ -478,8 +486,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 		std::string alist = "[{ \"value\": \n";
 		alist += Json::encode_value(ValueCast(h->getTruthValue()));
-		alist += "}]\n";
-		return alist;
+		alist += "}]";
+		RETURNSTR(alist);
 	}
 
 	// -----------------------------------------------
@@ -492,7 +500,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_VALUE;
 
 		as->set_truthvalue(h, TruthValueCast(v));
-		return "true\n";
+		RETURN("true");
 	}
 
 	// -----------------------------------------------
@@ -505,7 +513,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		ADD_ATOM;
 
 		ValuePtr vp = h->execute();
-		return Json::encode_value(vp);
+		RETURNSTR(Json::encode_value(vp));
 	}
 
 	// -----------------------------------------------
@@ -514,12 +522,12 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		CHK_CMD;
 		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "false\n";
+		if (nullptr == h) RETURN("false");
 		pos = epos;
 		GET_BOOL;
 		bool ok = as->extract_atom(h, recursive);
-		if (ok) return "true\n";
-		return "false\n";
+		if (ok) RETURN("true");
+		RETURN("false");
 	}
 
 	// -----------------------------------------------
