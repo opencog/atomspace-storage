@@ -39,6 +39,39 @@
 
 using namespace opencog;
 
+// Helper function to parse boolean parameters from commands
+static bool parse_bool_param(const std::string& cmd, size_t& pos, size_t epos, bool js_mode)
+{
+	bool recursive = false;
+	if (js_mode) {
+		pos = cmd.find_first_not_of(",) \n\t", pos);
+		if (std::string::npos != pos) {
+			recursive = true;
+			if (0 == cmd.compare(pos, 1, "0") or
+			    0 == cmd.compare(pos, 5, "false") or
+			    0 == cmd.compare(pos, 5, "False"))
+				recursive = false;
+		}
+	} else {
+		// In MCP mode, look for "subclass" or "recursive" field
+		// Search backwards from epos to find the boolean
+		size_t bool_pos = cmd.rfind("\"subclass\"", epos);
+		if (std::string::npos == bool_pos)
+			bool_pos = cmd.rfind("\"recursive\"", epos);
+		if (std::string::npos != bool_pos) {
+			bool_pos = cmd.find(':', bool_pos);
+			if (std::string::npos != bool_pos && bool_pos < epos) {
+				bool_pos = cmd.find_first_not_of(": \n\t", bool_pos);
+				if (std::string::npos != bool_pos && bool_pos < epos) {
+					if (0 == cmd.compare(bool_pos, 4, "true"))
+						recursive = true;
+				}
+			}
+		}
+	}
+	return recursive;
+}
+
 static std::string reterr(const std::string& cmd)
 {
 	return "{\"success\": false, \"error\": \"Invalid command format\", \"command\": " + cmd + "}\n";
@@ -50,14 +83,6 @@ static std::string retmsgerr(const std::string& errmsg)
 }
 
 // Common boilerplate
-#define CHK_CMD \
-	if (js_mode) { \
-		pos = cmd.find_first_of("(", epos); \
-		if (std::string::npos == pos) return reterr(cmd); \
-		pos++; \
-		epos = cmd.size(); \
-	}
-
 #define RETURN(RV) { \
 	if (js_mode) return RV "\n"; \
 	return "{\"success\": true, \"result\": " RV "}\n"; }
@@ -75,15 +100,7 @@ static std::string retmsgerr(const std::string& errmsg)
 	}
 
 #define GET_BOOL \
-	pos = cmd.find_first_not_of(",) \n\t", pos); \
-	bool recursive = false; \
-	if (std::string::npos != pos) { \
-		recursive = true; \
-		if (0 == cmd.compare(pos, 1, "0") or \
-		    0 == cmd.compare(pos, 5, "false") or \
-		    0 == cmd.compare(pos, 5, "False")) \
-			recursive = false; \
-	}
+	bool recursive = parse_bool_param(cmd, pos, epos, js_mode);
 
 #define GET_ATOM(rv) \
 	Handle h = Json::decode_atom(cmd, pos, epos); \
@@ -164,6 +181,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		return reterr(cmd);
 
 	size_t pos, epos;
+	size_t act;
+
 	if (js_mode)
 	{
 		cpos = cmd.find_first_of(".", cpos);
@@ -175,6 +194,9 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		epos = cmd.find_first_of("( \n\t", cpos);
 		if (std::string::npos == epos) return reterr(cmd);
 		pos = epos + 1;
+
+		act = std::hash<std::string>{}(cmd.substr(cpos, epos-cpos));
+		epos = cmd.size();
 	}
 	else
 	{
@@ -185,17 +207,40 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		cpos = cmd.find_first_not_of("\" \n\t", cpos);
 		if (std::string::npos == cpos) return reterr(cmd);
 
-		epos = cmd.find_first_of("\", \n\t", cpos);
-		if (std::string::npos == epos) return reterr(cmd);
+		size_t tool_end = cmd.find_first_of("\", \n\t", cpos);
+		if (std::string::npos == tool_end) return reterr(cmd);
 
-		// OK, so now pos and epos bracket the tool name.
+		// Extract the tool name
+		std::string tool_name = cmd.substr(cpos, tool_end-cpos);
+		act = std::hash<std::string>{}(tool_name);
+
+		// OK, so now pos and tool_end bracket the tool name.
 		// Advance cpos past the params.
-		pos = cmd.find("\"params\": ", epos);
+		pos = cmd.find("\"params\": ", tool_end);
 		if (std::string::npos == pos) return reterr(cmd);
 		pos += 10; // 10 == strlen("\"params\": ");
-	}
 
-	size_t act = std::hash<std::string>{}(cmd.substr(cpos, epos-cpos));
+		// For MCP mode, find the closing } of the params object
+		// We need to find the matching } for the { that comes after "params":
+		int brace_count = 0;
+		size_t scan_pos = pos;
+		epos = std::string::npos;
+
+		while (scan_pos < cmd.size()) {
+			if (cmd[scan_pos] == '{') {
+				brace_count++;
+			} else if (cmd[scan_pos] == '}') {
+				brace_count--;
+				if (brace_count == 0) {
+					epos = scan_pos + 1; // Include the closing }
+					break;
+				}
+			}
+			scan_pos++;
+		}
+
+		if (std::string::npos == epos) return reterr(cmd);
+	}
 
 	// -----------------------------------------------
 	// Get version
@@ -203,7 +248,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.version({})
 	if (versn == act)
 	{
-		CHK_CMD;
 		RETURN(ATOMSPACE_VERSION_STRING);
 	}
 
@@ -215,7 +259,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getSubTypes({ "type": "Link", "recursive": true})
 	if (gtsub == act)
 	{
-		CHK_CMD;
 		GET_TYPE;
 		GET_BOOL;
 
@@ -235,7 +278,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getSuperTypes({ "type": "ListLink"})
 	if (gtsup == act)
 	{
-		CHK_CMD;
 		GET_TYPE;
 		GET_BOOL;
 
@@ -248,13 +290,12 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	}
 
 	// -----------------------------------------------
-	// AtomSpace.getAtoms("Node")
+	// AtomSpace.getAtoms("Node") // no subclassing
 	// AtomSpace.getAtoms("Node", true)
-	// AtomSpace.getAtoms({"type": "Node"})
+	// AtomSpace.getAtoms({"type": "Node"}) // no sublassing
 	// AtomSpace.getAtoms({"type": "Node", "subclass": true})
 	if (gtatm == act)
 	{
-		CHK_CMD;
 		GET_TYPE;
 		GET_BOOL;
 
@@ -276,8 +317,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveNode({ "type": "Concept", "name": "foo"})
 	if (haven == act)
 	{
-		CHK_CMD;
-
 		// Check if we have JSON object format by looking ahead
 		size_t check_pos = pos;
 		check_pos = cmd.find_first_not_of(" \n\t", check_pos);
@@ -314,8 +353,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveLink({ "type": "List", "outgoing": [{ "type": "ConceptNode", "name": "foo"}]})
 	if (havel == act)
 	{
-		CHK_CMD;
-
 		// Check if we might have JSON object format
 		size_t save_pos = pos;
 		pos = cmd.find_first_not_of(" \n\t", pos);
@@ -374,7 +411,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveAtom({ "type": "ConceptNode", "name": "foo"})
 	if (havea == act)
 	{
-		CHK_CMD;
 		GET_ATOM("false");
 		RETURN("true");
 	}
@@ -383,7 +419,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.makeAtom({ "type": "ConceptNode", "name": "foo"})
 	if (makea == act)
 	{
-		CHK_CMD;
 		ADD_ATOM;
 		RETURN("true");
 	}
@@ -394,7 +429,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//                      { "type": "ConceptNode", "name": "oofdah"}])
 	if (loada == act)
 	{
-		CHK_CMD;
 		pos = cmd.find_first_not_of(" \n\t", pos);
 		if ('[' != cmd[pos]) RETURN("false");
 		pos++;
@@ -425,7 +459,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getIncoming({ "type": "ConceptNode", "name": "foo"})
 	if (gtinc == act)
 	{
-		CHK_CMD;
 		GET_ATOM("[]");
 
 		Type t = NOTYPE;
@@ -462,7 +495,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getValues({ "type": "ConceptNode", "name": "foo"})
 	if (gtval == act)
 	{
-		CHK_CMD;
 		GET_ATOM("[]");
 		RETURNSTR(Json::encode_atom_values(h));
 	}
@@ -473,7 +505,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//     "value": { "type": "FloatValue", "value": [1, 2, 3] } } )
 	if (stval == act)
 	{
-		CHK_CMD;
 		ADD_ATOM;
 		GET_KEY;
 		GET_VALUE;
@@ -486,7 +517,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getTV({ "type": "ConceptNode", "name": "foo"})
 	if (gettv == act)
 	{
-		CHK_CMD;
 		GET_ATOM("[]");
 
 		std::string alist = "[{ \"value\": \n";
@@ -500,7 +530,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//     "value": { "type": "SimpleTruthValue", "value": [0.2, 0.3] } } )
 	if (settv == act)
 	{
-		CHK_CMD;
 		ADD_ATOM;
 		GET_VALUE;
 
@@ -514,7 +543,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//      { "type": "NumberNode", "name": "2" }] })
 	if (execu == act)
 	{
-		CHK_CMD;
 		ADD_ATOM;
 
 		ValuePtr vp = h->execute();
@@ -525,7 +553,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.extract({ "type": "Concept", "name": "foo"}, true)
 	if (extra == act)
 	{
-		CHK_CMD;
 		Handle h = Json::decode_atom(cmd, pos, epos);
 		if (nullptr == h) RETURN("false");
 		pos = epos;
