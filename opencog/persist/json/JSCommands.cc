@@ -187,6 +187,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// -----------------------------------------------
 	// Get version
 	// AtomSpace.version()
+	// AtomSpace.version({})
 	if (versn == act)
 	{
 		CHK_CMD;
@@ -196,6 +197,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// -----------------------------------------------
 	// Get subtypes of the named type.
 	// AtomSpace.getSubTypes("Link")
+	// AtomSpace.getSubTypes({ "type": "Link"})
 	if (gtsub == act)
 	{
 		CHK_CMD;
@@ -213,6 +215,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// -----------------------------------------------
 	// Get supertypes of the named type.
 	// AtomSpace.getSuperTypes("ListLink")
+	// AtomSpace.getSuperTypes({ "type": "ListLink"})
 	if (gtsup == act)
 	{
 		CHK_CMD;
@@ -229,6 +232,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 	// -----------------------------------------------
 	// AtomSpace.getAtoms("Node", true)
+	// AtomSpace.getAtoms({"type": "Node", "subclass": true})
+	// AtomSpace.getAtoms({"type": "Node"})
 	if (gtatm == act)
 	{
 		CHK_CMD;
@@ -250,6 +255,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 	// -----------------------------------------------
 	// AtomSpace.haveNode("Concept", "foo")
+	// AtomSpace.haveNode({ "type": "Concept", "name": "foo"})
 	if (haven == act)
 	{
 		CHK_CMD;
@@ -268,6 +274,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 	// -----------------------------------------------
 	// AtomSpace.haveLink("List", [{ "type": "ConceptNode", "name": "foo"}])
+	// AtomSpace.haveLink({ "type": "List", [{ "type": "ConceptNode", "name": "foo"}]})
 	if (havel == act)
 	{
 		CHK_CMD;
