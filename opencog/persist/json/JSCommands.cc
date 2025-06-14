@@ -56,7 +56,7 @@ static std::string reterr(const std::string& cmd)
 #define GET_TYPE \
 	Type t = NOTYPE; \
 	try { \
-		t = Json::decode_type(cmd, pos); \
+		t = Json::decode_type_arg(cmd, pos); \
 	} catch(...) { \
 		return "Unknown type: " + cmd.substr(pos); \
 	}
@@ -265,7 +265,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			return "Type is not a Node type: " + cmd.substr(epos);
 
 		pos = cmd.find_first_not_of(",) \n\t", pos);
-		std::string name = Json::get_node_name(cmd, pos, epos);
+		std::string name = Json::get_node_name_arg(cmd, pos, epos);
 		Handle h = as->get_node(t, std::move(name));
 
 		if (nullptr == h) return "false\n";
@@ -274,10 +274,17 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 	// -----------------------------------------------
 	// AtomSpace.haveLink("List", [{ "type": "ConceptNode", "name": "foo"}])
-	// AtomSpace.haveLink({ "type": "List", [{ "type": "ConceptNode", "name": "foo"}]})
+	// AtomSpace.haveLink({ "type": "List", "outgoing": [{ "type": "ConceptNode", "name": "foo"}]})
 	if (havel == act)
 	{
 		CHK_CMD;
+
+		// Check if we might have JSON object format
+		size_t save_pos = pos;
+		pos = cmd.find_first_not_of(" \n\t", pos);
+		bool might_be_json_object = (pos != std::string::npos && cmd[pos] == '{');
+		pos = save_pos;
+
 		GET_TYPE;
 
 		if (not nameserver().isA(t, LINK))
@@ -287,10 +294,29 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 		HandleSeq hs;
 
+		// Check if we need to look for "outgoing" field
+		if (might_be_json_object)
+		{
+			// Look for "outgoing": field
+			size_t out_pos = cmd.find("\"outgoing\":", save_pos);
+			if (std::string::npos != out_pos)
+			{
+				out_pos += 11; // skip past "outgoing":
+				out_pos = cmd.find('[', out_pos);
+				if (std::string::npos != out_pos)
+				{
+					pos = out_pos + 1; // skip past '['
+				}
+			}
+		}
+
 		size_t l = pos;
 		size_t r = epos;
 		while (std::string::npos != r)
 		{
+			l = cmd.find_first_not_of(" \n\t", l);
+			if (l == std::string::npos || cmd[l] == ']') break;
+
 			Handle ho = Json::decode_atom(cmd, l, r);
 			if (nullptr == ho) return "false\n";
 			hs.push_back(ho);

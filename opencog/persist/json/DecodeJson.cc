@@ -73,6 +73,53 @@ Type Json::decode_type(const std::string& tna, size_t& pos)
 
 /* ================================================================== */
 
+/**
+ * Decode a type argument that can be either a simple string like "ConceptNode"
+ * or a JSON object like {"type": "ConceptNode"}.
+ * This function handles the unwrapping and calls decode_type for the actual lookup.
+ */
+Type Json::decode_type_arg(const std::string& tna, size_t& pos)
+{
+	// Advance past whitespace.
+	pos = tna.find_first_not_of(" \n\t", pos);
+	if (std::string::npos == pos)
+		throw SyntaxException(TRACE_INFO, "Bad Type >>%s<<",
+			tna.substr(pos).c_str());
+
+	// Check if this is a JSON object format
+	if ('{' == tna[pos])
+	{
+		// Look for "type": field
+		size_t tpos = tna.find("\"type\":", pos);
+		if (std::string::npos == tpos)
+			throw SyntaxException(TRACE_INFO, "Missing type field in JSON object >>%s<<",
+				tna.substr(pos).c_str());
+
+		tpos += 7; // skip past "type":
+
+		// Call the original decode_type to parse the actual type name
+		Type t = decode_type(tna, tpos);
+
+		// Find closing brace and any trailing content we need to skip
+		size_t close = tna.find('}', tpos);
+		if (std::string::npos == close)
+			throw SyntaxException(TRACE_INFO, "Missing closing brace >>%s<<",
+				tna.substr(tpos).c_str());
+
+		// Update pos to point after the closing brace
+		pos = close + 1;
+
+		return t;
+	}
+	else
+	{
+		// Simple string format - just call decode_type directly
+		return decode_type(tna, pos);
+	}
+}
+
+/* ================================================================== */
+
 /// Extracts Node name-string. Given the string `s`, this updates
 /// the `l` and `r` values such that `l` points at the first
 /// non-whitespace character of the name, and `r` points at the last.
@@ -103,6 +150,53 @@ std::string Json::get_node_name(const std::string& s,
 	ss << s.substr(l, r-l);
 	ss >> std::quoted(name);
 	return name;
+}
+
+/* ================================================================== */
+
+/**
+ * Get a node name argument that can be either a direct string like "foo"
+ * or from a JSON object like {"name": "foo"}.
+ * This function handles the unwrapping and calls get_node_name for the actual extraction.
+ */
+std::string Json::get_node_name_arg(const std::string& s, size_t& pos, size_t& r)
+{
+	// Advance past whitespace.
+	pos = s.find_first_not_of(" \n\t", pos);
+	if (std::string::npos == pos)
+		throw SyntaxException(TRACE_INFO, "Bad node name >>%s<<",
+			s.substr(pos).c_str());
+
+	// Check if this is a JSON object format
+	if ('{' == s[pos])
+	{
+		// Look for "name": field
+		size_t npos = s.find("\"name\":", pos);
+		if (std::string::npos == npos)
+			throw SyntaxException(TRACE_INFO, "Missing name field in JSON object >>%s<<",
+				s.substr(pos).c_str());
+
+		npos += 7; // skip past "name":
+
+		// Find the closing brace to use as boundary
+		size_t close = s.find('}', npos);
+		if (std::string::npos == close)
+			throw SyntaxException(TRACE_INFO, "Missing closing brace >>%s<<",
+				s.substr(npos).c_str());
+
+		// Call the original get_node_name to extract the actual name
+		std::string name = get_node_name(s, npos, close);
+
+		// Update pos to point after the closing brace
+		pos = close + 1;
+
+		return name;
+	}
+	else
+	{
+		// Simple string format - just call get_node_name directly
+		return get_node_name(s, pos, r);
+	}
 }
 
 /* ================================================================== */

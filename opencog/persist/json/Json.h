@@ -54,9 +54,11 @@ public:
                              size_t& l, size_t& r);
 
 	static std::string get_node_name(const std::string&, size_t& l, size_t& r);
+	static std::string get_node_name_arg(const std::string& s, size_t& pos, size_t& r);
 
 	static ValuePtr decode_value(const std::string&, size_t&, size_t&);
 	static Type decode_type(const std::string& s, size_t& pos);
+	static Type decode_type_arg(const std::string& s, size_t& pos);
 
 	// -------------------------------------------
 	// Encoding functions
