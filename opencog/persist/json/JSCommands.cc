@@ -58,12 +58,20 @@ static std::string retmsgerr(const std::string& errmsg)
 		epos = cmd.size(); \
 	}
 
+#define RETURN(RV) { \
+	if (js_mode) return RV "\n"; \
+	return "{\"success\": true, \"result\": " RV "}"; }
+
+#define RETURNSTR(RV) { \
+	if (js_mode) return RV + "\n"; \
+	return "{\"success\": true, \"result\": " + RV + "}"; }
+
 #define GET_TYPE \
 	Type t = NOTYPE; \
 	try { \
 		t = Json::decode_type_arg(cmd, pos); \
 	} catch(...) { \
-		return "Unknown type: " + cmd.substr(pos); \
+		return retmsgerr("Unknown type: " + cmd.substr(pos)); \
 	}
 
 #define GET_BOOL \
@@ -79,42 +87,34 @@ static std::string retmsgerr(const std::string& errmsg)
 
 #define GET_ATOM(rv) \
 	Handle h = Json::decode_atom(cmd, pos, epos); \
-	if (nullptr == h) return rv; \
+	if (nullptr == h) RETURN(rv); \
 	h = as->get_atom(h); \
-	if (nullptr == h) return rv;
+	if (nullptr == h) RETURN(rv);
 
 #define ADD_ATOM \
 	Handle h = Json::decode_atom(cmd, pos, epos); \
-	if (nullptr == h) return "false\n"; \
+	if (nullptr == h) RETURN("false"); \
 	h = as->add_atom(h); \
-	if (nullptr == h) return "false\n";
+	if (nullptr == h) RETURN("false");
 
 #define GET_KEY \
 	pos = cmd.find("\"key\":", epos); \
-	if (std::string::npos == pos) return "false"; \
+	if (std::string::npos == pos) RETURN("false"); \
 	pos += 6; \
 	epos = cmd.size(); \
 	Handle k = Json::decode_atom(cmd, pos, epos); \
-	if (nullptr == k) return "false"; \
+	if (nullptr == k) RETURN("false"); \
 	k = as->add_atom(k); \
 	pos = cmd.find(',', epos); \
-	if (std::string::npos == pos) return "false";
+	if (std::string::npos == pos) RETURN("false");
 
 #define GET_VALUE \
 	pos = cmd.find("\"value\":", pos); \
-	if (std::string::npos == pos) return "false"; \
+	if (std::string::npos == pos) RETURN("false"); \
 	pos += 8; \
 	epos = cmd.size(); \
 	ValuePtr v = Json::decode_value(cmd, pos, epos); \
-	if (nullptr == v) return "false";
-
-#define RETURN(RV) { \
-	if (js_mode) return RV "\n"; \
-	return "{\"success\": true, \"result\": " RV "}"; }
-
-#define RETURNSTR(RV) { \
-	if (js_mode) return RV + "\n"; \
-	return "{\"success\": true, \"result\": " + RV + "}"; }
+	if (nullptr == v) RETURN("false");
 
 /// The cogserver provides a network API to send/receive Atoms, encoded
 /// as JSON, over the internet. This is NOT as efficient as the
@@ -375,7 +375,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (havea == act)
 	{
 		CHK_CMD;
-		GET_ATOM("false\n");
+		GET_ATOM("false");
 		RETURN("true");
 	}
 
@@ -426,7 +426,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gtinc == act)
 	{
 		CHK_CMD;
-		GET_ATOM("[]\n");
+		GET_ATOM("[]");
 
 		Type t = NOTYPE;
 		pos = cmd.find(",", epos);
@@ -463,7 +463,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gtval == act)
 	{
 		CHK_CMD;
-		GET_ATOM("[]\n");
+		GET_ATOM("[]");
 		RETURNSTR(Json::encode_atom_values(h));
 	}
 
@@ -487,7 +487,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gettv == act)
 	{
 		CHK_CMD;
-		GET_ATOM("[]\n");
+		GET_ATOM("[]");
 
 		std::string alist = "[{ \"value\": \n";
 		alist += Json::encode_value(ValueCast(h->getTruthValue()));
