@@ -178,9 +178,9 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	}
 	else
 	{
-		cpos = cmd.find("{ \"tool\": ", cpos);
+		cpos = cmd.find("\"tool\": ", cpos);
 		if (std::string::npos == cpos) return reterr(cmd);
-		cpos += 10; // 10 == strlen("{ \"tool\": ");
+		cpos += 8; // 8 == strlen("\"tool\": ");
 
 		cpos = cmd.find_first_not_of("\" \n\t", cpos);
 		if (std::string::npos == cpos) return reterr(cmd);
