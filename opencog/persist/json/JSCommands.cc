@@ -131,9 +131,10 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t extra = std::hash<std::string>{}("extract");
 
 	// Ignore comments, blank lines
-	if ('/' == cmd[0]) return "";
-	if ('#' == cmd[0]) return "";
-	if ('\n' == cmd[0]) return "";
+	size_t cpos = cmd.find_first_not_of(" \n\t");
+	if (std::string::npos == cpos) return "";
+	if ('/' == cmd[cpos]) return "";
+	if ('#' == cmd[cpos]) return "";
 
 	// In js-mode, the commands are all of the form
 	//    AtomSpace.someCommand(args)
@@ -143,26 +144,28 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// then we are in MCP-mode. Else we are in JS-mode.
 
 	bool js_mode = true;
-	if ('{' == cmd[0])
+
+	if ('{' == cmd[cpos])
 		js_mode = false;
-	else if ('A' != cmd[0])
+	else if ('A' != cmd[cpos])
 		return reterr(cmd);
 
-	size_t cpos, pos, epos;
+	size_t pos, epos;
 	if (js_mode)
 	{
-		cpos = cmd.find_first_of(".");
+		cpos = cmd.find_first_of(".", cpos);
 		if (std::string::npos == cpos) return reterr(cmd);
 
 		cpos = cmd.find_first_not_of(". \n\t", cpos);
-		if (std::string::npos == pos) return reterr(cmd);
+		if (std::string::npos == cpos) return reterr(cmd);
 
 		epos = cmd.find_first_of("( \n\t", cpos);
 		if (std::string::npos == epos) return reterr(cmd);
+		pos = epos + 1;
 	}
 	else
 	{
-		cpos = cmd.find("{ \"tool\": ");
+		cpos = cmd.find("{ \"tool\": ", cpos);
 		if (std::string::npos == cpos) return reterr(cmd);
 		cpos += 10; // 10 == strlen("{ \"tool\": ");
 
