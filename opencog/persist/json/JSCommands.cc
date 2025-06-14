@@ -41,12 +41,12 @@ using namespace opencog;
 
 static std::string reterr(const std::string& cmd)
 {
-	return "{\"success\": false, \"error\": \"Invalid command format\", \"command\": " + cmd + "}";
+	return "{\"success\": false, \"error\": \"Invalid command format\", \"command\": " + cmd + "}\n";
 }
 
 static std::string retmsgerr(const std::string& errmsg)
 {
-	return "{\"success\": false, \"error\": \"" + errmsg + "\"}";
+	return "{\"success\": false, \"error\": \"" + errmsg + "\"}\n";
 }
 
 // Common boilerplate
@@ -60,11 +60,11 @@ static std::string retmsgerr(const std::string& errmsg)
 
 #define RETURN(RV) { \
 	if (js_mode) return RV "\n"; \
-	return "{\"success\": true, \"result\": " RV "}"; }
+	return "{\"success\": true, \"result\": " RV "}\n"; }
 
 #define RETURNSTR(RV) { \
 	if (js_mode) return RV + "\n"; \
-	return "{\"success\": true, \"result\": " + RV + "}"; }
+	return "{\"success\": true, \"result\": " + RV + "}\n"; }
 
 #define GET_TYPE \
 	Type t = NOTYPE; \
