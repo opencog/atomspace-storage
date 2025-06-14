@@ -35,7 +35,7 @@ All JS-style API calls have the form:
 ```
     AtomSpace.someCommand(args)
 ```
-The JSON-style interface has the form:
+The JSON-style (MCP-style) interface has the form:
 ```
     { "tool": "someCommand", "params": { args }}
 ```
@@ -51,6 +51,15 @@ and
 do the same thing: they create a `ConceptNode` called `foo` in the
 AtomSpace.
 
+The JS-style returns will be be "true", "false", or some Atomese encoded
+as JSON.  The MCP-style return values will be of the form
+```
+    {"success": true, "result": some_json_obj }
+```
+Error returns will have the form
+```
+    {"success": false, "error": error_msg }
+```
 
 
 Examples
