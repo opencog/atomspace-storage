@@ -164,6 +164,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		return reterr(cmd);
 
 	size_t pos, epos;
+	size_t act;
+
 	if (js_mode)
 	{
 		cpos = cmd.find_first_of(".", cpos);
@@ -175,6 +177,9 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		epos = cmd.find_first_of("( \n\t", cpos);
 		if (std::string::npos == epos) return reterr(cmd);
 		pos = epos + 1;
+
+		act = std::hash<std::string>{}(cmd.substr(cpos, epos-cpos));
+		epos = cmd.size();
 	}
 	else
 	{
@@ -185,17 +190,40 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		cpos = cmd.find_first_not_of("\" \n\t", cpos);
 		if (std::string::npos == cpos) return reterr(cmd);
 
-		epos = cmd.find_first_of("\", \n\t", cpos);
-		if (std::string::npos == epos) return reterr(cmd);
+		size_t tool_end = cmd.find_first_of("\", \n\t", cpos);
+		if (std::string::npos == tool_end) return reterr(cmd);
 
-		// OK, so now pos and epos bracket the tool name.
+		// Extract the tool name
+		std::string tool_name = cmd.substr(cpos, tool_end-cpos);
+		act = std::hash<std::string>{}(tool_name);
+
+		// OK, so now pos and tool_end bracket the tool name.
 		// Advance cpos past the params.
-		pos = cmd.find("\"params\": ", epos);
+		pos = cmd.find("\"params\": ", tool_end);
 		if (std::string::npos == pos) return reterr(cmd);
 		pos += 10; // 10 == strlen("\"params\": ");
-	}
 
-	size_t act = std::hash<std::string>{}(cmd.substr(cpos, epos-cpos));
+		// For MCP mode, find the closing } of the params object
+		// We need to find the matching } for the { that comes after "params":
+		int brace_count = 0;
+		size_t scan_pos = pos;
+		epos = std::string::npos;
+
+		while (scan_pos < cmd.size()) {
+			if (cmd[scan_pos] == '{') {
+				brace_count++;
+			} else if (cmd[scan_pos] == '}') {
+				brace_count--;
+				if (brace_count == 0) {
+					epos = scan_pos + 1; // Include the closing }
+					break;
+				}
+			}
+			scan_pos++;
+		}
+
+		if (std::string::npos == epos) return reterr(cmd);
+	}
 
 	// -----------------------------------------------
 	// Get version
