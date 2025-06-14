@@ -38,18 +38,32 @@
 #include "Json.h"
 
 using namespace opencog;
+#define NEW_MCP_STYLE_API
 
 static std::string reterr(const std::string& cmd)
 {
+#ifdef OLD_JS_API
 	return "JSON/JavaScript function not supported: >>" + cmd + "<<\n";
+#endif // OLD_JS_API
+
+#ifdef NEW_MCP_STYLE_API
+	return "{\"success\": false, \"error\": \"Invalid command format\", \"comand\": " + cmd + "\"}";
+#endif // NEW_MCP_STYLE_API
 }
 
 // Common boilerplate
+#ifdef OLD_JS_API
 #define CHK_CMD \
 	pos = cmd.find_first_of("(", epos); \
 	if (std::string::npos == pos) return reterr(cmd); \
 	pos++; \
 	epos = cmd.size();
+#endif // OLD_JS_API
+
+#ifdef NEW_MCP_STYLE_API
+// No-op.
+#define CHK_CMD
+#endif // NEW_MCP_STYLE_API
 
 #define GET_TYPE \
 	Type t = NOTYPE; \
@@ -133,7 +147,35 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if ('#' == cmd[0]) return "";
 	if ('\n' == cmd[0]) return "";
 
-	// Find the command and dispatch
+#ifdef NEW_MCP_STYLE_API
+	// Assume that the commands are of the form
+	// { "tool": "someToolName", "params": { stuff }}
+	// e.g. getIncoming as the tool name. Get that name,
+	// move the string pointer to the params argument,
+	// then dispatch on the tool name.
+
+	size_t cpos = cmd.find("{ \"tool\": ");
+	if (std::string::npos == cpos) return reterr(cmd);
+	cpos += 10; // 10 == strlen("{ \"tool\": ");
+
+	size_t pos = cmd.find_first_not_of("\" \n\t", cpos);
+	if (std::string::npos == pos) return reterr(cmd);
+
+	size_t epos = cmd.find_first_of("\", \n\t", pos);
+	if (std::string::npos == epos) return reterr(cmd);
+
+	// OK, so now pos and epos bracket the tool name.
+	// Advance cpos past the params.
+	cpos = cmd.find("\"params\": {", epos);
+	if (std::string::npos == cpos) return reterr(cmd);
+	cpos += 13; // 13 == strlen("{ \"params\": {");
+#endif // NEW_MCP_STYLE_API
+
+#ifdef OLD_JS_API
+	// The older API worked much like above, except that it pretended
+	// that there was a js call happening. So, instead of it being pure
+	// JSON, it looked for AtomSpace.getIncoming(args), hunting for the
+	// dot and the open paren.
 	size_t cpos = cmd.find_first_of(".");
 	if (std::string::npos == cpos) return reterr(cmd);
 
@@ -142,6 +184,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 	size_t epos = cmd.find_first_of("( \n\t", pos);
 	if (std::string::npos == epos) return reterr(cmd);
+#endif // OLD_JS_API
 
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
 
