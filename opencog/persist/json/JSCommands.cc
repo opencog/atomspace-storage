@@ -41,7 +41,7 @@ using namespace opencog;
 
 static std::string reterr(const std::string& cmd)
 {
-	return "{\"success\": false, \"error\": \"Invalid command format\", \"comand\": " + cmd + "\"}";
+	return "{\"success\": false, \"error\": \"Invalid command format\", \"comand\": " + cmd + "}";
 }
 
 // Common boilerplate
