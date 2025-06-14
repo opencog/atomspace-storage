@@ -265,9 +265,9 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	}
 
 	// -----------------------------------------------
-	// AtomSpace.getAtoms("Node")
+	// AtomSpace.getAtoms("Node") // no subclassing
 	// AtomSpace.getAtoms("Node", true)
-	// AtomSpace.getAtoms({"type": "Node"})
+	// AtomSpace.getAtoms({"type": "Node"}) // no sublassing
 	// AtomSpace.getAtoms({"type": "Node", "subclass": true})
 	if (gtatm == act)
 	{
