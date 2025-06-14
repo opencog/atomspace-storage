@@ -44,6 +44,11 @@ static std::string reterr(const std::string& cmd)
 	return "{\"success\": false, \"error\": \"Invalid command format\", \"comand\": " + cmd + "}";
 }
 
+static std::string retmsgerr(const std::string& errmsg)
+{
+	return "{\"success\": false, \"error\": \"" + errmsg + "\"}";
+}
+
 // Common boilerplate
 #define CHK_CMD \
 	if (js_mode) { \
@@ -293,7 +298,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			GET_TYPE;
 
 			if (not nameserver().isA(t, NODE))
-				return "Type is not a Node type: " + cmd.substr(epos);
+				return retmsgerr("Type is not a Node type: " + cmd.substr(epos));
 
 			pos = cmd.find_first_not_of(",) \n\t", pos);
 			std::string name = Json::get_node_name(cmd, pos, epos);
@@ -320,7 +325,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_TYPE;
 
 		if (not nameserver().isA(t, LINK))
-			return "Type is not a Link type: " + cmd.substr(epos);
+			return retmsgerr("Type is not a Link type: " + cmd.substr(epos));
 
 		pos = cmd.find_first_not_of(", \n\t", pos);
 
@@ -432,7 +437,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 				t = Json::decode_type(cmd, pos);
 			}
 			catch(...) {
-				return "Unknown type: " + cmd.substr(pos);
+				return retmsgerr("Unknown type: " + cmd.substr(pos));
 			}
 		}
 
@@ -459,7 +464,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		CHK_CMD;
 		GET_ATOM("[]\n");
-		return Json::encode_atom_values(h);
+		RETURNSTR(Json::encode_atom_values(h));
 	}
 
 	// -----------------------------------------------
