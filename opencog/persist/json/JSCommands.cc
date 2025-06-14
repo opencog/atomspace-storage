@@ -197,7 +197,9 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// -----------------------------------------------
 	// Get subtypes of the named type.
 	// AtomSpace.getSubTypes("Link")
+	// AtomSpace.getSubTypes("Link", true)
 	// AtomSpace.getSubTypes({ "type": "Link"})
+	// AtomSpace.getSubTypes({ "type": "Link", "recursive": true})
 	if (gtsub == act)
 	{
 		CHK_CMD;
@@ -215,7 +217,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// -----------------------------------------------
 	// Get supertypes of the named type.
 	// AtomSpace.getSuperTypes("ListLink")
-	// AtomSpace.getSuperTypes({ "type": "ListLink"})
+	// AtomSpace.getSuperTypes("ListLink", true)
+	// AtomSpace.getSuperTypes({ "type": "ListLink", "recursive": true})
 	if (gtsup == act)
 	{
 		CHK_CMD;
@@ -231,9 +234,10 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	}
 
 	// -----------------------------------------------
+	// AtomSpace.getAtoms("Node")
 	// AtomSpace.getAtoms("Node", true)
-	// AtomSpace.getAtoms({"type": "Node", "subclass": true})
 	// AtomSpace.getAtoms({"type": "Node"})
+	// AtomSpace.getAtoms({"type": "Node", "subclass": true})
 	if (gtatm == act)
 	{
 		CHK_CMD;
