@@ -192,7 +192,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		// Advance cpos past the params.
 		pos = cmd.find("\"params\": ", epos);
 		if (std::string::npos == pos) return reterr(cmd);
-		pos += 10; // 10 == strlen("{ \"params\": ");
+		pos += 10; // 10 == strlen("\"params\": ");
 	}
 
 	size_t act = std::hash<std::string>{}(cmd.substr(cpos, epos-cpos));
