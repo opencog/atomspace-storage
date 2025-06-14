@@ -261,6 +261,57 @@ void MCPCommandsUTest::test_makeAtom()
 	TS_ASSERT(result.find("\"success\": true") != std::string::npos);
 	TS_ASSERT(result.find("\"result\": true") != std::string::npos);
 
+	// Test the specific fix: create an atom with makeAtom and verify it has the correct name
+	logger().info("Testing makeAtom name preservation fix...");
+
+	// Create a ConceptNode with a specific name using short type name
+	cmd = R"({ "tool": "makeAtom", "params": {"type": "Concept", "name": "foo"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for makeAtom with name 'foo': %s", result.c_str());
+	TS_ASSERT(result.find("\"success\": true") != std::string::npos);
+	TS_ASSERT(result.find("\"result\": true") != std::string::npos);
+
+	// Verify the atom can be found using getAtoms and has the correct name
+	cmd = R"({ "tool": "getAtoms", "params": {"type": "Concept"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for getAtoms: %s", result.c_str());
+	TS_ASSERT(result.find("\"success\": true") != std::string::npos);
+	TS_ASSERT(result.find("\"name\": \"foo\"") != std::string::npos);
+
+	// Also verify with haveNode
+	cmd = R"({ "tool": "haveNode", "params": {"type": "Concept", "name": "foo"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for haveNode 'foo': %s", result.c_str());
+	TS_ASSERT(result.find("\"success\": true") != std::string::npos);
+	TS_ASSERT(result.find("\"result\": true") != std::string::npos);
+
+	// Test with a more complex name
+	cmd = R"({ "tool": "makeAtom", "params": {"type": "Concept", "name": "test with spaces"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for makeAtom with complex name: %s", result.c_str());
+	TS_ASSERT(result.find("\"success\": true") != std::string::npos);
+	TS_ASSERT(result.find("\"result\": true") != std::string::npos);
+
+	// Verify the complex name is preserved
+	cmd = R"({ "tool": "haveNode", "params": {"type": "Concept", "name": "test with spaces"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	TS_ASSERT(result.find("\"success\": true") != std::string::npos);
+	TS_ASSERT(result.find("\"result\": true") != std::string::npos);
+
+	// Test with PredicateNode to ensure fix works for all node types
+	cmd = R"({ "tool": "makeAtom", "params": {"type": "PredicateNode", "name": "test_predicate"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for makeAtom PredicateNode: %s", result.c_str());
+	TS_ASSERT(result.find("\"success\": true") != std::string::npos);
+	TS_ASSERT(result.find("\"result\": true") != std::string::npos);
+
+	// Verify PredicateNode has correct name
+	cmd = R"({ "tool": "getAtoms", "params": {"type": "PredicateNode"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for getAtoms PredicateNode: %s", result.c_str());
+	TS_ASSERT(result.find("\"success\": true") != std::string::npos);
+	TS_ASSERT(result.find("\"name\": \"test_predicate\"") != std::string::npos);
+
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
