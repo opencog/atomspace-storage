@@ -5,6 +5,7 @@ ADD_LIBRARY (json SHARED
 	EncodeJson.cc
 	JSCommands.cc
 	JsonEval.cc
+	McpPlugAtomSpace.cc
 )
 
 TARGET_LINK_LIBRARIES(json
@@ -23,6 +24,7 @@ INSTALL (FILES
 	JsonEval.h
 	Json.h
 	McpPlugin.h
+	McpPlugAtomSpace.h
 	DESTINATION "include/opencog/persist/json"
 )
 
