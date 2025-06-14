@@ -39,6 +39,39 @@
 
 using namespace opencog;
 
+// Helper function to parse boolean parameters from commands
+static bool parse_bool_param(const std::string& cmd, size_t& pos, size_t epos, bool js_mode)
+{
+	bool recursive = false;
+	if (js_mode) {
+		pos = cmd.find_first_not_of(",) \n\t", pos);
+		if (std::string::npos != pos) {
+			recursive = true;
+			if (0 == cmd.compare(pos, 1, "0") or
+			    0 == cmd.compare(pos, 5, "false") or
+			    0 == cmd.compare(pos, 5, "False"))
+				recursive = false;
+		}
+	} else {
+		// In MCP mode, look for "subclass" or "recursive" field
+		// Search backwards from epos to find the boolean
+		size_t bool_pos = cmd.rfind("\"subclass\"", epos);
+		if (std::string::npos == bool_pos)
+			bool_pos = cmd.rfind("\"recursive\"", epos);
+		if (std::string::npos != bool_pos) {
+			bool_pos = cmd.find(':', bool_pos);
+			if (std::string::npos != bool_pos && bool_pos < epos) {
+				bool_pos = cmd.find_first_not_of(": \n\t", bool_pos);
+				if (std::string::npos != bool_pos && bool_pos < epos) {
+					if (0 == cmd.compare(bool_pos, 4, "true"))
+						recursive = true;
+				}
+			}
+		}
+	}
+	return recursive;
+}
+
 static std::string reterr(const std::string& cmd)
 {
 	return "{\"success\": false, \"error\": \"Invalid command format\", \"command\": " + cmd + "}\n";
@@ -67,15 +100,7 @@ static std::string retmsgerr(const std::string& errmsg)
 	}
 
 #define GET_BOOL \
-	pos = cmd.find_first_not_of(",) \n\t", pos); \
-	bool recursive = false; \
-	if (std::string::npos != pos) { \
-		recursive = true; \
-		if (0 == cmd.compare(pos, 1, "0") or \
-		    0 == cmd.compare(pos, 5, "false") or \
-		    0 == cmd.compare(pos, 5, "False")) \
-			recursive = false; \
-	}
+	bool recursive = parse_bool_param(cmd, pos, epos, js_mode);
 
 #define GET_ATOM(rv) \
 	Handle h = Json::decode_atom(cmd, pos, epos); \
