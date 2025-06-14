@@ -50,14 +50,6 @@ static std::string retmsgerr(const std::string& errmsg)
 }
 
 // Common boilerplate
-#define CHK_CMD \
-	if (js_mode) { \
-		pos = cmd.find_first_of("(", epos); \
-		if (std::string::npos == pos) return reterr(cmd); \
-		pos++; \
-		epos = cmd.size(); \
-	}
-
 #define RETURN(RV) { \
 	if (js_mode) return RV "\n"; \
 	return "{\"success\": true, \"result\": " RV "}\n"; }
@@ -231,7 +223,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.version({})
 	if (versn == act)
 	{
-		CHK_CMD;
 		RETURN(ATOMSPACE_VERSION_STRING);
 	}
 
@@ -243,7 +234,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getSubTypes({ "type": "Link", "recursive": true})
 	if (gtsub == act)
 	{
-		CHK_CMD;
 		GET_TYPE;
 		GET_BOOL;
 
@@ -263,7 +253,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getSuperTypes({ "type": "ListLink"})
 	if (gtsup == act)
 	{
-		CHK_CMD;
 		GET_TYPE;
 		GET_BOOL;
 
@@ -282,7 +271,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getAtoms({"type": "Node", "subclass": true})
 	if (gtatm == act)
 	{
-		CHK_CMD;
 		GET_TYPE;
 		GET_BOOL;
 
@@ -304,8 +292,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveNode({ "type": "Concept", "name": "foo"})
 	if (haven == act)
 	{
-		CHK_CMD;
-
 		// Check if we have JSON object format by looking ahead
 		size_t check_pos = pos;
 		check_pos = cmd.find_first_not_of(" \n\t", check_pos);
@@ -342,8 +328,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveLink({ "type": "List", "outgoing": [{ "type": "ConceptNode", "name": "foo"}]})
 	if (havel == act)
 	{
-		CHK_CMD;
-
 		// Check if we might have JSON object format
 		size_t save_pos = pos;
 		pos = cmd.find_first_not_of(" \n\t", pos);
@@ -402,7 +386,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveAtom({ "type": "ConceptNode", "name": "foo"})
 	if (havea == act)
 	{
-		CHK_CMD;
 		GET_ATOM("false");
 		RETURN("true");
 	}
@@ -411,7 +394,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.makeAtom({ "type": "ConceptNode", "name": "foo"})
 	if (makea == act)
 	{
-		CHK_CMD;
 		ADD_ATOM;
 		RETURN("true");
 	}
@@ -422,7 +404,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//                      { "type": "ConceptNode", "name": "oofdah"}])
 	if (loada == act)
 	{
-		CHK_CMD;
 		pos = cmd.find_first_not_of(" \n\t", pos);
 		if ('[' != cmd[pos]) RETURN("false");
 		pos++;
@@ -453,7 +434,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getIncoming({ "type": "ConceptNode", "name": "foo"})
 	if (gtinc == act)
 	{
-		CHK_CMD;
 		GET_ATOM("[]");
 
 		Type t = NOTYPE;
@@ -490,7 +470,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getValues({ "type": "ConceptNode", "name": "foo"})
 	if (gtval == act)
 	{
-		CHK_CMD;
 		GET_ATOM("[]");
 		RETURNSTR(Json::encode_atom_values(h));
 	}
@@ -501,7 +480,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//     "value": { "type": "FloatValue", "value": [1, 2, 3] } } )
 	if (stval == act)
 	{
-		CHK_CMD;
 		ADD_ATOM;
 		GET_KEY;
 		GET_VALUE;
@@ -514,7 +492,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getTV({ "type": "ConceptNode", "name": "foo"})
 	if (gettv == act)
 	{
-		CHK_CMD;
 		GET_ATOM("[]");
 
 		std::string alist = "[{ \"value\": \n";
@@ -528,7 +505,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//     "value": { "type": "SimpleTruthValue", "value": [0.2, 0.3] } } )
 	if (settv == act)
 	{
-		CHK_CMD;
 		ADD_ATOM;
 		GET_VALUE;
 
@@ -542,7 +518,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//      { "type": "NumberNode", "name": "2" }] })
 	if (execu == act)
 	{
-		CHK_CMD;
 		ADD_ATOM;
 
 		ValuePtr vp = h->execute();
@@ -553,7 +528,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.extract({ "type": "Concept", "name": "foo"}, true)
 	if (extra == act)
 	{
-		CHK_CMD;
 		Handle h = Json::decode_atom(cmd, pos, epos);
 		if (nullptr == h) RETURN("false");
 		pos = epos;
