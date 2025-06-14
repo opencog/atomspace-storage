@@ -87,9 +87,26 @@ static std::string retmsgerr(const std::string& errmsg)
 	if (js_mode) return RV "\n"; \
 	return "{\"content\": [{\"type\":\"text\", \"text\": " RV "}]}\n"; }
 
+// Sigh. So MCP is not really JSON, it's pseudo-json. It does use
+// "valid" JSON to create, send and receive messages, but all tool-use
+// messages must always be text strings (and not JSON). But our core
+// API returns ... actual JSON. So .. fake it. Escape all quotes in
+// in the JSON, surround the whole thing with quotes, and bingo: its
+// now a text string. Hurrah. Well, for now, it seems that at least
+// Claude Code seems to grok this at some level, so we're good for now.
+// I personally think it's ugly and annoying but whatever.
 #define RETURNSTR(RV) { \
 	if (js_mode) return RV + "\n"; \
-	return "{\"content\": [{\"type\":\"text\", \"text\": " + RV + "}]}\n"; }
+	/* return "{\"content\": [{\"type\":\"text\", \"text\": " + RV + "}]}\n"; } */ \
+	std::string srv(RV); \
+	while (srv.back() == '\n') srv.pop_back(); \
+	std::stringstream ss; \
+	ss << std::quoted(srv); \
+	std::string rs = "{\"content\": [{\"type\":\"text\", \"text\": "; \
+	rs += ss.str(); \
+	rs += "}]}\n"; \
+	return rs; \
+	}
 
 #define GET_TYPE \
 	Type t = NOTYPE; \
