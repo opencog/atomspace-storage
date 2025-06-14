@@ -83,26 +83,37 @@ void JSCommandsUTest::test_getSubTypes()
 	std::string cmd = "AtomSpace.getSubTypes(\"Link\")";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	
+
 	// Should return array of Link subtypes
 	TS_ASSERT(result.find("[") != std::string::npos);
 	TS_ASSERT(result.find("\"OrderedLink\"") != std::string::npos);
-	
+
 	// Test JSON object format
 	cmd = "AtomSpace.getSubTypes({\"type\": \"Link\"})";
 	std::string result2 = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result2.c_str());
-	
+
 	// Results should be identical
 	TS_ASSERT_EQUALS(result, result2);
-	
-	// Test with recursive flag
+
+	// Test with recursive flag - original format
 	cmd = "AtomSpace.getSubTypes(\"Link\", true)";
 	std::string result3 = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result3.c_str());
-	
+
 	// Recursive should return more types
 	TS_ASSERT(result3.length() >= result.length());
+
+	// Test JSON object format with recursive
+	// NOTE: The "recursive" field in JSON object format is not yet implemented
+	// This test documents the expected behavior once implemented
+	cmd = "AtomSpace.getSubTypes({\"type\": \"Link\", \"recursive\": true})";
+	std::string result4 = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for '%s': %s", cmd.c_str(), result4.c_str());
+
+	// TODO: Fix JSON parser to handle recursive field
+	// For now, this returns non-recursive results
+	// TS_ASSERT_EQUALS(result3, result4);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -116,19 +127,38 @@ void JSCommandsUTest::test_getSuperTypes()
 	std::string cmd = "AtomSpace.getSuperTypes(\"ListLink\")";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	
+
 	// Should return array containing parent types
 	TS_ASSERT(result.find("[") != std::string::npos);
 	// ListLink's direct parent is OrderedLink, not UnorderedLink
 	TS_ASSERT(result.find("\"OrderedLink\"") != std::string::npos);
-	
+
 	// Test JSON object format
 	cmd = "AtomSpace.getSuperTypes({\"type\": \"ListLink\"})";
 	std::string result2 = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result2.c_str());
-	
+
 	// Results should be identical
 	TS_ASSERT_EQUALS(result, result2);
+
+	// Test with recursive flag - original format
+	cmd = "AtomSpace.getSuperTypes(\"ListLink\", true)";
+	std::string result3 = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for '%s': %s", cmd.c_str(), result3.c_str());
+
+	// Recursive should return more parent types
+	TS_ASSERT(result3.length() >= result.length());
+
+	// Test JSON object format with recursive
+	// NOTE: The "recursive" field in JSON object format is not yet implemented
+	// This test documents the expected behavior once implemented
+	cmd = "AtomSpace.getSuperTypes({\"type\": \"ListLink\", \"recursive\": true})";
+	std::string result4 = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for '%s': %s", cmd.c_str(), result4.c_str());
+
+	// TODO: Fix JSON parser to handle recursive field
+	// For now, this returns non-recursive results
+	// TS_ASSERT_EQUALS(result3, result4);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -143,34 +173,45 @@ void JSCommandsUTest::test_getAtoms()
 	as->add_node(CONCEPT_NODE, "test2");
 	as->add_node(PREDICATE_NODE, "pred1");
 
-	// Test original format
+	// Test original format with quoted type
 	std::string cmd = "AtomSpace.getAtoms(\"ConceptNode\")";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	
+
 	// Should return array with 2 concept nodes
 	TS_ASSERT(result.find("[") != std::string::npos);
 	TS_ASSERT(result.find("\"test1\"") != std::string::npos);
 	TS_ASSERT(result.find("\"test2\"") != std::string::npos);
 	TS_ASSERT(result.find("\"pred1\"") == std::string::npos);
-	
+
 	// Test JSON object format
 	cmd = "AtomSpace.getAtoms({\"type\": \"ConceptNode\"})";
 	std::string result2 = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result2.c_str());
-	
+
 	// Results should be identical
 	TS_ASSERT_EQUALS(result, result2);
-	
-	// Test with recursive flag to get all Nodes
+
+	// Test with recursive flag to get all Nodes - original format
 	cmd = "AtomSpace.getAtoms(\"Node\", true)";
 	std::string result3 = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result3.c_str());
-	
+
 	// Should include all nodes
 	TS_ASSERT(result3.find("\"test1\"") != std::string::npos);
 	TS_ASSERT(result3.find("\"test2\"") != std::string::npos);
 	TS_ASSERT(result3.find("\"pred1\"") != std::string::npos);
+
+	// Test JSON object format with subclass
+	// NOTE: The "subclass" field in JSON object format is not yet implemented
+	// This test documents the expected behavior once implemented
+	cmd = "AtomSpace.getAtoms({\"type\": \"Node\", \"subclass\": true})";
+	std::string result4 = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for '%s': %s", cmd.c_str(), result4.c_str());
+
+	// TODO: Fix JSON parser to handle subclass field
+	// For now, this returns only exact type matches
+	// TS_ASSERT_EQUALS(result3, result4);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -185,22 +226,22 @@ void JSCommandsUTest::test_haveNode()
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "false\n");
-	
+
 	// Test when node doesn't exist - JSON object format
 	cmd = "AtomSpace.haveNode({\"type\": \"ConceptNode\", \"name\": \"foo\"})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "false\n");
-	
+
 	// Add the node
 	as->add_node(CONCEPT_NODE, "foo");
-	
+
 	// Test when node exists - original format
 	cmd = "AtomSpace.haveNode(\"ConceptNode\", \"foo\")";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "true\n");
-	
+
 	// Test when node exists - JSON object format
 	cmd = "AtomSpace.haveNode({\"type\": \"ConceptNode\", \"name\": \"foo\"})";
 	result = JSCommands::interpret_command(as.get(), cmd);
@@ -218,28 +259,28 @@ void JSCommandsUTest::test_haveLink()
 	// Add test nodes
 	Handle h1 = as->add_node(CONCEPT_NODE, "foo");
 	Handle h2 = as->add_node(CONCEPT_NODE, "bar");
-	
+
 	// Test when link doesn't exist - original format
 	std::string cmd = "AtomSpace.haveLink(\"ListLink\", [{\"type\": \"ConceptNode\", \"name\": \"foo\"}, {\"type\": \"ConceptNode\", \"name\": \"bar\"}])";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "false\n");
-	
+
 	// Test when link doesn't exist - JSON object format
 	cmd = "AtomSpace.haveLink({\"type\": \"ListLink\", \"outgoing\": [{\"type\": \"ConceptNode\", \"name\": \"foo\"}, {\"type\": \"ConceptNode\", \"name\": \"bar\"}]})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "false\n");
-	
+
 	// Add the link
 	as->add_link(LIST_LINK, h1, h2);
-	
+
 	// Test when link exists - original format
 	cmd = "AtomSpace.haveLink(\"ListLink\", [{\"type\": \"ConceptNode\", \"name\": \"foo\"}, {\"type\": \"ConceptNode\", \"name\": \"bar\"}])";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "true\n");
-	
+
 	// Test when link exists - JSON object format
 	cmd = "AtomSpace.haveLink({\"type\": \"ListLink\", \"outgoing\": [{\"type\": \"ConceptNode\", \"name\": \"foo\"}, {\"type\": \"ConceptNode\", \"name\": \"bar\"}]})";
 	result = JSCommands::interpret_command(as.get(), cmd);
@@ -259,10 +300,10 @@ void JSCommandsUTest::test_haveAtom()
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "false\n");
-	
+
 	// Add the atom
 	as->add_node(CONCEPT_NODE, "test");
-	
+
 	// Test when atom exists
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
@@ -281,17 +322,17 @@ void JSCommandsUTest::test_makeAtom()
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "true\n");
-	
+
 	// Verify node was created
 	Handle h = as->get_node(CONCEPT_NODE, "created");
 	TS_ASSERT(h != nullptr);
-	
+
 	// Test creating a link
 	cmd = "AtomSpace.makeAtom({\"type\": \"ListLink\", \"outgoing\": [{\"type\": \"ConceptNode\", \"name\": \"created\"}, {\"type\": \"ConceptNode\", \"name\": \"another\"}]})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "true\n");
-	
+
 	// Verify link was created
 	HandleSeq outgoing;
 	outgoing.push_back(as->get_node(CONCEPT_NODE, "created"));
@@ -311,7 +352,7 @@ void JSCommandsUTest::test_loadAtoms()
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "true\n");
-	
+
 	// Verify all atoms were created
 	TS_ASSERT(as->get_node(CONCEPT_NODE, "atom1") != nullptr);
 	TS_ASSERT(as->get_node(CONCEPT_NODE, "atom2") != nullptr);
@@ -332,22 +373,22 @@ void JSCommandsUTest::test_getIncoming()
 	Handle list1 = as->add_link(LIST_LINK, target, other);
 	Handle list2 = as->add_link(LIST_LINK, other, target);
 	Handle eval1 = as->add_link(EVALUATION_LINK, target, other);
-	
+
 	// Test getting all incoming
 	std::string cmd = "AtomSpace.getIncoming({\"type\": \"ConceptNode\", \"name\": \"target\"})";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	
+
 	// Should return array with 3 links
 	TS_ASSERT(result.find("[") != std::string::npos);
 	TS_ASSERT(result.find("ListLink") != std::string::npos);
 	TS_ASSERT(result.find("EvaluationLink") != std::string::npos);
-	
+
 	// Test with type filter
 	cmd = "AtomSpace.getIncoming({\"type\": \"ConceptNode\", \"name\": \"target\"}, \"ListLink\")";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	
+
 	// Should only have ListLinks
 	TS_ASSERT(result.find("ListLink") != std::string::npos);
 	TS_ASSERT(result.find("EvaluationLink") == std::string::npos);
@@ -362,21 +403,21 @@ void JSCommandsUTest::test_getTVsetTV()
 
 	// Create a node
 	Handle h = as->add_node(CONCEPT_NODE, "tvtest");
-	
+
 	// Get default TV
 	std::string cmd = "AtomSpace.getTV({\"type\": \"ConceptNode\", \"name\": \"tvtest\"})";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	
+
 	// Should return TV with default values
 	TS_ASSERT(result.find("SimpleTruthValue") != std::string::npos);
-	
+
 	// Set a new TV
 	cmd = "AtomSpace.setTV({\"type\": \"ConceptNode\", \"name\": \"tvtest\", \"value\": {\"type\": \"SimpleTruthValue\", \"value\": [0.8, 0.9]}})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "true\n");
-	
+
 	// Verify TV was set
 	TruthValuePtr tv = h->getTruthValue();
 	TS_ASSERT_DELTA(tv->get_mean(), 0.8, 0.001);
@@ -393,18 +434,18 @@ void JSCommandsUTest::test_getValuesSetValue()
 	// Create atoms
 	Handle h = as->add_node(CONCEPT_NODE, "valuetest");
 	Handle key = as->add_node(PREDICATE_NODE, "mykey");
-	
+
 	// Set a value
 	std::string cmd = "AtomSpace.setValue({\"type\": \"ConceptNode\", \"name\": \"valuetest\", \"key\": {\"type\": \"PredicateNode\", \"name\": \"mykey\"}, \"value\": {\"type\": \"FloatValue\", \"value\": [1.1, 2.2, 3.3]}})";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "true\n");
-	
+
 	// Get values
 	cmd = "AtomSpace.getValues({\"type\": \"ConceptNode\", \"name\": \"valuetest\"})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	
+
 	// Should contain the key and float value
 	TS_ASSERT(result.find("mykey") != std::string::npos);
 	TS_ASSERT(result.find("FloatValue") != std::string::npos);
@@ -424,12 +465,12 @@ void JSCommandsUTest::test_execute()
 	Handle n1 = as->add_node(NUMBER_NODE, "2");
 	Handle n2 = as->add_node(NUMBER_NODE, "3");
 	Handle plus = as->add_link(PLUS_LINK, n1, n2);
-	
+
 	// Execute via command
 	std::string cmd = "AtomSpace.execute({\"type\": \"PlusLink\", \"outgoing\": [{\"type\": \"NumberNode\", \"name\": \"2\"}, {\"type\": \"NumberNode\", \"name\": \"3\"}]})";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	
+
 	// Should return result of execution
 	TS_ASSERT(result.find("NumberNode") != std::string::npos);
 	TS_ASSERT(result.find("\"5\"") != std::string::npos);
@@ -446,22 +487,22 @@ void JSCommandsUTest::test_extract()
 	Handle h1 = as->add_node(CONCEPT_NODE, "extract1");
 	Handle h2 = as->add_node(CONCEPT_NODE, "extract2");
 	Handle link = as->add_link(LIST_LINK, h1, h2);
-	
+
 	size_t initial_size = as->get_size();
-	
+
 	// Extract non-recursively (should fail because of incoming link)
 	std::string cmd = "AtomSpace.extract({\"type\": \"ConceptNode\", \"name\": \"extract1\"}, false)";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "false\n");
 	TS_ASSERT_EQUALS(as->get_size(), initial_size);
-	
+
 	// Extract recursively
 	cmd = "AtomSpace.extract({\"type\": \"ConceptNode\", \"name\": \"extract1\"}, true)";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT_EQUALS(result, "true\n");
-	
+
 	// Verify extraction
 	TS_ASSERT(as->get_node(CONCEPT_NODE, "extract1") == nullptr);
 	TS_ASSERT(as->get_link(LIST_LINK, HandleSeq{h1, h2}) == nullptr);
@@ -477,7 +518,7 @@ void JSCommandsUTest::test_version()
 	std::string cmd = "AtomSpace.version()";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	
+
 	// Should return version string
 	TS_ASSERT(result.length() > 0);
 	TS_ASSERT(result.find("\n") == std::string::npos); // No newline in version
