@@ -74,9 +74,8 @@ Type Json::decode_type(const std::string& tna, size_t& pos)
 /* ================================================================== */
 
 /**
- * Decode a type argument that can be either a simple string like "ConceptNode"
- * or a JSON object like {"type": "ConceptNode"}.
- * This function handles the unwrapping and calls decode_type for the actual lookup.
+ * Decode a type argument that can be either a simple string like
+ * "ConceptNode" or a JSON object like {"type": "ConceptNode"}.
  */
 Type Json::decode_type_arg(const std::string& tna, size_t& pos)
 {
@@ -155,9 +154,8 @@ std::string Json::get_node_name(const std::string& s,
 /* ================================================================== */
 
 /**
- * Get a node name argument that can be either a direct string like "foo"
- * or from a JSON object like {"name": "foo"}.
- * This function handles the unwrapping and calls get_node_name for the actual extraction.
+ * Get a node name argument that can be either a direct string
+ * like "foo" or from a JSON object like {"name": "foo"}.
  */
 std::string Json::get_node_name_arg(const std::string& s, size_t& pos, size_t& r)
 {
@@ -184,7 +182,7 @@ std::string Json::get_node_name_arg(const std::string& s, size_t& pos, size_t& r
 			throw SyntaxException(TRACE_INFO, "Missing closing brace >>%s<<",
 				s.substr(npos).c_str());
 
-		// Call the original get_node_name to extract the actual name
+		// Call get_node_name to extract the actual name
 		std::string name = get_node_name(s, npos, close);
 
 		// Update pos to point after the closing brace
