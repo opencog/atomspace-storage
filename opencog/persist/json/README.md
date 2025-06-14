@@ -11,7 +11,7 @@ just enough to interact with the AtomSpace, and nothing more.
 
 Status
 ------
-**Version 0.9.2.** There is enough here to be usable for basic things.
+**Version 0.9.3.** There is enough here to be usable for basic things.
 Support for multiple AtomSpaces is missing.  A convenience call for
 setting multiple values at the same time is missing.
 
@@ -24,8 +24,43 @@ here to provide a network interface to the JSON code here.
 
 You can access the code here both through the WebSockets and through
 netcat/telnet.   Use `ws://localhost:18080/json` for the websockets
-interface. It works exactly the same way as the telnet interface
-(described below).
+interface. It works exactly the same way as the telnet interface.
+(The telnet interface is used in the examples below.)
+
+Two alternative interfaces are provided. One interface uses a
+Jvascript-like syntax; the other is pure JSON. They do the same thing,
+under the covers; they just have a (slightly) different API.
+
+All JS-style API calls have the form:
+```
+    AtomSpace.someCommand(args)
+```
+The JSON-style (MCP-style) interface has the form:
+```
+    { "tool": "someCommand", "params": { args }}
+```
+
+Thus, both
+```
+    AtomSpace.makeAtom({"type": "Concept", "name": "foo"})
+```
+and
+```
+    { "tool": "makeAtom", "params": {"type": "Concept", "name": "foo"}}
+```
+do the same thing: they create a `ConceptNode` called `foo` in the
+AtomSpace.
+
+The JS-style returns will be be "true", "false", or some Atomese encoded
+as a JSON object.  The MCP-style return values will be of the form
+```
+    {"success": true, "result": some_json_object }
+```
+Error returns will have the form
+```
+    {"success": false, "error": error_msg }
+```
+
 
 Examples
 --------

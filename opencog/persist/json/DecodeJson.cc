@@ -54,21 +54,79 @@ Type Json::decode_type(const std::string& tna, size_t& pos)
 		throw SyntaxException(TRACE_INFO, "Bad Type >>%s<<",
 			tna.substr(pos).c_str());
 
-	// Advance to next whitespace.
+	// Check if we have a quoted string
+	if ('"' == tna[pos]) {
+		pos++; // skip opening quote
+		size_t endquote = tna.find('"', pos);
+		if (std::string::npos == endquote)
+			throw SyntaxException(TRACE_INFO, "Unterminated quoted type >>%s<<",
+				tna.substr(pos).c_str());
+
+		Type t = nameserver().getType(tna.substr(pos, endquote-pos));
+		if (NOTYPE == t)
+			throw SyntaxException(TRACE_INFO, "Unknown Type >>%s<<",
+				tna.substr(pos, endquote-pos).c_str());
+
+		pos = endquote + 1; // skip closing quote
+		return t;
+	}
+
+	// Unquoted string - advance to next whitespace
 	size_t nos = tna.find_first_of(",) \n\t", pos);
 	if (std::string::npos == nos)
 		nos = tna.size();
 
-	size_t sos = nos;
-	if ('"' == tna[pos]) { pos++; sos--; }
-
-	Type t = nameserver().getType(tna.substr(pos, sos-pos));
+	Type t = nameserver().getType(tna.substr(pos, nos-pos));
 	if (NOTYPE == t)
 		throw SyntaxException(TRACE_INFO, "Unknown Type >>%s<<",
-			tna.substr(pos, sos-pos).c_str());
+			tna.substr(pos, nos-pos).c_str());
 
 	pos = nos;
 	return t;
+}
+
+/* ================================================================== */
+
+/**
+ * Decode a type argument that can be either a simple string like
+ * "ConceptNode" or a JSON object like {"type": "ConceptNode"}.
+ */
+Type Json::decode_type_arg(const std::string& tna, size_t& pos)
+{
+	// Advance past whitespace.
+	pos = tna.find_first_not_of(" \n\t", pos);
+	if (std::string::npos == pos)
+		throw SyntaxException(TRACE_INFO, "Bad Type - empty string");
+
+	// Check if this is a JSON object format
+	if ('{' == tna[pos])
+	{
+		// Look for "type": field
+		size_t tpos = tna.find("\"type\":", pos);
+		if (std::string::npos == tpos)
+			throw SyntaxException(TRACE_INFO, "Missing type field in JSON object");
+
+		tpos += 7; // skip past "type":
+
+		// Call the original decode_type to parse the actual type name
+		Type t = decode_type(tna, tpos);
+
+		// Find closing brace and any trailing content we need to skip
+		size_t close = tna.find('}', tpos);
+		if (std::string::npos == close)
+			throw SyntaxException(TRACE_INFO, "Missing closing brace >>%s<<",
+				tna.substr(tpos).c_str());
+
+		// Update pos to point after the closing brace
+		pos = close + 1;
+
+		return t;
+	}
+	else
+	{
+		// Simple string format - just call decode_type directly
+		return decode_type(tna, pos);
+	}
 }
 
 /* ================================================================== */
@@ -103,6 +161,50 @@ std::string Json::get_node_name(const std::string& s,
 	ss << s.substr(l, r-l);
 	ss >> std::quoted(name);
 	return name;
+}
+
+/* ================================================================== */
+
+/**
+ * Get a node name argument that can be either a direct string
+ * like "foo" or from a JSON object like {"name": "foo"}.
+ */
+std::string Json::get_node_name_arg(const std::string& s, size_t& pos, size_t& r)
+{
+	// Advance past whitespace.
+	pos = s.find_first_not_of(" \n\t", pos);
+	if (std::string::npos == pos)
+		throw SyntaxException(TRACE_INFO, "Bad node name - empty string");
+
+	// Check if this is a JSON object format
+	if ('{' == s[pos])
+	{
+		// Look for "name": field
+		size_t npos = s.find("\"name\":", pos);
+		if (std::string::npos == npos)
+			throw SyntaxException(TRACE_INFO, "Missing name field in JSON object");
+
+		npos += 7; // skip past "name":
+
+		// Find the closing brace to use as boundary
+		size_t close = s.find('}', npos);
+		if (std::string::npos == close)
+			throw SyntaxException(TRACE_INFO, "Missing closing brace >>%s<<",
+				s.substr(npos).c_str());
+
+		// Call get_node_name to extract the actual name
+		std::string name = get_node_name(s, npos, close);
+
+		// Update pos to point after the closing brace
+		pos = close + 1;
+
+		return name;
+	}
+	else
+	{
+		// Simple string format - just call get_node_name directly
+		return get_node_name(s, pos, r);
+	}
 }
 
 /* ================================================================== */
