@@ -52,9 +52,9 @@ do the same thing: they create a `ConceptNode` called `foo` in the
 AtomSpace.
 
 The JS-style returns will be be "true", "false", or some Atomese encoded
-as JSON.  The MCP-style return values will be of the form
+as a JSON object.  The MCP-style return values will be of the form
 ```
-    {"success": true, "result": some_json_obj }
+    {"success": true, "result": some_json_object }
 ```
 Error returns will have the form
 ```
