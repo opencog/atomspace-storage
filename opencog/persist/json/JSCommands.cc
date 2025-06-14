@@ -169,17 +169,17 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		if (std::string::npos == cpos) return reterr(cmd);
 		cpos += 10; // 10 == strlen("{ \"tool\": ");
 
-		pos = cmd.find_first_not_of("\" \n\t", cpos);
-		if (std::string::npos == pos) return reterr(cmd);
+		cpos = cmd.find_first_not_of("\" \n\t", cpos);
+		if (std::string::npos == cpos) return reterr(cmd);
 
-		epos = cmd.find_first_of("\", \n\t", pos);
+		epos = cmd.find_first_of("\", \n\t", cpos);
 		if (std::string::npos == epos) return reterr(cmd);
 
 		// OK, so now pos and epos bracket the tool name.
 		// Advance cpos past the params.
-		pos = cmd.find("\"params\": {", epos);
+		pos = cmd.find("\"params\": ", epos);
 		if (std::string::npos == pos) return reterr(cmd);
-		pos += 13; // 13 == strlen("{ \"params\": {");
+		pos += 10; // 10 == strlen("{ \"params\": ");
 	}
 
 	size_t act = std::hash<std::string>{}(cmd.substr(cpos, epos-cpos));
