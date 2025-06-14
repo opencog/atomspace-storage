@@ -85,11 +85,11 @@ static std::string retmsgerr(const std::string& errmsg)
 // Common boilerplate
 #define RETURN(RV) { \
 	if (js_mode) return RV "\n"; \
-	return "{\"success\": true, \"result\": " RV "}\n"; }
+	return "{\"content\": [{\"type\":\"text\", \"text\": " RV "}]}\n"; }
 
 #define RETURNSTR(RV) { \
 	if (js_mode) return RV + "\n"; \
-	return "{\"success\": true, \"result\": " + RV + "}\n"; }
+	return "{\"content\": [{\"type\":\"text\", \"text\": " + RV + "}]}\n"; }
 
 #define GET_TYPE \
 	Type t = NOTYPE; \
