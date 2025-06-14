@@ -22,6 +22,7 @@ INSTALL (FILES
 	JSCommands.h
 	JsonEval.h
 	Json.h
+	McpPlugin.h
 	DESTINATION "include/opencog/persist/json"
 )
 
