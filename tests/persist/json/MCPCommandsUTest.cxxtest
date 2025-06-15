@@ -374,7 +374,8 @@ void MCPCommandsUTest::test_loadAtoms()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string cmd = R"({ "tool": "loadAtoms", "params": [{"type": "ConceptNode", "name": "atom1"}, {"type": "ConceptNode", "name": "atom2"}, {"type": "PredicateNode", "name": "pred1"}]})";
+	// Test with full type names
+	std::string cmd = R"({ "tool": "loadAtoms", "params": {"atoms": [{"type": "ConceptNode", "name": "atom1"}, {"type": "ConceptNode", "name": "atom2"}, {"type": "PredicateNode", "name": "pred1"}]}})";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 	TS_ASSERT(result.find("\"content\"") != std::string::npos);
@@ -393,9 +394,60 @@ void MCPCommandsUTest::test_loadAtoms()
 	cmd = R"({ "tool": "haveNode", "params": {"type": "PredicateNode", "name": "pred1"}})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for haveNode pred1: %s", result.c_str());
-	// TODO: loadAtoms appears to not create PredicateNodes correctly in MCP mode
-	// This should return true but currently returns false
-	// TS_ASSERT(extractMCPContent(result) == "true");
+	TS_ASSERT(extractMCPContent(result) == "true");
+
+	// Clear atomspace for next test
+	as->clear();
+
+	// Test the specific case requested: shortened type names and reversed property order
+	// { "tool": "loadAtoms", "params": {"atoms":[{"name":"bar","type":"Concept"},{"name":"foo","type":"Concept"}]}}
+	cmd = R"({ "tool": "loadAtoms", "params": {"atoms": [{"name": "bar", "type": "Concept"}, {"name": "foo", "type": "Concept"}]}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for loadAtoms with short type names: %s", result.c_str());
+	TS_ASSERT(result.find("\"content\"") != std::string::npos);
+	TS_ASSERT(extractMCPContent(result) == "true");
+
+	// Verify atoms were created with short type names
+	cmd = R"({ "tool": "haveNode", "params": {"type": "Concept", "name": "bar"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for haveNode bar: %s", result.c_str());
+	TS_ASSERT(extractMCPContent(result) == "true");
+
+	cmd = R"({ "tool": "haveNode", "params": {"type": "Concept", "name": "foo"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for haveNode foo: %s", result.c_str());
+	TS_ASSERT(extractMCPContent(result) == "true");
+
+	// Also verify using getAtoms
+	cmd = R"({ "tool": "getAtoms", "params": {"type": "Concept"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for getAtoms: %s", result.c_str());
+	std::string content = extractMCPContent(result);
+	TS_ASSERT(content.find("\"bar\"") != std::string::npos);
+	TS_ASSERT(content.find("\"foo\"") != std::string::npos);
+
+	// Clear atomspace for next test
+	as->clear();
+
+	// Test with mixed shortened and full type names, and various property orders
+	cmd = R"({ "tool": "loadAtoms", "params": {"atoms": [{"type": "Predicate", "name": "pred1"}, {"name": "node1", "type": "ConceptNode"}, {"type": "Concept", "name": "concept1"}]}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for mixed types: %s", result.c_str());
+	TS_ASSERT(result.find("\"content\"") != std::string::npos);
+	TS_ASSERT(extractMCPContent(result) == "true");
+
+	// Verify all were created
+	cmd = R"({ "tool": "haveNode", "params": {"type": "PredicateNode", "name": "pred1"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	TS_ASSERT(extractMCPContent(result) == "true");
+
+	cmd = R"({ "tool": "haveNode", "params": {"type": "ConceptNode", "name": "node1"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	TS_ASSERT(extractMCPContent(result) == "true");
+
+	cmd = R"({ "tool": "haveNode", "params": {"type": "ConceptNode", "name": "concept1"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	TS_ASSERT(extractMCPContent(result) == "true");
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
