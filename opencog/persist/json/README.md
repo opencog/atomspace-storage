@@ -246,6 +246,7 @@ examples that actually work:
 * ask if it has a node of type 'Concept' that is named 'foo'
 * Are there any atoms of type Node?
 * Can you run that query again, setting subclass to true?
+* Please ask the sserver if it has (ListLink (Concept "foo"))
 
 JavaScript API
 --------------
