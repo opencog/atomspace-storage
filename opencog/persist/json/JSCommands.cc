@@ -99,7 +99,7 @@ static std::string retmsgerr(const std::string& errmsg)
 	if (js_mode) return RV + "\n"; \
 	/* return "{\"content\": [{\"type\":\"text\", \"text\": " + RV + "}]}\n"; } */ \
 	std::string srv(RV); \
-	while (srv.back() == '\n') srv.pop_back(); \
+	std::replace(srv.begin(), srv.end(), '\n', ' '); \
 	std::stringstream ss; \
 	ss << std::quoted(srv); \
 	std::string rs = "{\"content\": [{\"type\":\"text\", \"text\": "; \
