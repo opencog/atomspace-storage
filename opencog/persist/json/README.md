@@ -244,6 +244,8 @@ examples that actually work:
 * ask the atomspace server what all the direct subtypes of type 'Node' are
 * run that query again, but set subclass to true
 * ask if it has a node of type 'Concept' that is named 'foo'
+* Are there any atoms of type Node?
+* Can you run that query again, setting subclass to true?
 
 JavaScript API
 --------------
