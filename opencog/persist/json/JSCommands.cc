@@ -350,21 +350,19 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			GET_ATOM("false")
 			RETURN("true");
 		}
-		else
-		{
-			// Original format: type followed by name
-			GET_TYPE;
 
-			if (not nameserver().isA(t, NODE))
-				return retmsgerr("Type is not a Node type: " + cmd.substr(epos));
+		// Function argument format: type followed by name
+		GET_TYPE;
 
-			pos = cmd.find_first_not_of(",) \n\t", pos);
-			std::string name = Json::get_node_name(cmd, pos, epos);
-			Handle h = as->get_node(t, std::move(name));
+		if (not nameserver().isA(t, NODE))
+			return retmsgerr("Type is not a Node type: " + cmd.substr(epos));
 
-			if (nullptr == h) RETURN("false");
-			RETURN("true");
-		}
+		pos = cmd.find_first_not_of(",) \n\t", pos);
+		std::string name = Json::get_node_name(cmd, pos, epos);
+		Handle h = as->get_node(t, std::move(name));
+
+		if (nullptr == h) RETURN("false");
+		RETURN("true");
 	}
 
 	// -----------------------------------------------
@@ -378,40 +376,38 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			GET_ATOM("false")
 			RETURN("true");
 		}
-		else
+
+		// Function argument format: type followed by outgoing array
+		GET_TYPE;
+
+		if (not nameserver().isA(t, LINK))
+			return retmsgerr("Type is not a Link type: " + cmd.substr(epos));
+
+		pos = cmd.find_first_not_of(", \n\t", pos);
+
+		HandleSeq hs;
+
+		size_t l = pos;
+		size_t r = epos;
+		while (std::string::npos != r)
 		{
-			// Original format: type followed by outgoing array
-			GET_TYPE;
+			l = cmd.find_first_not_of(" \n\t", l);
+			if (l == std::string::npos || cmd[l] == ']') break;
 
-			if (not nameserver().isA(t, LINK))
-				return retmsgerr("Type is not a Link type: " + cmd.substr(epos));
+			Handle ho = Json::decode_atom(cmd, l, r);
+			if (nullptr == ho) RETURN("false");
+			hs.push_back(ho);
 
-			pos = cmd.find_first_not_of(", \n\t", pos);
-
-			HandleSeq hs;
-
-			size_t l = pos;
-			size_t r = epos;
-			while (std::string::npos != r)
-			{
-				l = cmd.find_first_not_of(" \n\t", l);
-				if (l == std::string::npos || cmd[l] == ']') break;
-
-				Handle ho = Json::decode_atom(cmd, l, r);
-				if (nullptr == ho) RETURN("false");
-				hs.push_back(ho);
-
-				// Look for the comma
-				l = cmd.find(",", r);
-				if (std::string::npos == l) break;
-				l ++;
-				r = epos;
-			}
-			Handle h = as->get_link(t, std::move(hs));
-
-			if (nullptr == h) RETURN("false");
-			RETURN("true");
+			// Look for the comma
+			l = cmd.find(",", r);
+			if (std::string::npos == l) break;
+			l ++;
+			r = epos;
 		}
+		Handle h = as->get_link(t, std::move(hs));
+
+		if (nullptr == h) RETURN("false");
+		RETURN("true");
 	}
 
 	// -----------------------------------------------
