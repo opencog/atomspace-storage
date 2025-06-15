@@ -54,11 +54,11 @@ AtomSpace.
 The JS-style returns will be be "true", "false", or some Atomese encoded
 as a JSON object.  The MCP-style return values will be of the form
 ```
-    {"success": true, "result": some_json_object }
+    {"content": [{"type":"text", "text": "..."}]}
 ```
 Error returns will have the form
 ```
-    {"success": false, "error": error_msg }
+    {"success": false, "error": {"code": -32603, "message": "..." }}
 ```
 
 
