@@ -348,6 +348,7 @@ void JSCommandsUTest::test_loadAtoms()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+	// Test with full type names
 	std::string cmd = "AtomSpace.loadAtoms([{\"type\": \"ConceptNode\", \"name\": \"atom1\"}, {\"type\": \"ConceptNode\", \"name\": \"atom2\"}, {\"type\": \"PredicateNode\", \"name\": \"pred1\"}])";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
@@ -358,6 +359,35 @@ void JSCommandsUTest::test_loadAtoms()
 	TS_ASSERT(as->get_node(CONCEPT_NODE, "atom2") != nullptr);
 	TS_ASSERT(as->get_node(PREDICATE_NODE, "pred1") != nullptr);
 	TS_ASSERT_EQUALS(as->get_size(), 3);
+
+	// Clear atomspace for next test
+	as->clear();
+
+	// Test with shortened type names and reversed property order
+	// This is the specific case mentioned: [{"name":"bar","type":"Concept"},{"type":"Concept","name":"foo"}]
+	cmd = "AtomSpace.loadAtoms([{\"name\":\"bar\",\"type\":\"Concept\"},{\"type\":\"Concept\",\"name\":\"foo\"}])";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
+	TS_ASSERT_EQUALS(result, "true\n");
+
+	// Verify atoms were created with short type names
+	TS_ASSERT(as->get_node(CONCEPT_NODE, "bar") != nullptr);
+	TS_ASSERT(as->get_node(CONCEPT_NODE, "foo") != nullptr);
+	TS_ASSERT_EQUALS(as->get_size(), 2);
+
+	// Clear atomspace for next test
+	as->clear();
+
+	// Test with MCP format (object with atoms array)
+	cmd = "AtomSpace.loadAtoms({\"atoms\": [{\"type\": \"Concept\", \"name\": \"mcp1\"}, {\"name\": \"mcp2\", \"type\": \"Predicate\"}]})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
+	TS_ASSERT_EQUALS(result, "true\n");
+
+	// Verify MCP format atoms were created
+	TS_ASSERT(as->get_node(CONCEPT_NODE, "mcp1") != nullptr);
+	TS_ASSERT(as->get_node(PREDICATE_NODE, "mcp2") != nullptr);
+	TS_ASSERT_EQUALS(as->get_size(), 2);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
