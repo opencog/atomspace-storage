@@ -90,6 +90,8 @@ Type Json::decode_type(const std::string& tna, size_t& pos)
 /**
  * Decode a type argument that can be either a simple string like
  * "ConceptNode" or a JSON object like {"type": "ConceptNode"}.
+ * It might also be a field in a JSON object:
+ *   {"other": "stuff", "type": "ConceptNode", "more": "stuff"}
  */
 Type Json::decode_type_arg(const std::string& tna, size_t& pos)
 {
@@ -101,6 +103,9 @@ Type Json::decode_type_arg(const std::string& tna, size_t& pos)
 	// Check if this is a JSON object format
 	if ('{' == tna[pos])
 	{
+		// Save the start position of the JSON object
+		size_t obj_start = pos;
+
 		// Look for "type": field
 		size_t tpos = tna.find("\"type\":", pos);
 		if (std::string::npos == tpos)
@@ -111,13 +116,44 @@ Type Json::decode_type_arg(const std::string& tna, size_t& pos)
 		// Call the original decode_type to parse the actual type name
 		Type t = decode_type(tna, tpos);
 
-		// Find closing brace and any trailing content we need to skip
-		size_t close = tna.find('}', tpos);
+		// For MCP format, we're looking at a params object that might have
+		// other fields before "type". We need to find the closing brace
+		// of the entire params object, not just the first closing brace.
+		// We'll count braces but also handle string literals properly.
+		size_t scan_pos = obj_start;
+		int brace_count = 0;
+		size_t close = std::string::npos;
+		bool in_string = false;
+		bool escape_next = false;
+
+		while (scan_pos < tna.size()) {
+			char ch = tna[scan_pos];
+
+			if (escape_next) {
+				escape_next = false;
+			} else if (ch == '\\' && in_string) {
+				escape_next = true;
+			} else if (ch == '"') {
+				in_string = !in_string;
+			} else if (!in_string) {
+				if (ch == '{') {
+					brace_count++;
+				} else if (ch == '}') {
+					brace_count--;
+					if (brace_count == 0) {
+						close = scan_pos;
+						break;
+					}
+				}
+			}
+			scan_pos++;
+		}
+
 		if (std::string::npos == close)
 			throw SyntaxException(TRACE_INFO, "Missing closing brace >>%s<<",
-				tna.substr(tpos).c_str());
+				tna.substr(obj_start).c_str());
 
-		// Update pos to point after the closing brace
+		// Update pos to point after the closing brace.
 		pos = close + 1;
 
 		return t;
