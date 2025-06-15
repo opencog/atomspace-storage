@@ -233,6 +233,18 @@ following limitations apply:
   to specity an Atom, the Atom type must come first.
 
 
+Using MCP
+---------
+The JSON API support a variant that is compatible with the Model Context
+protocol (MCP). When enabled in the CogServer, and attached to an LLM,
+you can chat with the LLM to find out about the AtomSpace contents. Some
+examples that actually work:
+
+* Please ask the AtomSpace MCP server what version it is.
+* ask the atomspace server what all the direct subtypes of type 'Node' are
+* run that query again, but set subclass to true
+* ask if it has a node of type 'Concept' that is named 'foo'
+
 JavaScript API
 --------------
 Version 0.0.0 of a JavaScript API for this thing can be found at
