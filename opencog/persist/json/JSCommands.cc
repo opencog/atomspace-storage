@@ -82,10 +82,11 @@ static std::string retmsgerr(const std::string& errmsg)
 	return "{\"success\": false, \"error\": \"" + errmsg + "\"}\n";
 }
 
-// Common boilerplate
+// Because MCP is not really JSON, (see below) we cannot return booleans
+// as booleans; they must be strings. So add some extra quotes to them.
 #define RETURN(RV) { \
 	if (js_mode) return RV "\n"; \
-	return "{\"content\": [{\"type\":\"text\", \"text\": " RV "}]}\n"; }
+	return "{\"content\": [{\"type\":\"text\", \"text\": \"" RV "\"}]}\n"; }
 
 // Sigh. So MCP is not really JSON, it's pseudo-json. It does use
 // "valid" JSON to create, send and receive messages, but all tool-use
@@ -108,6 +109,7 @@ static std::string retmsgerr(const std::string& errmsg)
 	return rs; \
 	}
 
+// Common boilerplate
 #define GET_TYPE \
 	Type t = NOTYPE; \
 	try { \
