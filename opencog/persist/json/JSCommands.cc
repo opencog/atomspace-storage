@@ -114,6 +114,10 @@ static std::string retmsgerr(const std::string& errmsg)
 	}
 
 // Common boilerplate
+#define CHK_FOR_JSON_ARG \
+	size_t brace = cmd.find_first_not_of(" \n\t", pos); \
+	bool is_json_object = (brace != std::string::npos and cmd[brace] == '{');
+
 #define GET_TYPE \
 	Type t = NOTYPE; \
 	try { \
@@ -438,8 +442,19 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// A list version of above.
 	// AtomSpace.loadAtoms([{ "type": "ConceptNode", "name": "foo"},
 	//                      { "type": "ConceptNode", "name": "oofdah"}])
+	// AtomSpace.loadAtoms({"atoms":
+	//                         [{ "type": "ConceptNode", "name": "foo"},
+	//                         { "type": "ConceptNode", "name": "oofdah"}]})
 	if (loada == act)
 	{
+		CHK_FOR_JSON_ARG;
+		if (is_json_object)
+		{
+			pos = cmd.find("\"atoms\":", pos);
+			if (std::string::npos == pos) RETURN("false");
+			pos += 8; // 8 == strlen("\"atoms\":");
+		}
+
 		pos = cmd.find_first_not_of(" \n\t", pos);
 		if ('[' != cmd[pos]) RETURN("false");
 		pos++;

@@ -258,6 +258,7 @@ examples that actually work:
 * The contents of the cogserv can change any time. If I ask to do it
   again, this is because things may have changed.
 * please get the incoming set of the ConceptNode foo
+* Please create (Concept "bar") and (Concept "foo")
 
 
 JavaScript API
