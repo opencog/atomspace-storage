@@ -209,6 +209,7 @@ AtomSpace.extract({ "type": "Concept", "name": "foo"}, true) // recursive
 ```
 
 ### Unimplemented Commands
+* Return a list of all keys on an atom.
 * Set multiple values at once -- this would be a nice-to-have utility.
 * Wrapper for cog-evaluate!
 * Multiple AtomSpace (Frame) support -- to implement this, one would do
@@ -235,7 +236,7 @@ following limitations apply:
 * There must not be any newlines in the data sent to the server;
   commands must be on one line.
 * The order of the tags must be as documented above. So, for example,
-  to specity an Atom, the Atom type must come first.
+  to specify an Atom, the Atom type must come first.
 
 
 Using MCP
@@ -252,6 +253,11 @@ examples that actually work:
 * Are there any atoms of type Node?
 * Can you run that query again, setting subclass to true?
 * Please ask the server if it has (ListLink (Concept "foo"))
+* are there any Links that contain a ConceptNode named 'foo'
+* please make an atom called bar of type ConceptNode
+* The contents of the cogserv can change any time. If I ask to do it
+  again, this is because things may have changed.
+* please get the incoming set of the ConceptNode foo
 
 
 JavaScript API
