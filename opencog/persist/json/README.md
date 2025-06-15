@@ -39,6 +39,11 @@ The JSON-style (MCP-style) interface has the form:
 ```
     { "tool": "someCommand", "params": { args }}
 ```
+For example:
+```
+{ "tool": "version", "params": {}}
+```
+returns the AtomSpace version number
 
 Thus, both
 ```
@@ -54,11 +59,11 @@ AtomSpace.
 The JS-style returns will be be "true", "false", or some Atomese encoded
 as a JSON object.  The MCP-style return values will be of the form
 ```
-    {"success": true, "result": some_json_object }
+    {"content": [{"type":"text", "text": "..."}]}
 ```
 Error returns will have the form
 ```
-    {"success": false, "error": error_msg }
+    {"success": false, "error": {"code": -32603, "message": "..." }}
 ```
 
 
@@ -204,6 +209,7 @@ AtomSpace.extract({ "type": "Concept", "name": "foo"}, true) // recursive
 ```
 
 ### Unimplemented Commands
+* Return a list of all keys on an atom.
 * Set multiple values at once -- this would be a nice-to-have utility.
 * Wrapper for cog-evaluate!
 * Multiple AtomSpace (Frame) support -- to implement this, one would do
@@ -230,7 +236,7 @@ following limitations apply:
 * There must not be any newlines in the data sent to the server;
   commands must be on one line.
 * The order of the tags must be as documented above. So, for example,
-  to specity an Atom, the Atom type must come first.
+  to specify an Atom, the Atom type must come first.
 
 
 Using MCP
@@ -240,12 +246,20 @@ protocol (MCP). When enabled in the CogServer, and attached to an LLM,
 you can chat with the LLM to find out about the AtomSpace contents. Some
 examples that actually work:
 
-* Please ask the AtomSpace MCP server what version it is.
-* ask the atomspace server what all the direct subtypes of type 'Node' are
+* Please ask the cogserv MCP server what version it is.
+* ask the cogserv server what all the direct subtypes of type 'Node' are
 * run that query again, but set subclass to true
 * ask if it has a node of type 'Concept' that is named 'foo'
 * Are there any atoms of type Node?
 * Can you run that query again, setting subclass to true?
+* Please ask the server if it has (ListLink (Concept "foo"))
+* are there any Links that contain a ConceptNode named 'foo'
+* please make an atom called bar of type ConceptNode
+* The contents of the cogserv can change any time. If I ask to do it
+  again, this is because things may have changed.
+* please get the incoming set of the ConceptNode foo
+* Please create (Concept "bar") and (Concept "foo")
+
 
 JavaScript API
 --------------

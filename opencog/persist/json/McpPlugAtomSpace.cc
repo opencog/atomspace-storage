@@ -102,10 +102,12 @@ std::string McpPlugAtomSpace::get_tool_descriptions() const
 
 	// loadAtoms
 	add_tool(json, "loadAtoms", "Create multiple atoms in the AtomSpace",
-		"{\"type\": \"array\", \"description\": \"Array of atom specifications to create\", "
+		"{\"type\": \"object\", \"properties\": {"
+		"\"atoms\": {\"type\": \"array\", \"description\": \"Array of atom specifications to create\", "
 		"\"items\": {\"type\": \"object\", \"properties\": {"
 		"\"type\": {\"type\": \"string\"}, \"name\": {\"type\": \"string\"}, "
-		"\"outgoing\": {\"type\": \"array\"}}, \"required\": [\"type\"]}}");
+		"\"outgoing\": {\"type\": \"array\"}}, \"required\": [\"type\"]}}}, "
+		"\"required\": [\"atoms\"]}");
 
 	// getIncoming
 	add_tool(json, "getIncoming", "Get all links that contain a given atom in their outgoing set",

@@ -114,6 +114,10 @@ static std::string retmsgerr(const std::string& errmsg)
 	}
 
 // Common boilerplate
+#define CHK_FOR_JSON_ARG \
+	size_t brace = cmd.find_first_not_of(" \n\t", pos); \
+	bool is_json_object = (brace != std::string::npos and cmd[brace] == '{');
+
 #define GET_TYPE \
 	Type t = NOTYPE; \
 	try { \
@@ -271,7 +275,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.version({})
 	if (versn == act)
 	{
-		RETURN("\"" ATOMSPACE_VERSION_STRING "\"");
+		RETURN(ATOMSPACE_VERSION_STRING);
 	}
 
 	// -----------------------------------------------
@@ -340,35 +344,25 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveNode({ "type": "Concept", "name": "foo"})
 	if (haven == act)
 	{
-		// Check if we have JSON object format by looking ahead
-		size_t check_pos = pos;
-		check_pos = cmd.find_first_not_of(" \n\t", check_pos);
-		bool is_json_object = (check_pos != std::string::npos && cmd[check_pos] == '{');
-
+		CHK_FOR_JSON_ARG;
 		if (is_json_object)
 		{
-			// For JSON object, we need to parse the whole object at once
-			Handle h = Json::decode_atom(cmd, pos, epos);
-			if (nullptr == h) RETURN("false");
-			h = as->get_atom(h);
-			if (nullptr == h) RETURN("false");
+			GET_ATOM("false")
 			RETURN("true");
 		}
-		else
-		{
-			// Original format: type followed by name
-			GET_TYPE;
 
-			if (not nameserver().isA(t, NODE))
-				return retmsgerr("Type is not a Node type: " + cmd.substr(epos));
+		// Function argument format: type followed by name
+		GET_TYPE;
 
-			pos = cmd.find_first_not_of(",) \n\t", pos);
-			std::string name = Json::get_node_name(cmd, pos, epos);
-			Handle h = as->get_node(t, std::move(name));
+		if (not nameserver().isA(t, NODE))
+			return retmsgerr("Type is not a Node type: " + cmd.substr(epos));
 
-			if (nullptr == h) RETURN("false");
-			RETURN("true");
-		}
+		pos = cmd.find_first_not_of(",) \n\t", pos);
+		std::string name = Json::get_node_name(cmd, pos, epos);
+		Handle h = as->get_node(t, std::move(name));
+
+		if (nullptr == h) RETURN("false");
+		RETURN("true");
 	}
 
 	// -----------------------------------------------
@@ -376,12 +370,14 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveLink({ "type": "List", "outgoing": [{ "type": "ConceptNode", "name": "foo"}]})
 	if (havel == act)
 	{
-		// Check if we might have JSON object format
-		size_t save_pos = pos;
-		pos = cmd.find_first_not_of(" \n\t", pos);
-		bool might_be_json_object = (pos != std::string::npos && cmd[pos] == '{');
-		pos = save_pos;
+		CHK_FOR_JSON_ARG;
+		if (is_json_object)
+		{
+			GET_ATOM("false")
+			RETURN("true");
+		}
 
+		// Function argument format: type followed by outgoing array
 		GET_TYPE;
 
 		if (not nameserver().isA(t, LINK))
@@ -390,22 +386,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		pos = cmd.find_first_not_of(", \n\t", pos);
 
 		HandleSeq hs;
-
-		// Check if we need to look for "outgoing" field
-		if (might_be_json_object)
-		{
-			// Look for "outgoing": field
-			size_t out_pos = cmd.find("\"outgoing\":", save_pos);
-			if (std::string::npos != out_pos)
-			{
-				out_pos += 11; // skip past "outgoing":
-				out_pos = cmd.find('[', out_pos);
-				if (std::string::npos != out_pos)
-				{
-					pos = out_pos + 1; // skip past '['
-				}
-			}
-		}
 
 		size_t l = pos;
 		size_t r = epos;
@@ -450,8 +430,19 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// A list version of above.
 	// AtomSpace.loadAtoms([{ "type": "ConceptNode", "name": "foo"},
 	//                      { "type": "ConceptNode", "name": "oofdah"}])
+	// AtomSpace.loadAtoms({"atoms":
+	//                         [{ "type": "ConceptNode", "name": "foo"},
+	//                         { "type": "ConceptNode", "name": "oofdah"}]})
 	if (loada == act)
 	{
+		CHK_FOR_JSON_ARG;
+		if (is_json_object)
+		{
+			pos = cmd.find("\"atoms\":", pos);
+			if (std::string::npos == pos) RETURN("false");
+			pos += 8; // 8 == strlen("\"atoms\":");
+		}
+
 		pos = cmd.find_first_not_of(" \n\t", pos);
 		if ('[' != cmd[pos]) RETURN("false");
 		pos++;
