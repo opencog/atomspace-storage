@@ -344,11 +344,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveNode({ "type": "Concept", "name": "foo"})
 	if (haven == act)
 	{
-		// Check if we have JSON object format by looking ahead
-		size_t check_pos = pos;
-		check_pos = cmd.find_first_not_of(" \n\t", check_pos);
-		bool is_json_object = (check_pos != std::string::npos && cmd[check_pos] == '{');
-
+		CHK_FOR_JSON_ARG;
 		if (is_json_object)
 		{
 			GET_ATOM("false")
@@ -376,11 +372,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveLink({ "type": "List", "outgoing": [{ "type": "ConceptNode", "name": "foo"}]})
 	if (havel == act)
 	{
-		// Check if we have JSON object format by looking ahead
-		size_t check_pos = pos;
-		check_pos = cmd.find_first_not_of(" \n\t", check_pos);
-		bool is_json_object = (check_pos != std::string::npos && cmd[check_pos] == '{');
-
+		CHK_FOR_JSON_ARG;
 		if (is_json_object)
 		{
 			GET_ATOM("false")
