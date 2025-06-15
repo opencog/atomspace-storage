@@ -377,7 +377,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		check_pos = cmd.find_first_not_of(" \n\t", check_pos);
 		bool is_json_object = (check_pos != std::string::npos && cmd[check_pos] == '{');
 
-		if (is_json_object && !js_mode)
+		if (is_json_object)
 		{
 			GET_ATOM("false")
 			RETURN("true");
