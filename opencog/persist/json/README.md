@@ -39,6 +39,11 @@ The JSON-style (MCP-style) interface has the form:
 ```
     { "tool": "someCommand", "params": { args }}
 ```
+For example:
+```
+{ "tool": "version", "params": {}}
+```
+returns the AtomSpace version number
 
 Thus, both
 ```
@@ -240,13 +245,14 @@ protocol (MCP). When enabled in the CogServer, and attached to an LLM,
 you can chat with the LLM to find out about the AtomSpace contents. Some
 examples that actually work:
 
-* Please ask the AtomSpace MCP server what version it is.
-* ask the atomspace server what all the direct subtypes of type 'Node' are
+* Please ask the cogserv MCP server what version it is.
+* ask the cogserv server what all the direct subtypes of type 'Node' are
 * run that query again, but set subclass to true
 * ask if it has a node of type 'Concept' that is named 'foo'
 * Are there any atoms of type Node?
 * Can you run that query again, setting subclass to true?
-* Please ask the sserver if it has (ListLink (Concept "foo"))
+* Please ask the server if it has (ListLink (Concept "foo"))
+
 
 JavaScript API
 --------------
