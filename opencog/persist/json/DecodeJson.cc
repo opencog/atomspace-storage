@@ -248,6 +248,8 @@ std::string Json::get_node_name_arg(const std::string& s, size_t& pos, size_t& r
 /// Convert an Atomese JSON expression into a C++ Atom.
 /// For example: `{ "type": "Concept", "name": "foo" }`
 /// will return the corresponding atom.
+/// Reversed arguments `{ "name": "foo", "type": "Concept" }`
+/// should also work.
 ///
 /// The string to decode is `s`, beginning at location `l` and using `r`
 /// as a hint for the end of the expression.
@@ -278,6 +280,10 @@ Handle Json::decode_atom(const std::string& s,
 
 		apos = s.find_first_not_of(" \n\t", apos);
 		std::string name = Json::get_node_name(s, apos, r);
+
+		// name and type could occur in either order;
+		// mov past both.
+		if (r < tpos) r = tpos;
 
 		r = s.find_first_of(",}", r); // Move past the closing paren
 		r++;
