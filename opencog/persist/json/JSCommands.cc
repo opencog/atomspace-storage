@@ -347,11 +347,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 		if (is_json_object)
 		{
-			// For JSON object, we need to parse the whole object at once
-			Handle h = Json::decode_atom(cmd, pos, epos);
-			if (nullptr == h) RETURN("false");
-			h = as->get_atom(h);
-			if (nullptr == h) RETURN("false");
+			GET_ATOM("false")
 			RETURN("true");
 		}
 		else
@@ -383,11 +379,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 		if (is_json_object && !js_mode)
 		{
-			// For MCP JSON object format, parse the whole link specification
-			Handle h = Json::decode_atom(cmd, pos, epos);
-			if (nullptr == h) RETURN("false");
-			h = as->get_atom(h);
-			if (nullptr == h) RETURN("false");
+			GET_ATOM("false")
 			RETURN("true");
 		}
 		else
