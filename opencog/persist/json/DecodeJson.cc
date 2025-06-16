@@ -245,6 +245,83 @@ std::string Json::get_node_name_arg(const std::string& s, size_t& pos, size_t& r
 
 /* ================================================================== */
 
+/// Helper function to find the closing brace of a JSON object
+/// Returns the position after the closing brace, or string::npos if
+/// not found.
+static size_t find_object_end(const std::string& s, size_t start)
+{
+	if (start >= s.size() || s[start] != '{') return std::string::npos;
+
+	int brace_count = 1;
+	size_t pos = start + 1;
+	bool in_string = false;
+	bool escape_next = false;
+
+	while (pos < s.size() && brace_count > 0) {
+		char ch = s[pos];
+		if (escape_next) {
+			escape_next = false;
+		} else if (ch == '\\' && in_string) {
+			escape_next = true;
+		} else if (ch == '"') {
+			in_string = !in_string;
+		} else if (!in_string) {
+			if (ch == '{') {
+				brace_count++;
+			} else if (ch == '}') {
+				brace_count--;
+			}
+		}
+		pos++;
+	}
+
+	return (brace_count == 0) ? pos : std::string::npos;
+}
+
+/// Helper function to find a top-level field in a JSON object
+/// Returns the position after the colon, or string::npos if not found
+static size_t find_top_level_field(const std::string& s,
+                                   const std::string& field_name,
+                                   size_t obj_start, size_t obj_end)
+{
+	std::string search_pattern = "\"" + field_name + "\":";
+	size_t search_pos = obj_start + 1;
+	int depth = 0;
+	bool in_string = false;
+	bool escape_next = false;
+
+	while (search_pos < obj_end) {
+		char ch = s[search_pos];
+		if (escape_next) {
+			escape_next = false;
+		} else if (ch == '\\' && in_string) {
+			escape_next = true;
+		} else if (ch == '"') {
+			in_string = !in_string;
+			// When we enter a string at depth 0, check if it's our field
+			if (!in_string && depth == 0) {
+				// We just exited a string, check if it matches our pattern
+				size_t check_start = search_pos - field_name.length() - 1;
+				if (check_start >= obj_start &&
+				    s.compare(check_start, search_pattern.length(), search_pattern) == 0) {
+					return check_start + search_pattern.length();
+				}
+			}
+		} else if (!in_string) {
+			if (ch == '{' || ch == '[') {
+				depth++;
+			} else if (ch == '}' || ch == ']') {
+				depth--;
+			}
+		}
+		search_pos++;
+	}
+
+	return std::string::npos;
+}
+
+/* ================================================================== */
+
 /// Convert an Atomese JSON expression into a C++ Atom.
 /// For example: `{ "type": "Concept", "name": "foo" }`
 /// will return the corresponding atom.
@@ -260,9 +337,14 @@ Handle Json::decode_atom(const std::string& s,
 	l = s.find("{", l);
 	if (std::string::npos == l) return Handle::UNDEFINED;
 
-	size_t tpos = s.find("\"type\":", l);
+	// Find the end of this JSON object
+	size_t obj_start = l;
+	size_t obj_end = find_object_end(s, obj_start);
+	if (std::string::npos == obj_end) return Handle::UNDEFINED;
+
+	// Find the "type" field at the top level
+	size_t tpos = find_top_level_field(s, "type", obj_start, obj_end);
 	if (std::string::npos == tpos) return Handle::UNDEFINED;
-	tpos += 7;  // skip past "type":
 
 	Type t = NOTYPE;
 	try {
@@ -274,9 +356,9 @@ Handle Json::decode_atom(const std::string& s,
 
 	if (nameserver().isA(t, NODE))
 	{
-		size_t apos = s.find("\"name\":", l);
+		// Find the "name" field at the top level
+		size_t apos = find_top_level_field(s, "name", obj_start, obj_end);
 		if (std::string::npos == apos) return Handle::UNDEFINED;
-		apos += 7;  // skip past "name":
 
 		apos = s.find_first_not_of(" \n\t", apos);
 		std::string name = Json::get_node_name(s, apos, r);
@@ -292,9 +374,9 @@ Handle Json::decode_atom(const std::string& s,
 
 	if (nameserver().isA(t, LINK))
 	{
-		size_t opos = s.find("\"outgoing\":", l);
+		// Find the "outgoing" field at the top level
+		size_t opos = find_top_level_field(s, "outgoing", obj_start, obj_end);
 		if (std::string::npos == opos) return Handle::UNDEFINED;
-		opos += 11;  // skip past "outgoing":
 
 		l = s.find("{", opos);
 		size_t epos = r;
