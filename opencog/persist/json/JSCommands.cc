@@ -524,7 +524,9 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//     "value": { "type": "FloatValue", "value": [1, 2, 3] } } )
 	if (stval == act)
 	{
+		size_t save_pos = pos;
 		ADD_ATOM;
+		epos = save_pos;
 		GET_KEY;
 		GET_VALUE;
 
