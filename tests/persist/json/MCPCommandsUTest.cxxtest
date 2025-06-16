@@ -557,6 +557,59 @@ void MCPCommandsUTest::test_getValuesSetValue()
 	TS_ASSERT(result.find("mykey") != std::string::npos);
 	TS_ASSERT(result.find("FloatValue") != std::string::npos);
 
+	// Test the specific setValue command with mixed field order
+	logger().info("Testing setValue with mixed field order (key before name/type)...");
+
+	// Clear atomspace for a clean test
+	as->clear();
+
+	// Test the exact command format requested
+	cmd = R"({"tool":"setValue","params":{"key":{"type":"Predicate","name":"fovs"},"name":"fimble","type":"Concept","value":{"type":"FloatValue","value":[1,2,3,0.4,0.5,-0.6,0.777,88,999]}}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for setValue with mixed fields: %s", result.c_str());
+	TS_ASSERT(result.find("\"content\"") != std::string::npos);
+	TS_ASSERT(extractMCPContent(result) == "true");
+
+	// Verify the atom was created with the correct name
+	Handle fimble = as->get_node(CONCEPT_NODE, "fimble");
+	TS_ASSERT(fimble != nullptr);
+	TS_ASSERT(fimble->get_name() == "fimble");
+
+	// Verify the key was created
+	Handle fovs = as->get_node(PREDICATE_NODE, "fovs");
+	TS_ASSERT(fovs != nullptr);
+	TS_ASSERT(fovs->get_name() == "fovs");
+
+	// Verify the value was set correctly
+	ValuePtr v = fimble->getValue(fovs);
+	TS_ASSERT(v != nullptr);
+
+	// Check that it's a FloatValue
+	FloatValuePtr fv = FloatValueCast(v);
+	TS_ASSERT(fv != nullptr);
+
+	// Verify the values
+	std::vector<double> expected = {1, 2, 3, 0.4, 0.5, -0.6, 0.777, 88, 999};
+	TS_ASSERT_EQUALS(fv->size(), expected.size());
+
+	for (size_t i = 0; i < expected.size(); i++) {
+		TS_ASSERT_DELTA(fv->value()[i], expected[i], 0.001);
+	}
+
+	// Also verify using getValues command
+	cmd = R"({ "tool": "getValues", "params": {"type": "Concept", "name": "fimble"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for getValues on fimble: %s", result.c_str());
+
+	// Should contain the key and values
+	TS_ASSERT(result.find("fovs") != std::string::npos);
+	TS_ASSERT(result.find("FloatValue") != std::string::npos);
+	TS_ASSERT(result.find("1") != std::string::npos);
+	TS_ASSERT(result.find("0.4") != std::string::npos);
+	TS_ASSERT(result.find("0.777") != std::string::npos);
+	TS_ASSERT(result.find("88") != std::string::npos);
+	TS_ASSERT(result.find("999") != std::string::npos);
+
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
