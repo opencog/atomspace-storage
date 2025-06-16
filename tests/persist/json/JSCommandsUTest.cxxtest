@@ -483,6 +483,56 @@ void JSCommandsUTest::test_getValuesSetValue()
 	TS_ASSERT(result.find("2.2") != std::string::npos);
 	TS_ASSERT(result.find("3.3") != std::string::npos);
 
+	// Test setValue with mixed field order and StringValue
+	logger().info("Testing setValue with mixed field order and StringValue...");
+
+	// Test the exact command format requested
+	cmd = "AtomSpace.setValue({\"key\":{\"type\":\"Predicate\",\"name\":\"sovs\"},\"name\":\"fimble\",\"type\":\"Concept\",\"value\":{\"type\":\"StringValue\",\"value\":[\"a\", \"b\", \"c\", \"wait there's more\", \"e\", \"oofdah\"]}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for setValue with mixed fields: %s", result.c_str());
+	TS_ASSERT_EQUALS(result, "true\n");
+
+	// Verify the atom was created with the correct name
+	Handle fimble = as->get_node(CONCEPT_NODE, "fimble");
+	TS_ASSERT(fimble != nullptr);
+	TS_ASSERT_EQUALS(fimble->get_name(), "fimble");
+
+	// Verify the key was created
+	Handle sovs = as->get_node(PREDICATE_NODE, "sovs");
+	TS_ASSERT(sovs != nullptr);
+	TS_ASSERT_EQUALS(sovs->get_name(), "sovs");
+
+	// Verify the value was set correctly
+	ValuePtr v = fimble->getValue(sovs);
+	TS_ASSERT(v != nullptr);
+
+	// Check that it's a StringValue
+	StringValuePtr sv = StringValueCast(v);
+	TS_ASSERT(sv != nullptr);
+
+	// Verify the string values
+	std::vector<std::string> expected = {"a", "b", "c", "wait there's more", "e", "oofdah"};
+	TS_ASSERT_EQUALS(sv->size(), expected.size());
+
+	for (size_t i = 0; i < expected.size(); i++) {
+		TS_ASSERT_EQUALS(sv->value()[i], expected[i]);
+	}
+
+	// Also verify using getValues command
+	cmd = "AtomSpace.getValues({\"type\": \"Concept\", \"name\": \"fimble\"})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for getValues on fimble: %s", result.c_str());
+
+	// Should contain the key and string values
+	TS_ASSERT(result.find("sovs") != std::string::npos);
+	TS_ASSERT(result.find("StringValue") != std::string::npos);
+	TS_ASSERT(result.find("\"a\"") != std::string::npos);
+	TS_ASSERT(result.find("\"b\"") != std::string::npos);
+	TS_ASSERT(result.find("\"c\"") != std::string::npos);
+	TS_ASSERT(result.find("\"wait there's more\"") != std::string::npos);
+	TS_ASSERT(result.find("\"e\"") != std::string::npos);
+	TS_ASSERT(result.find("\"oofdah\"") != std::string::npos);
+
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
