@@ -259,6 +259,11 @@ examples that actually work:
   again, this is because things may have changed.
 * please get the incoming set of the ConceptNode foo
 * Please create (Concept "bar") and (Concept "foo")
+* Please create a node called (Concept "fimble")
+* Please attach a value to this atom. The value should be located at
+  the key (Predicate "fovs") and it should be a FloatValue holding the
+  vector 1 2 3 0.4 0.5 -0.6 0.777 88 999
+
 
 
 JavaScript API

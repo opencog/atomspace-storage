@@ -322,6 +322,16 @@ Handle Json::decode_atom(const std::string& s,
 
 /* ================================================================== */
 
+#define GET_VALUE_POS \
+	size_t opos = s.find("\"value\":", l); \
+	if (std::string::npos != opos) \
+		opos += 8;  /* skip past "value": */ \
+	else { \
+		opos = s.find("\"values\":", l); \
+		if (std::string::npos == opos) return nullptr; \
+		opos += 9;  /* skip past "values": */ \
+	}
+
 /// Convert an Atomese JSON expression into a C++ Value.
 /// For example: `{ "type": "FloatValue", "value": [1, 2, 3] }`
 /// will return the corresponding ValuePtr.
@@ -356,10 +366,7 @@ ValuePtr Json::decode_value(const std::string& s,
 	if (nameserver().isA(t, FLOAT_VALUE))
 	{
 		l = tpos;
-		size_t opos = s.find("\"value\":", l);
-		if (std::string::npos == opos) return nullptr;
-		opos += 8;  // skip past "value":
-
+		GET_VALUE_POS;
 		l = s.find("[", opos);
 
 		size_t r = ro;
@@ -387,10 +394,7 @@ ValuePtr Json::decode_value(const std::string& s,
 	if (nameserver().isA(t, STRING_VALUE))
 	{
 		l = tpos;
-		size_t opos = s.find("\"value\":", l);
-		if (std::string::npos == opos) return nullptr;
-		opos += 8;  // skip past "value":
-
+		GET_VALUE_POS;
 		l = s.find("[", opos);
 
 		size_t r = ro;
@@ -422,10 +426,7 @@ ValuePtr Json::decode_value(const std::string& s,
 	if (nameserver().isA(t, LINK_VALUE))
 	{
 		l = tpos;
-		size_t opos = s.find("\"value\":", l);
-		if (std::string::npos == opos) return nullptr;
-		opos += 8;  // skip past "value":
-
+		GET_VALUE_POS;
 		l = s.find("[", opos);
 
 		size_t r = ro;
