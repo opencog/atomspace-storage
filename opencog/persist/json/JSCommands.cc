@@ -154,8 +154,13 @@ static std::string retmsgerr(const std::string& errmsg)
 
 #define GET_VALUE \
 	pos = cmd.find("\"value\":", pos); \
-	if (std::string::npos == pos) RETURN("false"); \
-	pos += 8; \
+	if (std::string::npos != pos) \
+		pos += 8; \
+	else { \
+		pos = cmd.find("\"values\":", pos); \
+		if (std::string::npos == pos) RETURN("false"); \
+		pos += 9; \
+	} \
 	epos = cmd.size(); \
 	ValuePtr v = Json::decode_value(cmd, pos, epos); \
 	if (nullptr == v) RETURN("false");
