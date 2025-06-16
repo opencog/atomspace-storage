@@ -522,6 +522,9 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.setValue({ "type": "ConceptNode", "name": "foo",
 	//     "key": { "type": "PredicateNode", "name": "keewee" },
 	//     "value": { "type": "FloatValue", "value": [1, 2, 3] } } )
+	// If all is well, then the member fields can occur in arbitrary
+	// order, so that the key can be given before the name, which can
+	// be given before the type.
 	if (stval == act)
 	{
 		size_t save_pos = pos;
