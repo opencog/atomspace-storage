@@ -389,6 +389,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			return retmsgerr("Type is not a Link type: " + cmd.substr(epos));
 
 		pos = cmd.find_first_not_of(", \n\t", pos);
+		// Skip the opening '[' if present
+		if (pos < cmd.size() && cmd[pos] == '[') pos++;
 
 		HandleSeq hs;
 

@@ -366,6 +366,42 @@ void MCPCommandsUTest::test_makeAtom()
 	TS_ASSERT(result.find("\"content\"") != std::string::npos);
 	TS_ASSERT(extractMCPContent(result).find("\"name\": \"test_predicate\"") != std::string::npos);
 
+	// Test parameter order independence for nodes (name before type)
+	logger().info("Testing parameter order independence...");
+
+	// Test node with name before type
+	cmd = R"({ "tool": "makeAtom", "params": {"name": "reversed_params", "type": "ConceptNode"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for makeAtom with reversed params: %s", result.c_str());
+	TS_ASSERT(result.find("\"content\"") != std::string::npos);
+	TS_ASSERT(extractMCPContent(result) == "true");
+
+	// Verify it was created correctly
+	cmd = R"({ "tool": "haveNode", "params": {"type": "ConceptNode", "name": "reversed_params"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	TS_ASSERT(result.find("\"content\"") != std::string::npos);
+	TS_ASSERT(extractMCPContent(result) == "true");
+
+	// Test EdgeLink with outgoing before type (the failing case from the user)
+	cmd = R"({ "tool": "makeAtom", "params": {"outgoing": [{"type": "Concept", "name": "start"}, {"type": "Concept", "name": "finish"}], "type": "EdgeLink"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for EdgeLink with outgoing before type: %s", result.c_str());
+	TS_ASSERT(result.find("\"content\"") != std::string::npos);
+	TS_ASSERT(extractMCPContent(result) == "true");
+
+	// Verify the EdgeLink was created correctly
+	cmd = R"({ "tool": "haveLink", "params": {"type": "EdgeLink", "outgoing": [{"type": "Concept", "name": "start"}, {"type": "Concept", "name": "finish"}]}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	TS_ASSERT(result.find("\"content\"") != std::string::npos);
+	TS_ASSERT(extractMCPContent(result) == "true");
+
+	// Test another link type with reversed params
+	cmd = R"({ "tool": "makeAtom", "params": {"outgoing": [{"type": "ConceptNode", "name": "first"}, {"type": "ConceptNode", "name": "second"}], "type": "ListLink"}})";
+	result = JSCommands::interpret_command(as.get(), cmd);
+	logger().info("Result for ListLink with outgoing before type: %s", result.c_str());
+	TS_ASSERT(result.find("\"content\"") != std::string::npos);
+	TS_ASSERT(extractMCPContent(result) == "true");
+
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 

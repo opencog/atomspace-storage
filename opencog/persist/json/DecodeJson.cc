@@ -245,19 +245,26 @@ std::string Json::get_node_name_arg(const std::string& s, size_t& pos, size_t& r
 
 /* ================================================================== */
 
-/// Helper function to find the closing brace of a JSON object
-/// Returns the position after the closing brace, or string::npos if
-/// not found.
-static size_t find_object_end(const std::string& s, size_t start)
+/// Helper function to find the closing delimiter of a JSON object or array
+/// For objects (starting with '{'), returns the position after the closing '}'
+/// For arrays (starting with '['), returns the position after the closing ']'
+/// Returns string::npos if not found or if start doesn't begin with '{' or '['
+static size_t find_json_end(const std::string& s, size_t start)
 {
-	if (start >= s.size() || s[start] != '{') return std::string::npos;
+	if (start >= s.size()) return std::string::npos;
 
-	int brace_count = 1;
+	char open_char = s[start];
+
+	if (open_char != '{' && open_char != '[') {
+		return std::string::npos;
+	}
+
+	int depth = 1;
 	size_t pos = start + 1;
 	bool in_string = false;
 	bool escape_next = false;
 
-	while (pos < s.size() && brace_count > 0) {
+	while (pos < s.size() && depth > 0) {
 		char ch = s[pos];
 		if (escape_next) {
 			escape_next = false;
@@ -266,16 +273,22 @@ static size_t find_object_end(const std::string& s, size_t start)
 		} else if (ch == '"') {
 			in_string = !in_string;
 		} else if (!in_string) {
-			if (ch == '{') {
-				brace_count++;
-			} else if (ch == '}') {
-				brace_count--;
+			if (ch == open_char) {
+				// Only count the same type of delimiter we're looking for
+				depth++;
+			} else if ((open_char == '{' && ch == '}') ||
+			           (open_char == '[' && ch == ']')) {
+				depth--;
+				if (depth == 0) {
+					// Found the matching closing delimiter
+					return pos + 1; // Return position after the delimiter
+				}
 			}
 		}
 		pos++;
 	}
 
-	return (brace_count == 0) ? pos : std::string::npos;
+	return (depth == 0) ? pos : std::string::npos;
 }
 
 /// Helper function to find a top-level field in a JSON object
@@ -298,13 +311,19 @@ static size_t find_top_level_field(const std::string& s,
 			escape_next = true;
 		} else if (ch == '"') {
 			in_string = !in_string;
-			// When we enter a string at depth 0, check if it's our field
+			// When we exit a string at depth 0, check if it's our field
 			if (!in_string && depth == 0) {
 				// We just exited a string, check if it matches our pattern
-				size_t check_start = search_pos - field_name.length() - 1;
-				if (check_start >= obj_start &&
-				    s.compare(check_start, search_pattern.length(), search_pattern) == 0) {
-					return check_start + search_pattern.length();
+				// Make sure we have enough characters before search_pos
+				// We need at least field_name.length() + 2 chars (for quotes) before search_pos
+				if (search_pos >= field_name.length() + 2) {
+					size_t check_start = search_pos - field_name.length() - 1;
+					// Additional bounds check
+					if (check_start >= obj_start &&
+					    check_start + search_pattern.length() <= s.length() &&
+					    s.compare(check_start, search_pattern.length(), search_pattern) == 0) {
+						return check_start + search_pattern.length();
+					}
 				}
 			}
 		} else if (!in_string) {
@@ -334,12 +353,15 @@ static size_t find_top_level_field(const std::string& s,
 Handle Json::decode_atom(const std::string& s,
                          size_t& l, size_t& r)
 {
-	l = s.find("{", l);
-	if (std::string::npos == l) return Handle::UNDEFINED;
+	// Find the start of the JSON object
+	l = s.find_first_not_of(" \n\t", l);
+	if (std::string::npos == l || s[l] != '{') {
+		return Handle::UNDEFINED;
+	}
 
 	// Find the end of this JSON object
 	size_t obj_start = l;
-	size_t obj_end = find_object_end(s, obj_start);
+	size_t obj_end = find_json_end(s, obj_start);
 	if (std::string::npos == obj_end) return Handle::UNDEFINED;
 
 	// Find the "type" field at the top level
@@ -361,14 +383,12 @@ Handle Json::decode_atom(const std::string& s,
 		if (std::string::npos == apos) return Handle::UNDEFINED;
 
 		apos = s.find_first_not_of(" \n\t", apos);
-		std::string name = Json::get_node_name(s, apos, r);
+		size_t name_end = obj_end;
+		std::string name = Json::get_node_name(s, apos, name_end);
 
-		// name and type could occur in either order;
-		// mov past both.
-		if (r < tpos) r = tpos;
+		// Update r to point after the closing brace of the JSON object
+		r = obj_end;
 
-		r = s.find_first_of(",}", r); // Move past the closing paren
-		r++;
 		return createNode(t, std::move(name));
 	}
 
@@ -378,23 +398,40 @@ Handle Json::decode_atom(const std::string& s,
 		size_t opos = find_top_level_field(s, "outgoing", obj_start, obj_end);
 		if (std::string::npos == opos) return Handle::UNDEFINED;
 
-		l = s.find("{", opos);
-		size_t epos = r;
+		// Find the opening bracket of the outgoing array
+		l = s.find("[", opos);
+		if (std::string::npos == l) return Handle::UNDEFINED;
+
+		// Find the closing bracket using our helper function
+		size_t array_end = find_json_end(s, l);
+		if (std::string::npos == array_end) return Handle::UNDEFINED;
+
+		l++; // Move past the '['
+		size_t close_bracket = array_end - 1; // Position of the ']'
 
 		HandleSeq hs;
 
-		while (std::string::npos != r)
+		// Process each atom in the outgoing array
+		while (l < close_bracket)
 		{
-			Handle ho = Json::decode_atom(s, l, r);
+			// Skip whitespace and commas
+			l = s.find_first_not_of(" \n\t,", l);
+			if (l >= close_bracket || std::string::npos == l) break;
+
+			// Check if we've reached the end of the array
+			if (s[l] == ']') break;
+
+			size_t atom_end = close_bracket;
+			Handle ho = Json::decode_atom(s, l, atom_end);
 			if (nullptr == ho) return Handle::UNDEFINED;
 			hs.push_back(ho);
 
-			// Look for the comma
-			l = s.find(",", r);
-			if (std::string::npos == l) break;
-			l ++;
-			r = epos;
+			// Update position for next iteration
+			l = atom_end;
 		}
+
+		// Update r to point after the closing brace of the JSON object
+		r = obj_end;
 
 		return createLink(std::move(hs), t);
 	}
