@@ -425,6 +425,11 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 	// -----------------------------------------------
 	// AtomSpace.makeAtom({ "type": "ConceptNode", "name": "foo"})
+	// AtomSpace.makeAtom(
+	//    {"outgoing":
+	//       [{"type":"Concept","name":"start"},
+	//       {"type":"Concept","name":"finish"}],
+	//    "type":"EdgeLink"})
 	if (makea == act)
 	{
 		ADD_ATOM;
