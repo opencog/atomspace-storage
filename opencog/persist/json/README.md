@@ -22,14 +22,16 @@ The CogServer provides a network API to send/receive Atoms over the
 internet. See https://wiki.opencog.org/w/CogServer It uses the code
 here to provide a network interface to the JSON code here.
 
-You can access the code here both through the WebSockets and through
-netcat/telnet.   Use `ws://localhost:18080/json` for the websockets
-interface. It works exactly the same way as the telnet interface.
-(The telnet interface is used in the examples below.)
+You can access the code here in six different ways: three using a
+JS-style syntax, and three using an MCP syntax. The three interfaces
+are WebSockets, HTTP and a netcat/telnet shell. All three provide the
+same commands; the HTTP interface wraps them in HTTP request and
+response headers.
 
-Two alternative interfaces are provided. One interface uses a
-Jvascript-like syntax; the other is pure JSON. They do the same thing,
-under the covers; they just have a (slightly) different API.
+The JS-style syntax is at `ws://localhost:18080/json`,
+`http://localhost:18080/json` or telnet.
+The MCP syntax is served from `ws://localhost:18080/mcp`,
+`http://localhost:18080/mcp`, and a telnet shell.
 
 All JS-style API calls have the form:
 ```
@@ -41,7 +43,7 @@ The JSON-style (MCP-style) interface has the form:
 ```
 For example:
 ```
-{ "tool": "version", "params": {}}
+    { "tool": "version", "params": {}}
 ```
 returns the AtomSpace version number
 
@@ -264,6 +266,10 @@ examples that actually work:
   the key (Predicate "fovs") and it should be a FloatValue holding the
   vector 1 2 3 0.4 0.5 -0.6 0.777 88 999
 
+Additional info can be found in the cogserver examples directory. This
+includes a CLAUDE.md file explaining Atomese.
+See https://github.com/opencog/cogserver/master/tree/examples/mcp for
+details.
 
 
 JavaScript API
