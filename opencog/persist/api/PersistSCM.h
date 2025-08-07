@@ -64,6 +64,8 @@ private:
 	static void sn_proxy_close(Handle);
 	static void sn_set_proxy(Handle, Handle);
 	static std::string sn_monitor(Handle);
+	static void sn_setvalue(Handle, Handle, ValuePtr);
+	static ValuePtr sn_getvalue(Handle, Handle);
 
 	void open(Handle);
 	void close(Handle);
@@ -96,6 +98,8 @@ private:
 	void dflt_set_proxy(Handle);
 	void dflt_barrier(void);
 	std::string dflt_monitor(void);
+	void dflt_setvalue(Handle, ValuePtr);
+	ValuePtr dflt_getvalue(Handle);
 	Handle current_storage(void);
 
 public:

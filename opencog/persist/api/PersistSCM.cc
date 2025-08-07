@@ -98,6 +98,11 @@ void PersistSCM::init(void)
 	define_scheme_primitive("sn-monitor",
 	             &PersistSCM::sn_monitor, "persist", false);
 
+	define_scheme_primitive("sn-setvalue",
+	             &PersistSCM::sn_setvalue, "persist", false);
+	define_scheme_primitive("sn-getvalue",
+	             &PersistSCM::sn_getvalue, "persist", false);
+
 	define_scheme_primitive("dflt-fetch-atom",
 	             &PersistSCM::dflt_fetch_atom, this, "persist", false);
 	define_scheme_primitive("dflt-fetch-value",
@@ -144,6 +149,10 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_set_proxy, this, "persist", false);
 	define_scheme_primitive("dflt-monitor",
 	             &PersistSCM::dflt_monitor, this, "persist", false);
+	define_scheme_primitive("dflt-setvalue",
+	             &PersistSCM::dflt_setvalue, this, "persist", false);
+	define_scheme_primitive("dflt-getvalue",
+	             &PersistSCM::dflt_getvalue, this, "persist", false);
 }
 
 // =====================================================================
@@ -385,6 +394,18 @@ std::string PersistSCM::sn_monitor(Handle hsn)
 	return stnp->monitor();
 }
 
+void PersistSCM::sn_setvalue(Handle hsn, Handle key, ValuePtr val)
+{
+	GET_STNP;
+	stnp->setValue(key, val);
+}
+
+ValuePtr PersistSCM::sn_getvalue(Handle hsn, Handle key)
+{
+	GET_STNP;
+	return stnp->getValue(key);
+}
+
 // =====================================================================
 
 #define CHECK \
@@ -557,6 +578,18 @@ std::string PersistSCM::dflt_monitor(void)
 	if (nullptr == _sn)
 		return "No open connection to storage!";
 	return _sn->monitor();
+}
+
+void PersistSCM::dflt_setvalue(Handle key, ValuePtr val)
+{
+	CHECK;
+	_sn->setValue(key, val);
+}
+
+ValuePtr PersistSCM::dflt_getvalue(Handle key)
+{
+	CHECK;
+	return _sn->getValue(key);
 }
 
 Handle PersistSCM::current_storage(void)
