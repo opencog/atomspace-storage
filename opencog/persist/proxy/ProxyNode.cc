@@ -158,6 +158,16 @@ StorageNodeSeq ProxyNode::setup(void)
 	return stolist;
 }
 
+void ProxyNode::setValue(const Handle& key, const ValuePtr& value)
+{
+	Atom::setValue(key, value);
+}
+
+ValuePtr ProxyNode::getValue(const Handle& key) const
+{
+	return Atom::getValue(key);
+}
+
 void ProxyNode::destroy(void) {}
 void ProxyNode::erase(void) {}
 

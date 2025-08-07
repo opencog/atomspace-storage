@@ -41,6 +41,10 @@ public:
 	ProxyNode(Type t, const std::string&&);
 	virtual ~ProxyNode();
 
+	virtual void setValue(const Handle& key, const ValuePtr& value);
+	virtual ValuePtr getValue(const Handle& key) const;
+
+	// ----------------------------------------------------------------
 	StorageNodeSeq setup();
 
 	// Flags. Avoid calling into the proxy, if these are absent.
