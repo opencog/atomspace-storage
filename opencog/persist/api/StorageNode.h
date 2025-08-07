@@ -107,8 +107,7 @@ public:
 
 	/**
 	 * For StorageNodes that support proxying, define what the proxy will be.
-	 * The argument must be of the form `(FooProxyNode "blah")` or of the
-	 * form `(ProxyParameters (FooProxyNode "blah") (BlahBlah...) ...)`.
+	 * The argument must be of the form `(FooProxyNode "blah")`.
 	 */
 	virtual void set_proxy(const Handle&);
 

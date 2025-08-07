@@ -44,7 +44,6 @@ void CachingProxy::init(void)
 {
 }
 
-// Get our configuration from the ProxyParameterLink we live in.
 // XXX TODO Add support for expiration times, limited AtomSpace
 // size and whatever other whizzy caching ideas we might want.
 void CachingProxy::open(void)

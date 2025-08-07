@@ -336,11 +336,11 @@
     Example:
        (define rsn (RocksStorageNode \"rocks:///tmp/foo.rdb\"))
        (define pxy (WriteThruProxy \"any name will do\"))
-       (define pms (ProxyParameters pxy (List rsn)))
+       (cog-set-value! pxy (Predicate "*-proxy-parts-*") rsn))
 
        (define csn (CogStorageNode \"cog://example.com:17001\"))
        (cog-open csn)
-       (cog-set-proxy! pms)
+       (cog-set-proxy! pxy)
        (cog-proxy-open)
        (store-atom (Concept \"foo\"))
 

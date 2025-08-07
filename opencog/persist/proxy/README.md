@@ -95,13 +95,9 @@ cog_define
 
 Status & TODO
 -------------
-***Version 0.9.1*** -- Seems to work. Has not been stressed.
+***Version 0.9.2*** -- Seems to work. Has not been stressed.
 
 Some open TODO items:
-
- * Move ProxyParametersLink from being a DefineLink to a StateLink.
-   DefineLinks are a freakin pain in the neck. However, they do force
-   the user to not screw around...
 
  * Multi-atomspace (frame) support is missing. Some basic work
    in this direction has been done, but it is not been completed.  The
