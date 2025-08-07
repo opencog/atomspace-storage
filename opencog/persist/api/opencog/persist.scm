@@ -336,7 +336,7 @@
     Example:
        (define rsn (RocksStorageNode \"rocks:///tmp/foo.rdb\"))
        (define pxy (WriteThruProxy \"any name will do\"))
-       (cog-set-value! pxy (Predicate "*-proxy-parts-*") rsn))
+       (cog-set-value! pxy (Predicate \"*-proxy-parts-*\") rsn))
 
        (define csn (CogStorageNode \"cog://example.com:17001\"))
        (cog-open csn)
@@ -388,7 +388,7 @@
 
     See also:
        `cog-proxy-open` to start proxying.
-       `cog-proxy-close` to stope proxying.
+       `cog-proxy-close` to stop proxying.
 "
 	(if STORAGE (sn-set-proxy PROXY STORAGE) (dflt-set-proxy PROXY))
 )
