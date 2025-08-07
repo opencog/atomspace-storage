@@ -41,12 +41,12 @@
 	cog-delete-recursive!
 	barrier
 	cog-erase!
-	monitor-storage
 	load-atomspace
 	store-atomspace
 	load-frames
 	store-frames
-	delete-frame!)
+	delete-frame!
+	monitor-storage)
 
 ;; -----------------------------------------------------
 ;;
@@ -66,7 +66,6 @@
        `cog-close` to close a connection.
        `cog-connected?` to obtain the connection status.
        `cog-storage-node` to obtain the current connection.
-       `monitor-storage` to print connection information.
 ")
 
 (set-procedure-property! cog-close 'documentation
@@ -86,7 +85,6 @@
        `cog-open` to open a connection.
        `cog-connected?` to obtain the connection status.
        `cog-storage-node` to obtain the current connection.
-       `monitor-storage` to print connection information.
 ")
 
 (set-procedure-property! cog-connected? 'documentation
@@ -100,7 +98,6 @@
        `cog-open` to open a connection.
        `cog-close` to close a connection.
        `cog-storage-node` to obtain the current connection.
-       `monitor-storage` to print connection information.
 ")
 
 (set-procedure-property! cog-storage-node 'documentation
@@ -117,7 +114,6 @@
        `cog-open` to open a connection.
        `cog-close` to close a connection.
        `cog-connected?` to obtain the connection status.
-       `monitor-storage` to print connection information.
 ")
 
 (define*-public (fetch-atom ATOM #:optional (STORAGE #f))
@@ -391,34 +387,6 @@
        `cog-proxy-close` to stop proxying.
 "
 	(if STORAGE (sn-set-proxy PROXY STORAGE) (dflt-set-proxy PROXY))
-)
-
-(define*-public (monitor-storage #:optional (STORAGE #f))
-"
- monitor-storage [STORAGE]
-
-    Deprecated! Instead, send the (Predicate \"*-monitor-*\") message
-    to the StorageNode directly. This can be done with
-    (cog-value (StorageNode ...) (Predicate \"*-monitor-*\"))
-
-    Return a string containing storage performance monitoring and
-    debugging information. To display the string in a properly
-    formatted fashion, say `(display (monitor-storage))`.
-
-    If the optional STORAGE argument is provided, then the statistics
-    will be printed for that Node. It must be a StorageNode.
-
-    Note that some StorageNodes might do significant computations
-    before returning a report, and thus may appear to hang. Patience!
-
-    See also:
-       `cog-open` to open a connection.
-       `cog-close` to close a connection.
-       `cog-connected?` to obtain the connection status.
-       `cog-storage-node` to obtain the current connection.
-"
-	(define mkey (PredicateNode "*-monitor-*"))
-	(if STORAGE (sn-getvalue STORAGE mkey) (dflt-getvalue mkey))
 )
 
 (define*-public (load-atomspace #:optional (ATOMSPACE #f) (STORAGE #f))
@@ -763,6 +731,39 @@
 			(if (and sn (cog-connected? sn))
 				(dflt-delete-rec ATOM)
 				(cog-extract-recursive! ATOM))))
+)
+
+; --------------------------------------------------------------------
+; --------------------------------------------------------------------
+; --------------------------------------------------------------------
+; Deprecated calls. Remove soon.
+
+(define*-public (monitor-storage #:optional (STORAGE #f))
+"
+ monitor-storage [STORAGE]
+
+    Deprecated! Instead, send the (Predicate \"*-monitor-*\") message
+    to the StorageNode directly. This can be done with
+    (cog-value (StorageNode ...) (Predicate \"*-monitor-*\"))
+
+    Return a string containing storage performance monitoring and
+    debugging information. To display the string in a properly
+    formatted fashion, say `(display (monitor-storage))`.
+
+    If the optional STORAGE argument is provided, then the statistics
+    will be printed for that Node. It must be a StorageNode.
+
+    Note that some StorageNodes might do significant computations
+    before returning a report, and thus may appear to hang. Patience!
+
+    See also:
+       `cog-open` to open a connection.
+       `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
+"
+	(define mkey (PredicateNode "*-monitor-*"))
+	(if STORAGE (sn-getvalue STORAGE mkey) (dflt-getvalue mkey))
 )
 
 ; --------------------------------------------------------------------
