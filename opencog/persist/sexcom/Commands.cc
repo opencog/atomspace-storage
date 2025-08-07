@@ -100,7 +100,7 @@ std::string Commands::cog_atomspace_clear(const std::string& arg)
 }
 
 // -----------------------------------------------
-// (cog-set-proxy! (ProxyParameters (ProxyNode "foo") ...))
+// (cog-set-proxy! (ProxyNode "foo"))
 std::string Commands::cog_set_proxy(const std::string& cmd)
 {
 	// If there already is one, do nothing.
@@ -109,29 +109,14 @@ std::string Commands::cog_set_proxy(const std::string& cmd)
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
 
-	// If we got a full definition, the proxy is then just the first atom.
-	if (h->is_type(PROXY_PARAMETERS_LINK))
-	{
-		h = _base_space->add_atom(h);
-		Handle pxy = h->getOutgoingAtom(0);
-		if (pxy and pxy->is_type(PROXY_NODE))
-		{
-			_proxy = ProxyNodeCast(pxy);
-			return "#t";
-		}
+	// If it's not a proxy, its an error.
+	if (not h->is_type(PROXY_NODE))
 		return "#f";
-	}
 
-	// If it's a bare-naked proxy, just set it.
-	if (h->is_type(PROXY_NODE))
-	{
-		h = _base_space->add_atom(h);
-		_proxy = ProxyNodeCast(h);
-		return "#t";
-	}
-
-	// If we are here, its an error.
-	return "#f";
+	// Record the proxy.
+	h = _base_space->add_atom(h);
+	_proxy = ProxyNodeCast(h);
+	return "#t";
 }
 
 // -----------------------------------------------
