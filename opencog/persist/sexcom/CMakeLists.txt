@@ -9,6 +9,7 @@ ADD_LIBRARY (sexcom SHARED
 ADD_DEPENDENCIES(sexcom storage_types)
 
 TARGET_LINK_LIBRARIES(sexcom
+	sexpr
 	storage-types
 	persist-proxy
 	persist
