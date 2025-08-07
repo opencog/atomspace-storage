@@ -46,6 +46,29 @@ StorageNode::~StorageNode()
 void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 {
 	Atom::setValue(key, value);
+	if (PREDICATE_NODE != key->get_type())
+		return;
+
+	const std::string& pred(key->get_name());
+
+	if (0 == pred.compare("*-proxy-open-*"))
+	{
+		proxy_open();
+		return;
+	}
+
+	if (0 == pred.compare("*-proxy-close-*"))
+	{
+		proxy_close();
+		return;
+	}
+
+	if (0 == pred.compare("*-set-proxy-*"))
+	{
+		set_proxy(HandleCast(value));
+		return;
+	}
+
 }
 
 ValuePtr StorageNode::getValue(const Handle& key) const
@@ -56,9 +79,7 @@ ValuePtr StorageNode::getValue(const Handle& key) const
 	const std::string& pred(key->get_name());
 
 	if (0 == pred.compare("*-monitor-*"))
-	{
 		return createStringValue(const_cast<StorageNode*>(this)->monitor());
-	}
 
 	return Atom::getValue(key);
 }
