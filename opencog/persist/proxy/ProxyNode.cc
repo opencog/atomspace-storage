@@ -83,53 +83,32 @@ std::string ProxyNode::monitor(void)
 	return rpt;
 }
 
-// Get our configuration from the DefineLink we live in.
-// Hmm, perhaps this should be a StateLink?
-//
-// XXX FIXME. Using this ProxyParametersLink thing is a kind of
-// cheesy hack, to pass parameters to the ProxyNode. It vaguely
-// resembles the structure of an ExecutionLink, but instead of
-// writing (Execution (Predicate "foo") (List (args...)))
-// we write (ProxyParameters (Proxy "foo") (List (params...)))
-// Except that we don't have a C++ class for ProxyParameters
-// and it is not executable. So ... I dunno. I'm not happy with
-// this design.
-//
-// More generally there is the work in sensory to create a DTD/IDL
-// to describe parameters. The design work there is not done, but
-// when it is, this should convert to that.
-StorageNodeSeq ProxyNode::setup(void)
+void ProxyNode::setValue(const Handle& key, const ValuePtr& value)
 {
-	StorageNodeSeq stolist;
+	// Cache, as always.
+	Atom::setValue(key, value);
 
-	IncomingSet dli(getIncomingSetByType(PROXY_PARAMETERS_LINK));
-
-	// We could throw an error here ... or we can just no-op.
-	if (0 == dli.size()) return stolist;
-
-	// Don't know what to do if there are two or more parameter sets.
-	if (1 != dli.size())
+	// If we don't understand the message, just ignore it.
+	if (PREDICATE_NODE != key->get_type() or
+	    0 != key->get_name().compare("*-proxy-parts-*"))
 	{
-		throw SyntaxException(TRACE_INFO,
-			"Expecting only one set of parameters for a ProxyNode. Got %lu of them:\n%s\n",
-			dli.size(), oc_to_string(dli).c_str());
+		return;
 	}
 
 	// If there is no ListLink, then just grab that.
-	const Handle& params = dli[0]->getOutgoingAtom(1);
-	if (params->is_type(STORAGE_NODE))
+	if (value->is_type(STORAGE_NODE))
 	{
-		stolist.emplace_back(StorageNodeCast(params));
-		return stolist;
+		_parts.emplace_back(StorageNodeCast(HandleCast(value)));
+		return;
 	}
 
-	// Expect the parameters to be wrapped in a ListLink
-	if (not params->is_type(LIST_LINK))
+	// Expect the parts to be wrapped in a ListLink
+	if (not value->is_type(LIST_LINK))
 		throw SyntaxException(TRACE_INFO,
 			"Expecting parameters in a ListLink! Got\n%s\n",
-			dli[0]->to_short_string().c_str());
+			value->to_short_string().c_str());
 
-	for (const Handle& h : params->getOutgoingSet())
+	for (const Handle& h : HandleCast(value)->getOutgoingSet())
 	{
 		StorageNodePtr stnp = StorageNodeCast(h);
 		if (nullptr == stnp)
@@ -145,17 +124,20 @@ StorageNodeSeq ProxyNode::setup(void)
 					"For example: `(use-modules (opencog persist-rocks))`\n"
 					"Config was %s\n",
 					h->to_short_string().c_str(),
-					dli[0]->to_short_string().c_str());
+					value->to_short_string().c_str());
 			}
 			throw SyntaxException(TRACE_INFO,
 				"Expecting a list of Storage or ProxyNodes! Got\n%s\n",
-				dli[0]->to_short_string().c_str());
+				value->to_short_string().c_str());
 		}
 
-		stolist.emplace_back(stnp);
+		_parts.emplace_back(stnp);
 	}
+}
 
-	return stolist;
+ValuePtr ProxyNode::getValue(const Handle& key) const
+{
+	return Atom::getValue(key);
 }
 
 void ProxyNode::destroy(void) {}

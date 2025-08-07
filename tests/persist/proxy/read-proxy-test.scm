@@ -18,7 +18,7 @@
 	"postgres:///opencog_test?user=opencog_tester&password=cheese"))
 
 (define wsto (WriteThruProxy "writer"))
-(ProxyParametersLink wsto sto)
+(cog-set-value! wsto (Predicate "*-proxy-parts-*") sto)
 
 (cog-open wsto)
 (store-atom (Concept "b1" (stv 0.1 0.1)))
@@ -36,7 +36,7 @@
 	"postgres:///opencog_test?user=opencog_tester&password=cheese"))
 
 (define rsto (ReadThruProxy "reader"))
-(ProxyParametersLink rsto sto)
+(cog-set-value! rsto (Predicate "*-proxy-parts-*") sto)
 
 (cog-open rsto)
 (fetch-atom (Concept "b1"))

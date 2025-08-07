@@ -36,12 +36,19 @@ class ProxyNode : public StorageNode
 private:
 	void init(void);
 
+protected:
+	StorageNodeSeq _parts;
+
 public:
 	ProxyNode(const std::string&&);
 	ProxyNode(Type t, const std::string&&);
 	virtual ~ProxyNode();
 
-	StorageNodeSeq setup();
+	virtual void setValue(const Handle& key, const ValuePtr& value);
+	virtual ValuePtr getValue(const Handle& key) const;
+
+	// ----------------------------------------------------------------
+	StorageNodeSeq setup() { return _parts; }
 
 	// Flags. Avoid calling into the proxy, if these are absent.
 	bool have_getAtom;

@@ -3,11 +3,10 @@
 // a collection of types suitable for defining distributed storage
 // interconnects.
 //
-// What's the right base type for all StorageNodes?
-// LexicalNode, cause there's a collection of them.
-// TagNode cause base AtomSpace already calls them "data streams".
-// BondNode cause they are connector-like?
-STORAGE_NODE <- TAG_NODE
+// The ObjectNode is the base class for StorageNode, because all
+// StorageNodes are stateful objects, existing in the real physical
+// world, and accept the messages that define the storage API.
+STORAGE_NODE <- OBJECT_NODE
 //
 // Specific storage nodes. Most of these are implemented in other git
 // repos, and not here. Look for git repos called "atomspace-xxx" for
@@ -68,11 +67,6 @@ CACHING_PROXY_NODE <- PROXY_NODE
 // Supplies Values on-demand from the provided ProcedureNodes.
 // Given an (Atom,Key) pair, it computes the appropriate Value on the fly.
 DYNAMIC_DATA_PROXY_NODE <- PROXY_NODE
-
-// Decorate the Proxies with additional parameters.
-// We use the UniqueLink because the DefineLink constructor does
-// checks for DefinedSchema and what-not, which wrecks us.
-PROXY_PARAMETERS_LINK <- UNIQUE_LINK
 
 // ------------------------------------------------------------------
 // Fetch and store Values from Storage.
