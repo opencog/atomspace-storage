@@ -55,11 +55,6 @@ ValuePtr StorageNode::getValue(const Handle& key) const
 
 	const std::string& pred(key->get_name());
 
-	// XXX FIXME. We get called with *-TruthValueKey-* A LOT
-	// and really it should be zero. WTF. Bug? Needs to get fixed.
-	if (0 == pred.compare("*-TruthValueKey-*"))
-		return Atom::getValue(key);
-
 	if (0 == pred.compare("*-monitor-*"))
 	{
 		return createStringValue(const_cast<StorageNode*>(this)->monitor());
