@@ -23,6 +23,7 @@
 
 #include <string>
 
+#include <opencog/atoms/value/StringValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/storage/storage_types.h>
 #include "StorageNode.h"
@@ -49,6 +50,21 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 
 ValuePtr StorageNode::getValue(const Handle& key) const
 {
+	if (PREDICATE_NODE != key->get_type())
+		return Atom::getValue(key);
+
+	const std::string& pred(key->get_name());
+
+	// XXX FIXME. We get called with *-TruthValueKey-* A LOT
+	// and really it should be zero. WTF. Bug? Needs to get fixed.
+	if (0 == pred.compare("*-TruthValueKey-*"))
+		return Atom::getValue(key);
+
+	if (0 == pred.compare("*-monitor-*"))
+	{
+		return createStringValue(const_cast<StorageNode*>(this)->monitor());
+	}
+
 	return Atom::getValue(key);
 }
 
