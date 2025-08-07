@@ -20,12 +20,15 @@
 (define tname "proxy-node")
 (test-begin tname)
 
+(define parts (Predicate "*-proxy-parts-*"))
+
 ; This should lead to failure.
 (define foo (WriteThruProxy "foo"))
-(ProxyParametersLink foo (Concept "bar"))
 
 (define caught #f)
-(catch 'C++-EXCEPTION (lambda () (cog-open foo))
+(catch 'C++-EXCEPTION
+	(lambda ()
+		(cog-set-value! foo parts (Concept "bar")))
 	(lambda (key funcname msg)
 		(format #t "Yes, we got the exception as expected\n")
 		(set! caught #t)))
@@ -36,7 +39,7 @@
 ; Assorted permutations -- just one target
 
 (define wnull (WriteThruProxy "wnull"))
-(ProxyParametersLink wnull (NullProxy "bar"))
+(cog-set-value! wnull parts (NullProxy "bar"))
 
 (cog-open wnull)
 (store-atom (Concept "boffo"))
@@ -54,7 +57,7 @@
 ; Multiple targets
 
 (define wmulti (WriteThruProxy "wmulti"))
-(ProxyParametersLink wmulti
+(cog-set-value! wmulti parts
 	(List
 		(NullProxy "foo")
 		(NullProxy "bar")
@@ -77,7 +80,7 @@
 ; Assorted permutations -- just one reader
 
 (define rnull (ReadThruProxy "wnull"))
-(ProxyParametersLink rnull (NullProxy "bar"))
+(cog-set-value! rnull parts (NullProxy "bar"))
 
 (cog-open rnull)
 (fetch-atom (Concept "b1"))
@@ -98,7 +101,7 @@
 ; Multiple readers
 
 (define rmulti (ReadThruProxy "wmulti"))
-(ProxyParametersLink rmulti
+(cog-set-value! rmulti parts
 	(List
 		(NullProxy "foo")
 		(NullProxy "bar")
