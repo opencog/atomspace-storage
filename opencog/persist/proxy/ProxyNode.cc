@@ -86,7 +86,7 @@ std::string ProxyNode::monitor(void)
 void ProxyNode::setValue(const Handle& key, const ValuePtr& value)
 {
 	// Cache, as always.
-	Atom::setValue(key, value);
+	StorageNode::setValue(key, value);
 
 	// If we don't understand the message, just ignore it.
 	if (PREDICATE_NODE != key->get_type() or
@@ -137,7 +137,7 @@ void ProxyNode::setValue(const Handle& key, const ValuePtr& value)
 
 ValuePtr ProxyNode::getValue(const Handle& key) const
 {
-	return Atom::getValue(key);
+	return StorageNode::getValue(key);
 }
 
 void ProxyNode::destroy(void) {}

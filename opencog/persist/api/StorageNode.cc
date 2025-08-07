@@ -42,6 +42,16 @@ StorageNode::~StorageNode()
 {
 }
 
+void StorageNode::setValue(const Handle& key, const ValuePtr& value)
+{
+	Atom::setValue(key, value);
+}
+
+ValuePtr StorageNode::getValue(const Handle& key) const
+{
+	return Atom::getValue(key);
+}
+
 void StorageNode::proxy_open(void)
 {
 	throw RuntimeException(TRACE_INFO,
