@@ -397,6 +397,10 @@
 "
  monitor-storage [STORAGE]
 
+    Deprecated! Instead, send the (Predicate \"*-monitor-*\") message
+    to the StorageNode directly. This can be done with
+    (cog-value (StorageNode ...) (Predicate \"*-monitor-*\"))
+
     Return a string containing storage performance monitoring and
     debugging information. To display the string in a properly
     formatted fashion, say `(display (monitor-storage))`.
@@ -413,7 +417,8 @@
        `cog-connected?` to obtain the connection status.
        `cog-storage-node` to obtain the current connection.
 "
-	(if STORAGE (sn-monitor STORAGE) (dflt-monitor))
+	(define mkey (PredicateNode "*-monitor-*"))
+	(if STORAGE (sn-getvalue STORAGE mkey) (dflt-getvalue mkey))
 )
 
 (define*-public (load-atomspace #:optional (ATOMSPACE #f) (STORAGE #f))

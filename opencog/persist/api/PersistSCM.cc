@@ -95,8 +95,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_proxy_close, "persist", false);
 	define_scheme_primitive("sn-set-proxy",
 	             &PersistSCM::sn_set_proxy, "persist", false);
-	define_scheme_primitive("sn-monitor",
-	             &PersistSCM::sn_monitor, "persist", false);
 
 	define_scheme_primitive("sn-setvalue",
 	             &PersistSCM::sn_setvalue, "persist", false);
@@ -147,8 +145,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_proxy_close, this, "persist", false);
 	define_scheme_primitive("dflt-set-proxy",
 	             &PersistSCM::dflt_set_proxy, this, "persist", false);
-	define_scheme_primitive("dflt-monitor",
-	             &PersistSCM::dflt_monitor, this, "persist", false);
 	define_scheme_primitive("dflt-setvalue",
 	             &PersistSCM::dflt_setvalue, this, "persist", false);
 	define_scheme_primitive("dflt-getvalue",
@@ -388,12 +384,6 @@ void PersistSCM::sn_set_proxy(Handle h, Handle hsn)
 	stnp->set_proxy(h);
 }
 
-std::string PersistSCM::sn_monitor(Handle hsn)
-{
-	GET_STNP;
-	return stnp->monitor();
-}
-
 void PersistSCM::sn_setvalue(Handle hsn, Handle key, ValuePtr val)
 {
 	GET_STNP;
@@ -571,13 +561,6 @@ void PersistSCM::dflt_set_proxy(Handle h)
 {
 	CHECK;
 	_sn->set_proxy(h);
-}
-
-std::string PersistSCM::dflt_monitor(void)
-{
-	if (nullptr == _sn)
-		return "No open connection to storage!";
-	return _sn->monitor();
 }
 
 void PersistSCM::dflt_setvalue(Handle key, ValuePtr val)
