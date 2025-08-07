@@ -55,26 +55,30 @@ void WriteBufferProxy::init(void)
 	reset_stats();
 }
 
-// Get configuration from the ProxyParametersLink we live in.
+void WriteBufferProxy::setValue(const Handle& key, const ValuePtr& value)
+{
+	// If we don't understand the message, just pass it on.
+	if (PREDICATE_NODE != key->get_type() or
+	    0 != key->get_name().compare("*-decay-const-*"))
+	{
+		ProxyNode::setValue(key, value);
+		return;
+	}
+
+	// Save the time decay const.
+	if (not value->is_type(NUMBER_NODE))
+		throw SyntaxException(TRACE_INFO,
+			"Expecting decay time in a NumberNode, got %s",
+			value->to_short_string().c_str());
+
+	NumberNodePtr nnp = NumberNodeCast(value);
+	_decay = nnp->get_value();
+}
+
 void WriteBufferProxy::open(void)
 {
-	// Let ProxyNode::setup() do the basic work.
+	// Let the base class set itself up.
 	WriteThruProxy::open();
-
-	// Now fish out the time decay const, if it is there.
-	IncomingSet dli(getIncomingSetByType(PROXY_PARAMETERS_LINK));
-	const Handle& pxy = dli[0];
-	if (2 < pxy->size())
-	{
-		const Handle& hdecay = pxy->getOutgoingAtom(2);
-		if (not hdecay->is_type(NUMBER_NODE))
-			throw SyntaxException(TRACE_INFO,
-				"Expecting decay time in a NumberNode, got %s",
-				hdecay->to_short_string().c_str());
-
-		NumberNodePtr nnp = NumberNodeCast(hdecay);
-		_decay = nnp->get_value();
-	}
 
 	// Reset the high-water mark.
 	_high_water_mark = HIMAX;

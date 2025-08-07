@@ -70,6 +70,8 @@ public:
 	WriteBufferProxy(Type, const std::string&&);
 	virtual ~WriteBufferProxy();
 
+	virtual void setValue(const Handle& key, const ValuePtr& value);
+
 	// ----------------------------------------------------------------
 	virtual void open(void);
 	virtual void close(void);
