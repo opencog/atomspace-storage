@@ -85,11 +85,13 @@ std::string ProxyNode::monitor(void)
 
 void ProxyNode::setValue(const Handle& key, const ValuePtr& value)
 {
-	// If we don't understand the message, just store it.
+	// Cache, as always.
+	Atom::setValue(key, value);
+
+	// If we don't understand the message, just ignore it.
 	if (PREDICATE_NODE != key->get_type() or
 	    0 != key->get_name().compare("*-proxy-parts-*"))
 	{
-		Atom::setValue(key, value);
 		return;
 	}
 

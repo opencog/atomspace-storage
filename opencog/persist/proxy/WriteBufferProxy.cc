@@ -57,11 +57,13 @@ void WriteBufferProxy::init(void)
 
 void WriteBufferProxy::setValue(const Handle& key, const ValuePtr& value)
 {
-	// If we don't understand the message, just pass it on.
+	// Pass it on.
+	ProxyNode::setValue(key, value);
+
+	// If we don't understand the message, just ignore it.
 	if (PREDICATE_NODE != key->get_type() or
 	    0 != key->get_name().compare("*-decay-const-*"))
 	{
-		ProxyNode::setValue(key, value);
 		return;
 	}
 
