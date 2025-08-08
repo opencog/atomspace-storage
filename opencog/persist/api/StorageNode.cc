@@ -57,6 +57,8 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		return;
 	}
 
+	// Create a fast dispatch table by using case-statement
+	// branching, instead of string compare.
 	static constexpr uint32_t p_store_frames = dispatch_hash("*-store-frames-*");
 	static constexpr uint32_t p_delete_frame = dispatch_hash("*-delete-frame-*");
 	static constexpr uint32_t p_erase = dispatch_hash("*-erase-*");
@@ -65,30 +67,46 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 	static constexpr uint32_t p_proxy_close = dispatch_hash("*-proxy-close-*");
 	static constexpr uint32_t p_set_proxy = dispatch_hash("*-set-proxy-*");
 
-	switch (dispatch_hash(key->get_name().c_str()))
+// There's almost no chance at all that any user will use some key
+// that is a PredicateNode that has a string name that collides with
+// one of the above. That's because there's really no reason to set
+// static values on a StorageNode. That I can think of. Still there's
+// some chance of a hash collision. In this case, define
+// COLLISION_PROOF, and recompile. Sorry in advance for the awful
+// debug session you had that caused you to discover this comment!
+//
+// #define COLLISION_PROOF
+#ifdef COLLISION_PROOF
+	#define COLL(STR) if (0 == pred.compare(STR)) break;
+#else
+	#define COLL(STR)
+#endif
+
+	const std::string& pred = key->get_name();
+	switch (dispatch_hash(pred.c_str()))
 	{
 		case p_store_frames:
-			// if (0 == pred.compare("*-store-frames-*")) break;
+			COLL("*-store-frames-*");
 			store_frames(HandleCast(value));
 			return;
 		case p_delete_frame:
-			// if (0 == pred.compare("*-delete-frame-*")) break;
+			COLL("*-delete-frame-*");
 			delete_frame(HandleCast(value));
 			return;
 		case p_erase:
-			// if (0 == pred.compare("*-erase-*")) break;
+			COLL("*-erase-*");
 			erase();
 			return;
 		case p_proxy_open:
-			// if (0 == pred.compare("*-proxy-open-*")) break;
+			COLL("*-proxy-open-*");
 			proxy_open();
 			return;
 		case p_proxy_close:
-			// if (0 == pred.compare("*-proxy-close-*")) break;
+			COLL("*-proxy-close-*");
 			proxy_close();
 			return;
 		case p_set_proxy:
-			// if (0 == pred.compare("*-set-proxy-*")) break;
+			COLL("*-set-proxy-*");
 			set_proxy(HandleCast(value));
 			return;
 		default:
