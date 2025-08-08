@@ -57,51 +57,42 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		return;
 	}
 
-	const std::string& pred(key->get_name());
+	static constexpr uint32_t p_store_frames = dispatch_hash("*-store-frames-*");
+	static constexpr uint32_t p_delete_frame = dispatch_hash("*-delete-frame-*");
+	static constexpr uint32_t p_erase = dispatch_hash("*-erase-*");
 
-	static constexpr int32_t foo = dispatch_hash("foo");
+	static constexpr uint32_t p_proxy_open = dispatch_hash("*-proxy-open-*");
+	static constexpr uint32_t p_proxy_close = dispatch_hash("*-proxy-close-*");
+	static constexpr uint32_t p_set_proxy = dispatch_hash("*-set-proxy-*");
+
 	switch (dispatch_hash(key->get_name().c_str()))
 	{
-		case foo:
-			break;
+		case p_store_frames:
+			// if (0 == pred.compare("*-store-frames-*")) break;
+			store_frames(HandleCast(value));
+			return;
+		case p_delete_frame:
+			// if (0 == pred.compare("*-delete-frame-*")) break;
+			delete_frame(HandleCast(value));
+			return;
+		case p_erase:
+			// if (0 == pred.compare("*-erase-*")) break;
+			erase();
+			return;
+		case p_proxy_open:
+			// if (0 == pred.compare("*-proxy-open-*")) break;
+			proxy_open();
+			return;
+		case p_proxy_close:
+			// if (0 == pred.compare("*-proxy-close-*")) break;
+			proxy_close();
+			return;
+		case p_set_proxy:
+			// if (0 == pred.compare("*-set-proxy-*")) break;
+			set_proxy(HandleCast(value));
+			return;
 		default:
 			break;
-	}
-
-	if (0 == pred.compare("*-store-frames-*"))
-	{
-		store_frames(HandleCast(value));
-		return;
-	}
-
-	if (0 == pred.compare("*-delete-frame-*"))
-	{
-		delete_frame(HandleCast(value));
-		return;
-	}
-
-	if (0 == pred.compare("*-erase-*"))
-	{
-		erase();
-		return;
-	}
-
-	if (0 == pred.compare("*-proxy-open-*"))
-	{
-		proxy_open();
-		return;
-	}
-
-	if (0 == pred.compare("*-proxy-close-*"))
-	{
-		proxy_close();
-		return;
-	}
-
-	if (0 == pred.compare("*-set-proxy-*"))
-	{
-		set_proxy(HandleCast(value));
-		return;
 	}
 
 	// Some other predicate. Store it.

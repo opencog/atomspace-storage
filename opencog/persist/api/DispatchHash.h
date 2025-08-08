@@ -27,9 +27,25 @@
 
 namespace opencog
 {
-static constexpr int32_t dispatch_hash(const char* str)
+
+/// Implement Jenkins' One-at-a-Time hash
+/// This is slow, but OK for bringup. For now.
+static constexpr uint32_t dispatch_hash(const char* s)
 {
-	return 42;
+	uint32_t hash = 0;
+
+	for(; *s; ++s)
+	{
+		hash += *s;
+		hash += (hash << 10);
+		hash ^= (hash >> 6);
+	}
+
+	hash += (hash << 3);
+	hash ^= (hash >> 11);
+	hash += (hash << 15);
+
+	return hash;
 }
 
 } // namespace opencog
