@@ -85,7 +85,7 @@ std::string ProxyNode::monitor(void)
 
 void ProxyNode::setValue(const Handle& key, const ValuePtr& value)
 {
-	// Cache, as always.
+	// It is safe to store the parts of a proxy node. Always.
 	StorageNode::setValue(key, value);
 
 	// If we don't understand the message, just ignore it.
@@ -133,11 +133,6 @@ void ProxyNode::setValue(const Handle& key, const ValuePtr& value)
 
 		_parts.emplace_back(stnp);
 	}
-}
-
-ValuePtr ProxyNode::getValue(const Handle& key) const
-{
-	return StorageNode::getValue(key);
 }
 
 void ProxyNode::destroy(void) {}

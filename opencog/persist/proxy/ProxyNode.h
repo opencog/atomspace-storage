@@ -45,7 +45,6 @@ public:
 	virtual ~ProxyNode();
 
 	virtual void setValue(const Handle& key, const ValuePtr& value);
-	virtual ValuePtr getValue(const Handle& key) const;
 
 	// ----------------------------------------------------------------
 	StorageNodeSeq setup() { return _parts; }
