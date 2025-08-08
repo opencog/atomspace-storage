@@ -664,14 +664,9 @@
 		(dflt-setvalue pkey ATOMSPACE))
 )
 
-(define*-public (barrier #:optional (STORAGE #f))
+(define-public (*-barrier-*)
 "
- barrier [STORAGE]
-
-    Convenience wrapper for the (Predicate \"*-barrier-*\") message.
-    Deprecated; instead, just say
-       (cog-set-value! (StorageNode ...)
-           (Predicate \"*-barrier-*\") (atomspace))
+  (PredicateNode \"*-narrier-*\") message
 
     Block (do not return to the caller) until the storage write queues
     are empty. Just because the atomspace write queues are empty, it
@@ -679,41 +674,64 @@
     means that the atomspace, as a client of the storage server, has
     given them to the server.
 
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-barrier-*) (cog-atomspace))
+"
+	(PredicateNode "*-barrier-*")
+)
+
+(define*-public (barrier #:optional (STORAGE #f))
+"
+ barrier [STORAGE]
+
+    Convenience wrapper for the (*-barrier-*) message.
+    Same as
+       (cog-set-value! STORAGE (*-barrier-*) (cog-atomspace))
+
     If the optional STORAGE argument is provided, then the barrier will
     be applied to it. It must be a StorageNode.
 "
-	(define mkey (PredicateNode "*-barrier-*"))
 	(if STORAGE
-		(sn-setvalue STORAGE mkey (cog-atomspace))
-		(dflt-setvalue mkey (cog-atomspace)))
+		(sn-setvalue STORAGE (*-barrier-*) (cog-atomspace))
+		(dflt-setvalue (*-barrier-*) (cog-atomspace)))
+)
+
+(define-public (*-monitor-*)
+"
+  (PredicateNode \"*-monitor-*\") message
+
+    Return a StringValue containing storage performance monitoring
+    and debugging information. To display the string in a properly
+    formatted fashion, say `(display (monitor-storage))`.
+
+    Note that some StorageNodes might do significant computations
+    before returning a report, and thus may appear to hang. Patience!
+
+  Usage:
+    (cog-value STORAGE (*-monitor-*))
+    (display (cog-value-ref STORAGE (*-monitor-*) 0))
+
+    See also:
+       `*-open-*` to open a connection.
+       `*-close-*` to close a connection.
+       `*-connected?-*` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
+"
+	(PredicateNode "*-monitor-*")
 )
 
 (define*-public (monitor-storage #:optional (STORAGE #f))
 "
  monitor-storage [STORAGE]
 
-    Convenience wrapper for the (Predicate \"*-monitor-*\") message.
-    Deprecated; instead, just say
-       (cog-value (StorageNode ...) (Predicate \"*-monitor-*\"))
-
-    Return a string containing storage performance monitoring and
-    debugging information. To display the string in a properly
-    formatted fashion, say `(display (monitor-storage))`.
-
-    If the optional STORAGE argument is provided, then the statistics
-    will be printed for that Node. It must be a StorageNode.
-
-    Note that some StorageNodes might do significant computations
-    before returning a report, and thus may appear to hang. Patience!
-
-    See also:
-       `cog-open` to open a connection.
-       `cog-close` to close a connection.
-       `cog-connected?` to obtain the connection status.
-       `cog-storage-node` to obtain the current connection.
+    Convenience wrapper for the (*-monitor-*) message.
+    Same as
+       (cog-value STORAGE (*-monitor-*))
 "
-	(define mkey (PredicateNode "*-monitor-*"))
-	(if STORAGE (sn-getvalue STORAGE mkey) (dflt-getvalue mkey))
+   (cog-value-ref
+		(if STORAGE
+			(sn-getvalue STORAGE (*-monitor-*))
+			(dflt-getvalue (*-monitor-*))) 0)
 )
 
 (define-public (*-proxy-open-*)
