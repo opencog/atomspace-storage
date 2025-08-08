@@ -79,8 +79,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_delete, "persist", false);
 	define_scheme_primitive("sn-delete-rec",
 	             &PersistSCM::sn_delete_recursive, "persist", false);
-	define_scheme_primitive("sn-barrier",
-	             &PersistSCM::sn_barrier, "persist", false);
 
 	define_scheme_primitive("sn-setvalue",
 	             &PersistSCM::sn_setvalue, "persist", false);
@@ -115,8 +113,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_delete, this, "persist", false);
 	define_scheme_primitive("dflt-delete-rec",
 	             &PersistSCM::dflt_delete_recursive, this, "persist", false);
-	define_scheme_primitive("dflt-barrier",
-	             &PersistSCM::dflt_barrier, this, "persist", false);
 	define_scheme_primitive("dflt-setvalue",
 	             &PersistSCM::dflt_setvalue, this, "persist", false);
 	define_scheme_primitive("dflt-getvalue",
@@ -307,13 +303,6 @@ bool PersistSCM::sn_delete_recursive(Handle h, Handle hsn)
 	return stnp->remove_atom(as, h, true);
 }
 
-void PersistSCM::sn_barrier(Handle hsn)
-{
-	GET_STNP;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("barrier");
-	stnp->barrier(asp.get());
-}
-
 void PersistSCM::sn_setvalue(Handle hsn, Handle key, ValuePtr val)
 {
 	GET_STNP;
@@ -442,13 +431,6 @@ bool PersistSCM::dflt_delete_recursive(Handle h)
 	CHECK;
 	const AtomSpacePtr& as = SchemeSmob::ss_get_env_as("cog-delete-recursive!");
 	return _sn->remove_atom(as, h, true);
-}
-
-void PersistSCM::dflt_barrier(void)
-{
-	CHECK;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("barrier");
-	_sn->barrier(asp.get());
 }
 
 void PersistSCM::dflt_setvalue(Handle key, ValuePtr val)

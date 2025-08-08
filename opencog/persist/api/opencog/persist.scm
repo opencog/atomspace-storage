@@ -39,7 +39,6 @@
 	load-atoms-of-type
 	cog-delete!
 	cog-delete-recursive!
-	barrier
 	load-atomspace
 	store-atomspace
 
@@ -47,6 +46,7 @@
 	store-frames
 	delete-frame!
 	cog-erase!
+	barrier
 	monitor-storage)
 
 ;; -----------------------------------------------------
@@ -275,22 +275,6 @@
 "
 	(if STORAGE (sn-load-atoms-of-type TYPE STORAGE)
 		(dflt-load-atoms-of-type TYPE))
-)
-
-(define*-public (barrier #:optional (STORAGE #f))
-"
- barrier [STORAGE]
-
-    Block (do not return to the caller) until the storage write queues
-    are empty. Just because the atomspace write queues are empty, it
-    does not mean that the data was actually written to disk. It merely
-    means that the atomspace, as a client of the storage server, has
-    given them to the server.
-
-    If the optional STORAGE argument is provided, then the barrier will
-    be applied to it. It must be a StorageNode.
-"
-	(if STORAGE (sn-barrier STORAGE) (dflt-barrier))
 )
 
 (define*-public (load-atomspace #:optional (ATOMSPACE #f) (STORAGE #f))
@@ -680,6 +664,30 @@
 		(dflt-setvalue pkey ATOMSPACE))
 )
 
+(define*-public (barrier #:optional (STORAGE #f))
+"
+ barrier [STORAGE]
+
+    Convenience wrapper for the (Predicate \"*-barrier-*\") message.
+    Deprecated; instead, just say
+       (cog-set-value! (StorageNode ...)
+           (Predicate \"*-barrier-*\") (atomspace))
+
+    Block (do not return to the caller) until the storage write queues
+    are empty. Just because the atomspace write queues are empty, it
+    does not mean that the data was actually written to disk. It merely
+    means that the atomspace, as a client of the storage server, has
+    given them to the server.
+
+    If the optional STORAGE argument is provided, then the barrier will
+    be applied to it. It must be a StorageNode.
+"
+	(define mkey (PredicateNode "*-barrier-*"))
+	(if STORAGE
+		(sn-setvalue STORAGE mkey (cog-atomspace))
+		(dflt-setvalue mkey (cog-atomspace)))
+)
+
 (define*-public (monitor-storage #:optional (STORAGE #f))
 "
  monitor-storage [STORAGE]
@@ -708,16 +716,13 @@
 	(if STORAGE (sn-getvalue STORAGE mkey) (dflt-getvalue mkey))
 )
 
-(define*-public (cog-proxy-open #:optional (STORAGE #f))
+(define-public (*-proxy-open-*)
 "
- cog-proxy-open [STORAGE] - Start proxying at the remote end.
+  (PredicateNode \"*-proxy-open-*\") message
 
-    Convenience wrapper for the (Predicate \"*-proxy-open-*\") message.
-    Deprecated; instead, just say
-       (cog-set-value! (StorageNode ...)
-          (Predicate \"*-proxy-open-*\") (VoidValue))
+  Start proxying at the remote end.
 
-    Pass a `cog-open` request to a proxy at the remote end of a network
+    Pass a `*-open-*` message to a proxy at the remote end of a network
     connection. This works only for StorageNodes that have a remote end;
     that is, for StorageNodes that can connect to other AtomSpaces.
     Examples of these include CogStorageNode and CogSimpleStorageNode,
@@ -735,21 +740,18 @@
 
     Since ProxyNodes are just like ordinary StorageNodes, they must be
     opened before they can be used. Since they are in a remote AtomSpace,
-    there is no way to access them directly; the `cog-proxy-open` command
-    will perform that open.
-
-    If the optional STORAGE argument is provided, then the open will
-    be applied to it. It must be a StorageNode that supports proxying.
+    there is no way to access them directly; the `*-proxy-open-*`
+    message will perform that open.
 
     Example:
        (define rsn (RocksStorageNode \"rocks:///tmp/foo.rdb\"))
        (define pxy (WriteThruProxy \"any name will do\"))
-       (cog-set-value! pxy (Predicate \"*-proxy-parts-*\") rsn))
+       (cog-set-value! pxy (*-proxy-parts-*) rsn))
 
        (define csn (CogStorageNode \"cog://example.com:17001\"))
        (cog-open csn)
-       (cog-set-value! csn (Predicate \"*-set-proxy-*\") pxy)
-       (cog-set-value! csn (Predicate \"*-proxy-open-*\") (VoidValue))
+       (cog-set-value! csn (*-set-proxy-*) pxy)
+       (cog-set-value! csn (*-proxy-open-*) (VoidValue))
        (store-atom (Concept \"foo\"))
 
     The above example will cause the Atom `(Concept \"foo\"))` to be
@@ -758,47 +760,60 @@
     complex dataflow networks to be defined.
 
     See also:
-       `cog-proxy-close` to halt proxying.
-       `cog-set-proxy!` to declare the remote proxy.
+       `*-proxy-close-*` to halt proxying.
+       `*-set-proxy-*` to declare the remote proxy.
 "
-	(define pkey (PredicateNode "*-proxy-open-*"))
+	(PredicateNode "*-proxy-open-*")
+)
+
+(define*-public (cog-proxy-open #:optional (STORAGE #f))
+"
+ cog-proxy-open [STORAGE] - Start proxying at the remote end.
+
+    Convenience wrapper for the (*-proxy-open-*) message.
+    Same as
+       (cog-set-value! STORAGE (*-proxy-open-*) (VoidValue))
+"
 	(define vv (VoidValue))
-	(if STORAGE (sn-setvalue STORAGE pkey vv)
-		(dflt-setvalue pkey vv))
+	(if STORAGE (sn-setvalue STORAGE (*-proxy-open-*) vv)
+		(dflt-setvalue (*-proxy-open-*) vv))
+)
+
+(define-public (*-proxy-close-*)
+"
+  (PredicateNode \"*-proxy-close-*\") message
+
+    Stop proxying at the remote end.  This halts proxying
+    previously started with the `*-proxy-open=*` message.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-proxy-close-*) (VoidValue))
+
+    See also:
+       `*-proxy-open-*` to start proxying.
+       `*-set-proxy-*` to declare the remote proxy.
+"
+	(PredicateNode "*-proxy-close-*")
 )
 
 (define*-public (cog-proxy-close #:optional (STORAGE #f))
 "
  cog-proxy-close [STORAGE] - Stop proxying at the remote end.
 
-    Convenience wrapper for the (Predicate \"*-proxy-close-*\") message.
-    Deprecated; instead, just say
-       (cog-set-value! (StorageNode ...)
-          (Predicate \"*-proxy-close-*\") (VoidValue))
-
-    Pass a `cog-close` request to a remote proxy. This stops proxying
-    previously started with the `cog-proxy-open` command.
-
-    See also:
-       `cog-proxy-open` to start proxying.
-       `cog-set-proxy!` to declare the remote proxy.
+    Convenience wrapper for the (*-proxy-close-*) message.
+    Same as
+       (cog-set-value! STORAGE (*-proxy-close-*) (VoidValue))
 "
-	(define pkey (PredicateNode "*-proxy-close-*"))
 	(define vv (VoidValue))
-	(if STORAGE (sn-setvalue STORAGE pkey vv)
-		(dflt-setvalue pkey vv))
+	(if STORAGE (sn-setvalue STORAGE (*-proxy-close-*) vv)
+		(dflt-setvalue (*-proxy-close-*) vv))
 )
 
-(define*-public (cog-set-proxy! PROXY #:optional (STORAGE #f))
+(define-public (*-set-proxy-*)
 "
- cog-set-proxy! PROXY [STORAGE] - Declare a proxy to the remote end.
+  (PredicateNode \"*-set-proxy-*\") message
 
-    Convenience wrapper for the (Predicate \"*-set-proxy-*\") message.
-    Deprecated; instead, just say
-       (cog-set-value! (StorageNode ...)
-          (Predicate \"*-set-proxy-*\") PROXY)
-
-    Declare a ProxyNode to the remote end of a network connection.
+    Declares a ProxyNode to the remote end of a network connection.
 
     ProxyNodes are StorageNodes that support the StorageNode API, and
     then satisfy API requests by passing them on to other StorageNodes.
@@ -810,13 +825,26 @@
     there is no way to access them directly; the `cog-proxy-open` command
     will perform that open.
 
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-set-proxy-*) (ProxyNode ...))
+
     See also:
-       `cog-proxy-open` to start proxying.
-       `cog-proxy-close` to stop proxying.
+       `*-proxy-open-*` to start proxying.
+       `*-proxy-close-*` to stop proxying.
 "
-	(define pkey (PredicateNode "*-set-proxy-*"))
-	(if STORAGE (sn-setvalue STORAGE pkey PROXY)
-		(dflt-setvalue pkey PROXY))
+	(PredicateNode "*-set-proxy-*")
+)
+
+(define*-public (cog-set-proxy! PROXY #:optional (STORAGE #f))
+"
+ cog-set-proxy! PROXY [STORAGE] - Declare a proxy to the remote end.
+
+    Convenience wrapper for the *-set-proxy-* message.
+    Same as
+       (cog-set-value! STORAGE (*-set-proxy-*) PROXY)
+"
+	(if STORAGE (sn-setvalue STORAGE (*-set-proxy-*) PROXY)
+		(dflt-setvalue (*-set-proxy-*) PROXY))
 )
 
 ; --------------------------------------------------------------------

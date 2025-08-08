@@ -59,6 +59,9 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 
 	// Create a fast dispatch table by using case-statement
 	// branching, instead of string compare.
+	static constexpr uint32_t p_barrier = dispatch_hash("*-barrier-*");
+
+	// *-load-frames-* is in getvalue
 	static constexpr uint32_t p_store_frames = dispatch_hash("*-store-frames-*");
 	static constexpr uint32_t p_delete_frame = dispatch_hash("*-delete-frame-*");
 	static constexpr uint32_t p_erase = dispatch_hash("*-erase-*");
@@ -85,6 +88,10 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 	const std::string& pred = key->get_name();
 	switch (dispatch_hash(pred.c_str()))
 	{
+		case p_barrier:
+			COLL("*-barrier-*");
+			barrier(AtomSpaceCast(value).get());
+			return;
 		case p_store_frames:
 			COLL("*-store-frames-*");
 			store_frames(HandleCast(value));
