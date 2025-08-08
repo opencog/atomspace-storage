@@ -23,6 +23,7 @@
 
 #include <string>
 
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/storage/storage_types.h>
@@ -51,6 +52,24 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 
 	const std::string& pred(key->get_name());
 
+	if (0 == pred.compare("*-store-frames-*"))
+	{
+		store_frames(HandleCast(value));
+		return;
+	}
+
+	if (0 == pred.compare("*-delete-frame-*"))
+	{
+		delete_frame(HandleCast(value));
+		return;
+	}
+
+	if (0 == pred.compare("*-erase-*"))
+	{
+		erase();
+		return;
+	}
+
 	if (0 == pred.compare("*-proxy-open-*"))
 	{
 		proxy_open();
@@ -77,6 +96,9 @@ ValuePtr StorageNode::getValue(const Handle& key) const
 		return Atom::getValue(key);
 
 	const std::string& pred(key->get_name());
+
+	if (0 == pred.compare("*-load-frames-*"))
+		return createLinkValue(const_cast<StorageNode*>(this)->load_frames());
 
 	if (0 == pred.compare("*-monitor-*"))
 		return createStringValue(const_cast<StorageNode*>(this)->monitor());
