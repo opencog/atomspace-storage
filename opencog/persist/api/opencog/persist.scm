@@ -627,40 +627,47 @@
 		(dflt-setvalue pkey ATOMSPACE))
 )
 
-(define*-public (delete-frame! ATOMSPACE #:optional (STORAGE #f))
+(define-public (*-delete-frame-*)
 "
- delete-frame! ATOMSPACE [STORAGE] - delete the contents of the AtomSpace.
+ (Predicate \"*-delete-frame-*\") message.
 
-    Convenience wrapper for the (Predicate \"*-delete-frame-*\") message.
-    Deprecated; instead, just say
-       (cog-set-value! (StorageNode ...)
-          (Predicate \"*-delete-frame-*\") ATOMSPACE)
+    Delete the contents of the AtomSpace.
 
-    This will delete all of the Atoms in the ATOMSPACE, as well as the
+    This will delete all of the Atoms in the AtomSpace, as well as the
     associated frame, so that it no longer appears in the frame DAG.
     Note that this will also delete any Atoms that have been marked
     hidden, and thus might cause the corresponding Atoms in lower frames
     to become visible.
 
-    If the optional STORAGE argument is provided, then it will be
-    used as the target of the delete. It must be a StorageNode.
-
     Caveats:
-    If STORAGE is specified, it must be open for writing.
-    If it is not specified, the AtomSpace must be attached to storage
-    that is open for writing.
+    The StorageNode must be open for writing.
     At this time, only the top-most frame can be deleted.
     The frame is deleted in storage only; the atoms remain in RAM
-    until all references to ATOMSPACE are gone. Use
+    until all references to that AtomSpace are gone. Use
     `cog-atomspace-clear` to also remove these atoms.
 
+    Usage:
+       (cog-set-value! (StorageNode ...)
+          (*-delete-frame-*) (cog-atomspace))
+
     See also:
-       load-frames -- load the DAG of AtomSpaces from storage.
-       store-frames ATOMSPACE -- store the DAG of AtomSpaces to storage.
-       cog-atomspace-clear -- extract all atoms in a frame.
+       *-load-frames-* -- load the DAG of AtomSpaces from storage.
+       *-store-frames-* -- store the DAG of AtomSpaces to storage.
+       *-clear-* -- extract all atoms in a frame.
 "
-	(define pkey (PredicateNode "*-delete-frame-*"))
-	(if STORAGE (sn-setvalue STORAGE pkey ATOMSPACE)
+	(PredicateNode "*-delete-frame-*")
+)
+
+(define*-public (delete-frame! ATOMSPACE #:optional (STORAGE #f))
+"
+ delete-frame! ATOMSPACE [STORAGE] - delete the contents of the AtomSpace.
+
+    Convenience wrapper for the (*-delete-frame-*) message.
+    Same as
+       (cog-set-value! STORAGE (*-delete-frame-*) ATOMSPACE)
+"
+	(if STORAGE
+		(sn-setvalue STORAGE (*-delete-frame-*) ATOMSPACE)
 		(dflt-setvalue pkey ATOMSPACE))
 )
 
