@@ -2,7 +2,7 @@
  * opencog/persist/api/StorageNode.cc
  *
  * Copyright (c) 2008-2010 OpenCog Foundation
- * Copyright (c) 2009,2013,2020,2022 Linas Vepstas
+ * Copyright (c) 2009,2013,2020,2022,2025 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,6 +28,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/storage/storage_types.h>
 #include "StorageNode.h"
+#include "DispatchHash.h"
 
 using namespace opencog;
 
@@ -56,42 +57,60 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		return;
 	}
 
-	const std::string& pred(key->get_name());
+	// Create a fast dispatch table by using case-statement
+	// branching, instead of string compare.
+	static constexpr uint32_t p_store_frames = dispatch_hash("*-store-frames-*");
+	static constexpr uint32_t p_delete_frame = dispatch_hash("*-delete-frame-*");
+	static constexpr uint32_t p_erase = dispatch_hash("*-erase-*");
 
-	if (0 == pred.compare("*-store-frames-*"))
-	{
-		store_frames(HandleCast(value));
-		return;
-	}
+	static constexpr uint32_t p_proxy_open = dispatch_hash("*-proxy-open-*");
+	static constexpr uint32_t p_proxy_close = dispatch_hash("*-proxy-close-*");
+	static constexpr uint32_t p_set_proxy = dispatch_hash("*-set-proxy-*");
 
-	if (0 == pred.compare("*-delete-frame-*"))
-	{
-		delete_frame(HandleCast(value));
-		return;
-	}
+// There's almost no chance at all that any user will use some key
+// that is a PredicateNode that has a string name that collides with
+// one of the above. That's because there's really no reason to set
+// static values on a StorageNode. That I can think of. Still there's
+// some chance of a hash collision. In this case, define
+// COLLISION_PROOF, and recompile. Sorry in advance for the awful
+// debug session you had that caused you to discover this comment!
+//
+// #define COLLISION_PROOF
+#ifdef COLLISION_PROOF
+	#define COLL(STR) if (0 == pred.compare(STR)) break;
+#else
+	#define COLL(STR)
+#endif
 
-	if (0 == pred.compare("*-erase-*"))
+	const std::string& pred = key->get_name();
+	switch (dispatch_hash(pred.c_str()))
 	{
-		erase();
-		return;
-	}
-
-	if (0 == pred.compare("*-proxy-open-*"))
-	{
-		proxy_open();
-		return;
-	}
-
-	if (0 == pred.compare("*-proxy-close-*"))
-	{
-		proxy_close();
-		return;
-	}
-
-	if (0 == pred.compare("*-set-proxy-*"))
-	{
-		set_proxy(HandleCast(value));
-		return;
+		case p_store_frames:
+			COLL("*-store-frames-*");
+			store_frames(HandleCast(value));
+			return;
+		case p_delete_frame:
+			COLL("*-delete-frame-*");
+			delete_frame(HandleCast(value));
+			return;
+		case p_erase:
+			COLL("*-erase-*");
+			erase();
+			return;
+		case p_proxy_open:
+			COLL("*-proxy-open-*");
+			proxy_open();
+			return;
+		case p_proxy_close:
+			COLL("*-proxy-close-*");
+			proxy_close();
+			return;
+		case p_set_proxy:
+			COLL("*-set-proxy-*");
+			set_proxy(HandleCast(value));
+			return;
+		default:
+			break;
 	}
 
 	// Some other predicate. Store it.
