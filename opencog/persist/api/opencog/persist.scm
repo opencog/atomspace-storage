@@ -594,10 +594,12 @@
 	(if (< 0 (cog-incoming-size ATOM))
 		#f
 		(if STORAGE
-			(begin (sn-setvalue STORAGE (*-delete-*) ATOM) #t)
+			(begin (sn-setvalue STORAGE (*-delete-*)
+				(LinkValue (cog-atomspace) ATOM)) #t)
 			(let ((sn (cog-storage-node)))
 				(if (and sn (cog-connected? sn))
-					(begin (sn-setvalue sn (*-delete-*) ATOM) #t)
+					(begin (sn-setvalue sn (*-delete-*)
+						(LikValue (cog-atomspace) ATOM)) #t)
 					(cog-extract! ATOM)))))
 )
 
@@ -627,10 +629,12 @@
        delete-frame! -- Delete all the Atoms in the frame.
 "
 	(if STORAGE
-		(begin (sn-setvalue STORAGE (*-delete-recursive-*) ATOM) #t)
+		(begin (sn-setvalue STORAGE (*-delete-recursive-*)
+			(LinkValue (cog-atomspace) ATOM)) #t)
 		(let ((sn (cog-storage-node)))
 			(if (and sn (cog-connected? sn))
-				(begin (sn-setvalue sn (*-delete-recursive-*) ATOM) #t)
+				(begin (sn-setvalue sn (*-delete-recursive-*)
+					(LinkValue (cog-atomspace) ATOM)) #t)
 				(cog-extract-recursive! ATOM))))
 )
 
