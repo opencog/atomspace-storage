@@ -319,7 +319,7 @@
     load-frames -- load DAG of AtomSpaces.
     store-atomspace -- store all Atoms in the AtomSpace.
 "
-	; Sort out which of two opional args showed up.
+	; Sort out which of two optional args showed up.
 	(if (and ATOMSPACE (cog-subtype? 'StorageNode (cog-type ATOMSPACE)))
 		(begin
 			(set! STORAGE ATOMSPACE)
