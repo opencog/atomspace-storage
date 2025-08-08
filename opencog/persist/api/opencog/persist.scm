@@ -703,7 +703,7 @@
 "
 	(if STORAGE
 		(sn-setvalue STORAGE (*-delete-frame-*) ATOMSPACE)
-		(dflt-setvalue pkey ATOMSPACE))
+		(dflt-setvalue (*-delete-frame-*) ATOMSPACE))
 )
 
 (define-public (*-barrier-*)
