@@ -612,7 +612,8 @@
     load-atomspace -- load the entire contents of storage.
 "
 	(define mkey (PredicateNode "*-load-frames-*"))
-	(if STORAGE (sn-getvalue STORAGE mkey) (dflt-getvalue mkey))
+	(cog-value->list
+		(if STORAGE (sn-getvalue STORAGE mkey) (dflt-getvalue mkey)))
 )
 
 (define*-public (store-frames ATOMSPACE #:optional (STORAGE #f))
