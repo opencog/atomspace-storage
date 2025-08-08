@@ -570,34 +570,48 @@
 		(dflt-setvalue pkey vv))
 )
 
-(define*-public (load-frames #:optional (STORAGE #f))
+(define-public (*-load-frames-*)
 "
- load-frames [STORAGE] - load the DAG of AtomSpaces from storage.
+  (Predicate \"*-load-frames-*\") message.
 
-    Convenience wrapper for the (Predicate \"*-load-frames-*\") message.
-    Deprecated; instead, just say
-       (cog-value (StorageNode ...)
-          (Predicate \"*-load-frames-*\"))
+  Load the DAG of AtomSpaces from storage.
 
     This will load the DAG of AtomSpaces held in the storage server to
     be created. This will only create the AtomSpaces; it will NOT
     populate them with Atoms. These have to be either fetched in bulk,
     or individually, using the usual methods.
 
-    If the optional STORAGE argument is provided, then it will be
-    used as the source of the load. It must be a StorageNode.
+    Returns the DAG
+
+    Usage:
+       (cog-value (StorageNode ...) (*-load-frames-*))
 
     See also:
-    store-frames ATOMSPACE -- store the DAG of AtomSpaces to storage.
-    fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
-    fetch-query QUERY -- get all Atoms for a given QUERY.
-    load-referrers ATOM -- get every graph that contains ATOM.
-    load-atoms-of-type TYPE -- load only atoms of type TYPE.
-    load-atomspace -- load the entire contents of storage.
+    *-store-frames-* -- store the DAG of AtomSpaces to storage.
+    *-fetch-atom-* -- fetch an individual ATOM, and all Values on it.
+    *-fetch-query-* -- get all Atoms for a given QUERY.
+    *-load-referrers-* -- get every graph that contains ATOM.
+    *-load-atoms-of-type-* -- load only atoms of type TYPE.
+    *-load-atomspace-* -- load the entire contents of storage.
 "
-	(define mkey (PredicateNode "*-load-frames-*"))
+	(PredicateNode "*-load-frames-*")
+)
+
+(define*-public (load-frames #:optional (STORAGE #f))
+"
+ load-frames [STORAGE] - load the DAG of AtomSpaces from storage.
+
+    Convenience wrapper for the (*-load-frames-*) message.
+    Same as
+       (cog-value STORAGE (*-load-frames-*))
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the load. It must be a StorageNode.
+"
 	(cog-value->list
-		(if STORAGE (sn-getvalue STORAGE mkey) (dflt-getvalue mkey)))
+		(if STORAGE
+			(sn-getvalue STORAGE (*-load-frames-*))
+			(dflt-getvalue (*-load-frames-*))))
 )
 
 (define-public (*-store-frames-*)
