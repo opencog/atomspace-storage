@@ -880,8 +880,26 @@
     See also:
        `*-proxy-close-*` to halt proxying.
        `*-set-proxy-*` to declare the remote proxy.
+       `*-decay-const-*` to specify a time interval to buffering proxies
 "
 	(PredicateNode "*-proxy-parts-*")
+)
+
+(define-public (*-decay-const-*)
+"
+  (PredicateNode \"*-decay-const-*\") message
+
+  Specify a time interval to a buffering proxy.
+  Conventionaly, the number is undertood to be seconds.
+
+    Example:
+       (define pxy (WriteBufferProxy \"buffy slayer\"))
+       (cog-set-value! pxy (*-decay-const-*) (NumberNode 42))
+
+    See also:
+       `*-proxy-parts-*` to specify the components making up a proxy.
+"
+	(PredicateNode "*-decay-const-*")
 )
 
 (define-public (*-proxy-open-*)
