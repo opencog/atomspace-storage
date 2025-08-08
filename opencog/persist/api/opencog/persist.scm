@@ -600,31 +600,42 @@
 		(if STORAGE (sn-getvalue STORAGE mkey) (dflt-getvalue mkey)))
 )
 
+(define-public (*-store-frames-*)
+"
+  (Predicate \"*-store-frames-*\") message.
+
+  Store the DAG of AtomSpaces to storage.
+
+    This will store the DAG of AtomSpaces to the storage server.  This
+    will only store the DAG of the AtomSpaces; it will NOT store their
+    contents.  These have to be either stored in bulk, or individually,
+    using the usual messages.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-store-frames-*) ATOMSPACE)
+
+    See also:
+    *-load-frames-* -- load the DAG of AtomSpaces from storage.
+    *-store-atomspace-* -- store the entire contents of an AtomSpace.
+    *-store-atom-* -- store an individual Atom.
+"
+	(PredicateNode "*-store-frames-*")
+)
+
 (define*-public (store-frames ATOMSPACE #:optional (STORAGE #f))
 "
  store-frames ATOMSPACE [STORAGE] - store the DAG of AtomSpaces to storage.
 
-    Convenience wrapper for the (Predicate \"*-store-frames-*\") message.
-    Deprecated; instead, just say
-       (cog-set-value! (StorageNode ...)
-          (Predicate \"*-store-frames-*\") ATOMSPACE)
-
-    This will store the DAG of AtomSpaces at ATOMSPACE and below, to
-    the storage server.  This will only store the DAG of the AtomSpaces;
-    it will NOT store their contents.  These have to be either stored in
-    bulk, or individually, using the usual methods.
+    Convenience wrapper for the (*-store-frames-*) message.
+    Same as
+       (cog-set-value! STORAGE (*-store-frames-*) ATOMSPACE)
 
     If the optional STORAGE argument is provided, then it will be
     used as the target of the store. It must be a StorageNode.
-
-    See also:
-    load-frames -- load the DAG of AtomSpaces from storage.
-    store-atomspace -- store the entire contents of an AtomSpace.
-    store-atom ATOM -- store an individual Atom.
 "
-	(define pkey (PredicateNode "*-store-frames-*"))
-	(if STORAGE (sn-setvalue STORAGE pkey ATOMSPACE)
-		(dflt-setvalue pkey ATOMSPACE))
+	(if STORAGE
+		(sn-setvalue STORAGE (*-store-frames-*) ATOMSPACE)
+		(dflt-setvalue (*-store-frames-*) ATOMSPACE))
 )
 
 (define-public (*-delete-frame-*)
