@@ -53,6 +53,8 @@ public:
 	StorageNode(Type, std::string);
 	virtual ~StorageNode();
 
+	virtual void setValue(const Handle& key, const ValuePtr& value);
+	virtual ValuePtr getValue(const Handle& key) const;
 
 	// ----------------------------------------------------------------
 	// Operations regarding the connection to the remote URI.
