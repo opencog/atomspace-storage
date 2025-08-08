@@ -246,7 +246,7 @@ bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 void StorageNode::remove_msg(Handle h, ValuePtr value, bool recursive)
 {
 	// Expect either delete of a single atom, or
-	// a ListValue giving the AtomSpace and the Atom to delete.
+	// a LinkValue giving the AtomSpace and the Atom to delete.
 	if (value->is_type(ATOM))
 	{
 		Handle atm(HandleCast(value));
