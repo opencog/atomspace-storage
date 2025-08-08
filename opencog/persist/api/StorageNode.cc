@@ -269,7 +269,7 @@ void StorageNode::remove_msg(Handle h, ValuePtr value, bool recursive)
 		else
 		{
 			Handle atm(HandleCast(vp));
-			remove_atom(atm->getAtomSpace(), atm, false);
+			remove_atom(atm->getAtomSpace(), atm, recursive);
 		}
 	}
 }
