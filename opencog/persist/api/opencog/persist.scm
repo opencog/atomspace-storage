@@ -547,131 +547,168 @@
 ; --------------------------------------------------------------------
 ; --------------------------------------------------------------------
 ; --------------------------------------------------------------------
-; Deprecated calls. Remove soon.
+; Messages
+
+(define-public (*-erase-*)
+"
+ (Predicate \"*-erase-*\") message.
+
+    Erase the entire contents of storage.  Use with caution to avoid
+    massive data loss.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-erase-*) (VoidValue))
+"
+	(PredicateNode "*-erase-*")
+)
 
 (define*-public (cog-erase! #:optional (STORAGE #f))
 "
  cog-erase! [STORAGE]
 
-    Convenience wrapper for the (Predicate \"*-erase-*\") message.
-    Deprecated; instead, just say
-       (cog-set-value! (StorageNode ...)
-          (Predicate \"*-erase-*\") (VoidValue))
+    Convenience wrapper for the (*-erase-*) message.
 
-    Erase the entire contents of storage.  Use with caution to avoid
-    massive data loss.
+    Same as
+       (cog-set-value! STORAGE (*-erase-*) (VoidValue))
 
     If the optional STORAGE argument is provided, then the erase will
     be applied to it. It must be a StorageNode.
 "
-	(define pkey (PredicateNode "*-erase-*"))
 	(define vv (VoidValue))
-	(if STORAGE (sn-setvalue STORAGE pkey vv)
-		(dflt-setvalue pkey vv))
+	(if STORAGE
+		(sn-setvalue STORAGE (*-erase-*) vv)
+		(dflt-setvalue (*-erase-*) vv))
 )
 
-(define*-public (load-frames #:optional (STORAGE #f))
+(define-public (*-load-frames-*)
 "
- load-frames [STORAGE] - load the DAG of AtomSpaces from storage.
+  (Predicate \"*-load-frames-*\") message.
 
-    Convenience wrapper for the (Predicate \"*-load-frames-*\") message.
-    Deprecated; instead, just say
-       (cog-value (StorageNode ...)
-          (Predicate \"*-load-frames-*\"))
+  Load the DAG of AtomSpaces from storage.
 
     This will load the DAG of AtomSpaces held in the storage server to
     be created. This will only create the AtomSpaces; it will NOT
     populate them with Atoms. These have to be either fetched in bulk,
     or individually, using the usual methods.
 
-    If the optional STORAGE argument is provided, then it will be
-    used as the source of the load. It must be a StorageNode.
+    Returns the DAG
+
+    Usage:
+       (cog-value (StorageNode ...) (*-load-frames-*))
 
     See also:
-    store-frames ATOMSPACE -- store the DAG of AtomSpaces to storage.
-    fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
-    fetch-query QUERY -- get all Atoms for a given QUERY.
-    load-referrers ATOM -- get every graph that contains ATOM.
-    load-atoms-of-type TYPE -- load only atoms of type TYPE.
-    load-atomspace -- load the entire contents of storage.
+    *-store-frames-* -- store the DAG of AtomSpaces to storage.
+    *-fetch-atom-* -- fetch an individual ATOM, and all Values on it.
+    *-fetch-query-* -- get all Atoms for a given QUERY.
+    *-load-referrers-* -- get every graph that contains ATOM.
+    *-load-atoms-of-type-* -- load only atoms of type TYPE.
+    *-load-atomspace-* -- load the entire contents of storage.
 "
-	(define mkey (PredicateNode "*-load-frames-*"))
+	(PredicateNode "*-load-frames-*")
+)
+
+(define*-public (load-frames #:optional (STORAGE #f))
+"
+ load-frames [STORAGE] - load the DAG of AtomSpaces from storage.
+
+    Convenience wrapper for the (*-load-frames-*) message.
+    Same as
+       (cog-value STORAGE (*-load-frames-*))
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the load. It must be a StorageNode.
+"
 	(cog-value->list
-		(if STORAGE (sn-getvalue STORAGE mkey) (dflt-getvalue mkey)))
+		(if STORAGE
+			(sn-getvalue STORAGE (*-load-frames-*))
+			(dflt-getvalue (*-load-frames-*))))
+)
+
+(define-public (*-store-frames-*)
+"
+  (Predicate \"*-store-frames-*\") message.
+
+  Store the DAG of AtomSpaces to storage.
+
+    This will store the DAG of AtomSpaces to the storage server.  This
+    will only store the DAG of the AtomSpaces; it will NOT store their
+    contents.  These have to be either stored in bulk, or individually,
+    using the usual messages.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-store-frames-*) ATOMSPACE)
+
+    See also:
+    *-load-frames-* -- load the DAG of AtomSpaces from storage.
+    *-store-atomspace-* -- store the entire contents of an AtomSpace.
+    *-store-atom-* -- store an individual Atom.
+"
+	(PredicateNode "*-store-frames-*")
 )
 
 (define*-public (store-frames ATOMSPACE #:optional (STORAGE #f))
 "
  store-frames ATOMSPACE [STORAGE] - store the DAG of AtomSpaces to storage.
 
-    Convenience wrapper for the (Predicate \"*-store-frames-*\") message.
-    Deprecated; instead, just say
-       (cog-set-value! (StorageNode ...)
-          (Predicate \"*-store-frames-*\") ATOMSPACE)
-
-    This will store the DAG of AtomSpaces at ATOMSPACE and below, to
-    the storage server.  This will only store the DAG of the AtomSpaces;
-    it will NOT store their contents.  These have to be either stored in
-    bulk, or individually, using the usual methods.
+    Convenience wrapper for the (*-store-frames-*) message.
+    Same as
+       (cog-set-value! STORAGE (*-store-frames-*) ATOMSPACE)
 
     If the optional STORAGE argument is provided, then it will be
     used as the target of the store. It must be a StorageNode.
+"
+	(if STORAGE
+		(sn-setvalue STORAGE (*-store-frames-*) ATOMSPACE)
+		(dflt-setvalue (*-store-frames-*) ATOMSPACE))
+)
+
+(define-public (*-delete-frame-*)
+"
+ (Predicate \"*-delete-frame-*\") message.
+
+    Delete the contents of the AtomSpace.
+
+    This will delete all of the Atoms in the AtomSpace, as well as the
+    associated frame, so that it no longer appears in the frame DAG.
+    Note that this will also delete any Atoms that have been marked
+    hidden, and thus might cause the corresponding Atoms in lower frames
+    to become visible.
+
+    Caveats:
+    The StorageNode must be open for writing.
+    At this time, only the top-most frame can be deleted.
+    The frame is deleted in storage only; the atoms remain in RAM
+    until all references to that AtomSpace are gone. Use
+    `cog-atomspace-clear` to also remove these atoms.
+
+    Usage:
+       (cog-set-value! (StorageNode ...)
+          (*-delete-frame-*) (cog-atomspace))
 
     See also:
-    load-frames -- load the DAG of AtomSpaces from storage.
-    store-atomspace -- store the entire contents of an AtomSpace.
-    store-atom ATOM -- store an individual Atom.
+       *-load-frames-* -- load the DAG of AtomSpaces from storage.
+       *-store-frames-* -- store the DAG of AtomSpaces to storage.
+       *-clear-* -- extract all atoms in a frame.
 "
-	(define pkey (PredicateNode "*-store-frames-*"))
-	(if STORAGE (sn-setvalue STORAGE pkey ATOMSPACE)
-		(dflt-setvalue pkey ATOMSPACE))
+	(PredicateNode "*-delete-frame-*")
 )
 
 (define*-public (delete-frame! ATOMSPACE #:optional (STORAGE #f))
 "
  delete-frame! ATOMSPACE [STORAGE] - delete the contents of the AtomSpace.
 
-    Convenience wrapper for the (Predicate \"*-delete-frame-*\") message.
-    Deprecated; instead, just say
-       (cog-set-value! (StorageNode ...)
-          (Predicate \"*-delete-frame-*\") ATOMSPACE)
-
-    This will delete all of the Atoms in the ATOMSPACE, as well as the
-    associated frame, so that it no longer appears in the frame DAG.
-    Note that this will also delete any Atoms that have been marked
-    hidden, and thus might cause the corresponding Atoms in lower frames
-    to become visible.
-
-    If the optional STORAGE argument is provided, then it will be
-    used as the target of the delete. It must be a StorageNode.
-
-    Caveats:
-    If STORAGE is specified, it must be open for writing.
-    If it is not specified, the AtomSpace must be attached to storage
-    that is open for writing.
-    At this time, only the top-most frame can be deleted.
-    The frame is deleted in storage only; the atoms remain in RAM
-    until all references to ATOMSPACE are gone. Use
-    `cog-atomspace-clear` to also remove these atoms.
-
-    See also:
-       load-frames -- load the DAG of AtomSpaces from storage.
-       store-frames ATOMSPACE -- store the DAG of AtomSpaces to storage.
-       cog-atomspace-clear -- extract all atoms in a frame.
+    Convenience wrapper for the (*-delete-frame-*) message.
+    Same as
+       (cog-set-value! STORAGE (*-delete-frame-*) ATOMSPACE)
 "
-	(define pkey (PredicateNode "*-delete-frame-*"))
-	(if STORAGE (sn-setvalue STORAGE pkey ATOMSPACE)
-		(dflt-setvalue pkey ATOMSPACE))
+	(if STORAGE
+		(sn-setvalue STORAGE (*-delete-frame-*) ATOMSPACE)
+		(dflt-setvalue (*-delete-frame-*) ATOMSPACE))
 )
 
-(define*-public (barrier #:optional (STORAGE #f))
+(define-public (*-barrier-*)
 "
- barrier [STORAGE]
-
-    Convenience wrapper for the (Predicate \"*-barrier-*\") message.
-    Deprecated; instead, just say
-       (cog-set-value! (StorageNode ...)
-           (Predicate \"*-barrier-*\") (atomspace))
+  (PredicateNode \"*-narrier-*\") message
 
     Block (do not return to the caller) until the storage write queues
     are empty. Just because the atomspace write queues are empty, it
@@ -679,41 +716,82 @@
     means that the atomspace, as a client of the storage server, has
     given them to the server.
 
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-barrier-*) (cog-atomspace))
+"
+	(PredicateNode "*-barrier-*")
+)
+
+(define*-public (barrier #:optional (STORAGE #f))
+"
+ barrier [STORAGE]
+
+    Convenience wrapper for the (*-barrier-*) message.
+    Same as
+       (cog-set-value! STORAGE (*-barrier-*) (cog-atomspace))
+
     If the optional STORAGE argument is provided, then the barrier will
     be applied to it. It must be a StorageNode.
 "
-	(define mkey (PredicateNode "*-barrier-*"))
 	(if STORAGE
-		(sn-setvalue STORAGE mkey (cog-atomspace))
-		(dflt-setvalue mkey (cog-atomspace)))
+		(sn-setvalue STORAGE (*-barrier-*) (cog-atomspace))
+		(dflt-setvalue (*-barrier-*) (cog-atomspace)))
+)
+
+(define-public (*-monitor-*)
+"
+  (PredicateNode \"*-monitor-*\") message
+
+    Return a StringValue containing storage performance monitoring
+    and debugging information. To display the string in a properly
+    formatted fashion, say `(display (monitor-storage))`.
+
+    Note that some StorageNodes might do significant computations
+    before returning a report, and thus may appear to hang. Patience!
+
+  Usage:
+    (cog-value STORAGE (*-monitor-*))
+    (display (cog-value-ref STORAGE (*-monitor-*) 0))
+
+    See also:
+       `*-open-*` to open a connection.
+       `*-close-*` to close a connection.
+       `*-connected?-*` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
+"
+	(PredicateNode "*-monitor-*")
 )
 
 (define*-public (monitor-storage #:optional (STORAGE #f))
 "
  monitor-storage [STORAGE]
 
-    Convenience wrapper for the (Predicate \"*-monitor-*\") message.
-    Deprecated; instead, just say
-       (cog-value (StorageNode ...) (Predicate \"*-monitor-*\"))
+    Convenience wrapper for the (*-monitor-*) message.
+    Same as
+       (cog-value STORAGE (*-monitor-*))
+"
+   (cog-value-ref
+		(if STORAGE
+			(sn-getvalue STORAGE (*-monitor-*))
+			(dflt-getvalue (*-monitor-*))) 0)
+)
 
-    Return a string containing storage performance monitoring and
-    debugging information. To display the string in a properly
-    formatted fashion, say `(display (monitor-storage))`.
+(define-public (*-proxy-parts-*)
+"
+  (PredicateNode \"*-proxy-parts-*\") message
 
-    If the optional STORAGE argument is provided, then the statistics
-    will be printed for that Node. It must be a StorageNode.
+  Specify the component parts (e.g. mirrors) of a proxy.
 
-    Note that some StorageNodes might do significant computations
-    before returning a report, and thus may appear to hang. Patience!
+    Example:
+       (define rsn (RocksStorageNode \"rocks:///tmp/foo.rdb\"))
+       (define pxy (WriteThruProxy \"any name will do\"))
+       (cog-set-value! pxy (*-proxy-parts-*) rsn))
 
     See also:
-       `cog-open` to open a connection.
-       `cog-close` to close a connection.
-       `cog-connected?` to obtain the connection status.
-       `cog-storage-node` to obtain the current connection.
+       `*-proxy-close-*` to halt proxying.
+       `*-set-proxy-*` to declare the remote proxy.
 "
-	(define mkey (PredicateNode "*-monitor-*"))
-	(if STORAGE (sn-getvalue STORAGE mkey) (dflt-getvalue mkey))
+	(PredicateNode "*-proxy-parts-*")
 )
 
 (define-public (*-proxy-open-*)
