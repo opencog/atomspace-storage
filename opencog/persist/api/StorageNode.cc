@@ -2,7 +2,7 @@
  * opencog/persist/api/StorageNode.cc
  *
  * Copyright (c) 2008-2010 OpenCog Foundation
- * Copyright (c) 2009,2013,2020,2022 Linas Vepstas
+ * Copyright (c) 2009,2013,2020,2022,2025 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,6 +28,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/storage/storage_types.h>
 #include "StorageNode.h"
+#include "DispatchHash.h"
 
 using namespace opencog;
 
@@ -57,6 +58,15 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 	}
 
 	const std::string& pred(key->get_name());
+
+	static constexpr int32_t foo = dispatch_hash("foo");
+	switch (dispatch_hash(key->get_name().c_str()))
+	{
+		case foo:
+			break;
+		default:
+			break;
+	}
 
 	if (0 == pred.compare("*-store-frames-*"))
 	{
