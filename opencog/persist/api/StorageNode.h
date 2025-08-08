@@ -320,9 +320,10 @@ public:
 	 * @return True if the Atom for the given Handle was successfully
 	 *         removed. False, otherwise.
 	 */
-	bool remove_atom(AtomSpace*, Handle h, bool recursive=false);
+	bool remove_atom(AtomSpace*, Handle, bool recursive=false);
 	bool remove_atom(const AtomSpacePtr& as, Handle h, bool recursive=false)
 		{ return remove_atom(as.get(), h, recursive); }
+	void remove_msg(Handle, ValuePtr, bool recursive=false);
 };
 
 NODE_PTR_DECL(StorageNode)

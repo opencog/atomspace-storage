@@ -60,7 +60,8 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 	// Create a fast dispatch table by using case-statement
 	// branching, instead of string compare.
 	static constexpr uint32_t p_delete = dispatch_hash("*-delete-*");
-	static constexpr uint32_t p_delete_recurisve = dispatch_hash("*-delete-recurisve-*");
+	static constexpr uint32_t p_delete_recursive =
+		dispatch_hash("*-delete-recursive-*");
 	static constexpr uint32_t p_barrier = dispatch_hash("*-barrier-*");
 
 	// *-load-frames-* is in getValue
@@ -91,35 +92,13 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 	switch (dispatch_hash(pred.c_str()))
 	{
 		case p_delete:
-		{
 			COLL("*-delete-*");
-			// Expect either delete of a single atom, or
-			// a ListValue giving the AtomSpace and the Atom to delete.
-			if (value->is_type(ATOM))
-			{
-				Handle atm(HandleCast(value));
-				remove_atom(atm->getAtomSpace(), atm, false);
-				return;
-			}
-			// Assume a LinkValue of some kind.
-			const LinkValuePtr& lvp(LinkValueCast(value));
-			AtomSpacePtr asp;
-			for (const ValuePtr& vp: lvp->value())
-			{
-				if (vp->is_type(ATOM_SPACE))
-				{
-					asp = AtomSpaceCast(vp);
-					continue;
-				}
-				if (asp) remove_atom(asp, HandleCast(vp), false);
-				else
-				{
-					Handle atm(HandleCast(vp));
-					remove_atom(atm->getAtomSpace(), atm, false);
-				}
-			}
+			remove_msg(key, value, false);
 			return;
-		}
+		case p_delete_recursive:
+			COLL("*-delete-recursive-*");
+			remove_msg(key, value, true);
+			return;
 		case p_barrier:
 			COLL("*-barrier-*");
 			barrier(AtomSpaceCast(value).get());
@@ -261,6 +240,38 @@ bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 	postRemoveAtom(as, h, recursive, exok);
 
 	return exok;
+}
+
+//. Same as above, but using teh message format.
+void StorageNode::remove_msg(Handle h, ValuePtr value, bool recursive)
+{
+	// Expect either delete of a single atom, or
+	// a ListValue giving the AtomSpace and the Atom to delete.
+	if (value->is_type(ATOM))
+	{
+		Handle atm(HandleCast(value));
+		remove_atom(atm->getAtomSpace(), atm, recursive);
+		return;
+	}
+
+	// Assume a LinkValue of some kind.
+	const LinkValuePtr& lvp(LinkValueCast(value));
+	AtomSpacePtr asp;
+	for (const ValuePtr& vp: lvp->value())
+	{
+		if (vp->is_type(ATOM_SPACE))
+		{
+			asp = AtomSpaceCast(vp);
+			continue;
+		}
+		if (asp)
+			remove_atom(asp.get(), HandleCast(vp), recursive);
+		else
+		{
+			Handle atm(HandleCast(vp));
+			remove_atom(atm->getAtomSpace(), atm, false);
+		}
+	}
 }
 
 Handle StorageNode::fetch_atom(const Handle& h, AtomSpace* as)
