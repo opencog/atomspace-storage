@@ -466,6 +466,92 @@
 	"See cog-delete-recursive!" (cog-delete-recursive! ATOM))
 
 
+(define-public (*-delete-*)
+"
+  (PredicateNode \"*-delete-*\") message.
+
+    Remove one or more Atoms from Storage, but only if they have
+    no incoming links.  If it has incoming links, the remove fails.
+
+    Use `*-delete-recursive-*` to force removal, together with any
+    links that might be holding these atoms.
+
+    A word of caution about multi-threaded operation: if one thread is
+    adding atoms, while another thread is removing the *same* atoms at
+    the same time, then these two threads will race. As a result of
+    this racing, there is no gauranteee that the AtomSpace and the
+    attached storage will stay in sync. One or the other might contain
+    Atoms that the other does not.  It is up to you, the user, to avoid
+    this inconsistncy when performing racey inserts/deletes.
+
+    Examples.
+
+    Delete a single Atom:
+       (cog-set-value!
+           (RocksStorage \"rocks:///tmp/my-rocks-db\")
+           (*-delete-*)
+           (Concept \"foo\"))
+
+    Delete a multiple Atoms:
+       (cog-set-value!
+           (RocksStorage \"rocks:///tmp/my-rocks-db\")
+           (*-delete-*)
+           (ListValue (Concept \"foo\") (Concept \"bar\")))
+
+    Specify the AtomSpace from which to delete. This is useful
+    when working with frames, where the deleting may actually
+    result in the hiding of an Atom:
+       (cog-set-value!
+           (RocksStorage \"rocks:///tmp/my-rocks-db\")
+           (*-delete-*)
+           (ListValue (cog-atomspace) (Concept \"foo\")))
+
+    See also:
+       *-delete-recursive-* -- Delete Atoms and any links that hold them.
+       *-delete-frame-* -- Delete all the Atoms in the frame.
+"
+	(PredicateNode "*-delete-*")
+)
+
+(define-public (*-delete-recursive-*)
+"
+  (PredicateNode \"*-delete-recursive-*\") message.
+
+    Remove one or more Atoms from storage, including any links that
+    might be holding the Atoms.
+
+    Use *-delete-* to get a non-recusive removal: the delete will fail
+    if the Atoms appear in any links.
+
+    Examples.
+
+    Recursive delete a single Atom:
+       (cog-set-value!
+           (RocksStorage \"rocks:///tmp/my-rocks-db\")
+           (*-delete-recursive-*)
+           (Concept \"foo\"))
+
+    Delete a multiple Atoms:
+       (cog-set-value!
+           (RocksStorage \"rocks:///tmp/my-rocks-db\")
+           (*-delete-recurive-*)
+           (ListValue (Concept \"foo\") (Concept \"bar\")))
+
+    Specify the AtomSpace from which to delete. This is useful
+    when working with frames, where the deleting may actually
+    result in the hiding of an Atom:
+       (cog-set-value!
+           (RocksStorage \"rocks:///tmp/my-rocks-db\")
+           (*-delete-recurive-*)
+           (ListValue (cog-atomspace) (Concept \"foo\")))
+
+    See also:
+       *-delete-* -- Delete Atoms non-recursively.
+       *-delete-frame-* -- Delete all the Atoms in the frame.
+"
+	(PredicateNode "*-delete-recursive-*")
+)
+
 (define*-public (cog-delete! ATOM #:optional (STORAGE #f))
 "
  cog-delete! ATOM [STORAGE]
@@ -505,10 +591,11 @@
     See also:
        delete-frame! -- Delete all the Atoms in the frame.
 "
-	(if STORAGE (sn-delete ATOM STORAGE)
+	(if STORAGE
+		(sn-setvalue STORAGE (*-delete-*) ATOM)
 		(let ((sn (cog-storage-node)))
 			(if (and sn (cog-connected? sn))
-				(dflt-delete ATOM)
+				(sn-setvalue sn (*-delete-*) ATOM)
 				(cog-extract! ATOM))))
 )
 
@@ -537,11 +624,12 @@
        cog-extract-recursive! -- Remove an atom form the AtomSpace only.
        delete-frame! -- Delete all the Atoms in the frame.
 "
-	(if STORAGE (sn-delete-rec ATOM STORAGE)
+	(if STORAGE
+		(sn-setvalue STORAGE (*-delete-recursive-*) ATOM)
 		(let ((sn (cog-storage-node)))
 			(if (and sn (cog-connected? sn))
-				(dflt-delete-rec ATOM)
-				(cog-extract-recursive! ATOM))))
+				(sn-setvalue sn (*-delete-recursive-*) ATOM)
+				(cog-extract! ATOM))))
 )
 
 ; --------------------------------------------------------------------

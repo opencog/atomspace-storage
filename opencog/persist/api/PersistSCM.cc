@@ -75,10 +75,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_load_atomspace, "persist", false);
 	define_scheme_primitive("sn-store-atomspace",
 	             &PersistSCM::sn_store_atomspace, "persist", false);
-	define_scheme_primitive("sn-delete",
-	             &PersistSCM::sn_delete, "persist", false);
-	define_scheme_primitive("sn-delete-rec",
-	             &PersistSCM::sn_delete_recursive, "persist", false);
 
 	define_scheme_primitive("sn-setvalue",
 	             &PersistSCM::sn_setvalue, "persist", false);
@@ -109,10 +105,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_load_atomspace, this, "persist", false);
 	define_scheme_primitive("dflt-store-atomspace",
 	             &PersistSCM::dflt_store_atomspace, this, "persist", false);
-	define_scheme_primitive("dflt-delete",
-	             &PersistSCM::dflt_delete, this, "persist", false);
-	define_scheme_primitive("dflt-delete-rec",
-	             &PersistSCM::dflt_delete_recursive, this, "persist", false);
 	define_scheme_primitive("dflt-setvalue",
 	             &PersistSCM::dflt_setvalue, this, "persist", false);
 	define_scheme_primitive("dflt-getvalue",
@@ -289,20 +281,6 @@ void PersistSCM::sn_store_atomspace(Handle space, Handle hsn)
 	}
 }
 
-bool PersistSCM::sn_delete(Handle h, Handle hsn)
-{
-	GET_STNP;
-	const AtomSpacePtr& as = SchemeSmob::ss_get_env_as("cog-delete!");
-	return stnp->remove_atom(as, h, false);
-}
-
-bool PersistSCM::sn_delete_recursive(Handle h, Handle hsn)
-{
-	GET_STNP;
-	const AtomSpacePtr& as = SchemeSmob::ss_get_env_as("cog-delete-recursive!");
-	return stnp->remove_atom(as, h, true);
-}
-
 void PersistSCM::sn_setvalue(Handle hsn, Handle key, ValuePtr val)
 {
 	GET_STNP;
@@ -417,20 +395,6 @@ void PersistSCM::dflt_store_atomspace(Handle space)
 		const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("store-atomspace");
 		_sn->store_atomspace(asp.get());
 	}
-}
-
-bool PersistSCM::dflt_delete(Handle h)
-{
-	CHECK;
-	const AtomSpacePtr& as = SchemeSmob::ss_get_env_as("cog-delete!");
-	return _sn->remove_atom(as, h, false);
-}
-
-bool PersistSCM::dflt_delete_recursive(Handle h)
-{
-	CHECK;
-	const AtomSpacePtr& as = SchemeSmob::ss_get_env_as("cog-delete-recursive!");
-	return _sn->remove_atom(as, h, true);
 }
 
 void PersistSCM::dflt_setvalue(Handle key, ValuePtr val)

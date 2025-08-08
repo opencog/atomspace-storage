@@ -59,9 +59,11 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 
 	// Create a fast dispatch table by using case-statement
 	// branching, instead of string compare.
+	static constexpr uint32_t p_delete = dispatch_hash("*-delete-*");
+	static constexpr uint32_t p_delete_recurisve = dispatch_hash("*-delete-recurisve-*");
 	static constexpr uint32_t p_barrier = dispatch_hash("*-barrier-*");
 
-	// *-load-frames-* is in getvalue
+	// *-load-frames-* is in getValue
 	static constexpr uint32_t p_store_frames = dispatch_hash("*-store-frames-*");
 	static constexpr uint32_t p_delete_frame = dispatch_hash("*-delete-frame-*");
 	static constexpr uint32_t p_erase = dispatch_hash("*-erase-*");
@@ -88,6 +90,36 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 	const std::string& pred = key->get_name();
 	switch (dispatch_hash(pred.c_str()))
 	{
+		case p_delete:
+		{
+			COLL("*-delete-*");
+			// Expect either delete of a single atom, or
+			// a ListValue giving the AtomSpace and the Atom to delete.
+			if (value->is_type(ATOM))
+			{
+				Handle atm(HandleCast(value));
+				remove_atom(atm->getAtomSpace(), atm, false);
+				return;
+			}
+			// Assume a LinkValue of some kind.
+			const LinkValuePtr& lvp(LinkValueCast(value));
+			AtomSpacePtr asp;
+			for (const ValuePtr& vp: lvp->value())
+			{
+				if (vp->is_type(ATOM_SPACE))
+				{
+					asp = AtomSpaceCast(vp);
+					continue;
+				}
+				if (asp) remove_atom(asp, HandleCast(vp), false);
+				else
+				{
+					Handle atm(HandleCast(vp));
+					remove_atom(atm->getAtomSpace(), atm, false);
+				}
+			}
+			return;
+		}
 		case p_barrier:
 			COLL("*-barrier-*");
 			barrier(AtomSpaceCast(value).get());
