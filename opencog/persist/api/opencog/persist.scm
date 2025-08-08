@@ -722,7 +722,7 @@
 
        (define csn (CogStorageNode \"cog://example.com:17001\"))
        (cog-open csn)
-       (cog-set-value! pxy (Predicate \"*-set-proxy-*\") (VoidValue))
+       (cog-set-value! csn (Predicate \"*-set-proxy-*\") pxy)
        (cog-set-value! csn (Predicate \"*-proxy-open-*\") (VoidValue))
        (store-atom (Concept \"foo\"))
 
@@ -792,4 +792,5 @@
 	(if STORAGE (sn-setvalue STORAGE pkey PROXY)
 		(dflt-setvalue pkey PROXY))
 )
+
 ; --------------------------------------------------------------------
