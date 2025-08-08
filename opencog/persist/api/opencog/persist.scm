@@ -547,27 +547,37 @@
 ; --------------------------------------------------------------------
 ; --------------------------------------------------------------------
 ; --------------------------------------------------------------------
-; Deprecated calls. Remove soon.
+; Messages
+
+(define-public (*-erase-*)
+"
+ (Predicate \"*-erase-*\") message.
+
+    Erase the entire contents of storage.  Use with caution to avoid
+    massive data loss.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-erase-*) (VoidValue))
+"
+	(PredicateNode "*-erase-*")
+)
 
 (define*-public (cog-erase! #:optional (STORAGE #f))
 "
  cog-erase! [STORAGE]
 
-    Convenience wrapper for the (Predicate \"*-erase-*\") message.
-    Deprecated; instead, just say
-       (cog-set-value! (StorageNode ...)
-          (Predicate \"*-erase-*\") (VoidValue))
+    Convenience wrapper for the (*-erase-*) message.
 
-    Erase the entire contents of storage.  Use with caution to avoid
-    massive data loss.
+    Same as
+       (cog-set-value! STORAGE (*-erase-*) (VoidValue))
 
     If the optional STORAGE argument is provided, then the erase will
     be applied to it. It must be a StorageNode.
 "
-	(define pkey (PredicateNode "*-erase-*"))
 	(define vv (VoidValue))
-	(if STORAGE (sn-setvalue STORAGE pkey vv)
-		(dflt-setvalue pkey vv))
+	(if STORAGE
+		(sn-setvalue STORAGE (*-erase-*) vv)
+		(dflt-setvalue (*-erase-*) vv))
 )
 
 (define-public (*-load-frames-*)
