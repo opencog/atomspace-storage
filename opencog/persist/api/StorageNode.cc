@@ -46,9 +46,15 @@ StorageNode::~StorageNode()
 
 void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 {
-	Atom::setValue(key, value);
+	// The value must be store only if it is not one of the values
+	// that causes an action to be taken. Action messages must not be
+	// recorded, as otherwise, restore from disk/net will cause the
+	// action to be triggered!
 	if (PREDICATE_NODE != key->get_type())
+	{
+		Atom::setValue(key, value);
 		return;
+	}
 
 	const std::string& pred(key->get_name());
 
@@ -88,6 +94,8 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		return;
 	}
 
+	// Some other predicate. Store it.
+	Atom::setValue(key, value);
 }
 
 ValuePtr StorageNode::getValue(const Handle& key) const
