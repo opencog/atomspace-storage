@@ -763,9 +763,7 @@
        `*-proxy-close-*` to halt proxying.
        `*-set-proxy-*` to declare the remote proxy.
 "
-	(define vv (VoidValue))
-	(if STORAGE (sn-setvalue STORAGE (*-proxy-open-*) vv)
-		(dflt-setvalue (*-proxy-open-*) vv))
+	(PredicateNode "*-proxy-open-*")
 )
 
 (define*-public (cog-proxy-open #:optional (STORAGE #f))
