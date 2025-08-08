@@ -631,7 +631,7 @@
 		(let ((sn (cog-storage-node)))
 			(if (and sn (cog-connected? sn))
 				(begin (sn-setvalue sn (*-delete-recursive-*) ATOM) #t)
-				(cog-extract! ATOM))))
+				(cog-extract-recursive! ATOM))))
 )
 
 ; --------------------------------------------------------------------
