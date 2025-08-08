@@ -39,7 +39,6 @@
 	load-atoms-of-type
 	cog-delete!
 	cog-delete-recursive!
-	barrier
 	load-atomspace
 	store-atomspace
 
@@ -47,6 +46,7 @@
 	store-frames
 	delete-frame!
 	cog-erase!
+	barrier
 	monitor-storage)
 
 ;; -----------------------------------------------------
@@ -275,22 +275,6 @@
 "
 	(if STORAGE (sn-load-atoms-of-type TYPE STORAGE)
 		(dflt-load-atoms-of-type TYPE))
-)
-
-(define*-public (barrier #:optional (STORAGE #f))
-"
- barrier [STORAGE]
-
-    Block (do not return to the caller) until the storage write queues
-    are empty. Just because the atomspace write queues are empty, it
-    does not mean that the data was actually written to disk. It merely
-    means that the atomspace, as a client of the storage server, has
-    given them to the server.
-
-    If the optional STORAGE argument is provided, then the barrier will
-    be applied to it. It must be a StorageNode.
-"
-	(if STORAGE (sn-barrier STORAGE) (dflt-barrier))
 )
 
 (define*-public (load-atomspace #:optional (ATOMSPACE #f) (STORAGE #f))
@@ -678,6 +662,30 @@
 	(define pkey (PredicateNode "*-delete-frame-*"))
 	(if STORAGE (sn-setvalue STORAGE pkey ATOMSPACE)
 		(dflt-setvalue pkey ATOMSPACE))
+)
+
+(define*-public (barrier #:optional (STORAGE #f))
+"
+ barrier [STORAGE]
+
+    Convenience wrapper for the (Predicate \"*-barrier-*\") message.
+    Deprecated; instead, just say
+       (cog-set-value! (StorageNode ...)
+           (Predicate \"*-barrier-*\") (atomspace))
+
+    Block (do not return to the caller) until the storage write queues
+    are empty. Just because the atomspace write queues are empty, it
+    does not mean that the data was actually written to disk. It merely
+    means that the atomspace, as a client of the storage server, has
+    given them to the server.
+
+    If the optional STORAGE argument is provided, then the barrier will
+    be applied to it. It must be a StorageNode.
+"
+	(define mkey (PredicateNode "*-barrier-*"))
+	(if STORAGE
+		(sn-setvalue STORAGE mkey (cog-atomspace))
+		(dflt-setvalue mkey (cog-atomspace)))
 )
 
 (define*-public (monitor-storage #:optional (STORAGE #f))
