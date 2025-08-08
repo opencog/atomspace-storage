@@ -776,6 +776,24 @@
 			(dflt-getvalue (*-monitor-*))) 0)
 )
 
+(define-public (*-proxy-parts-*)
+"
+  (PredicateNode \"*-proxy-parts-*\") message
+
+  Specify the component parts (e.g. mirrors) of a proxy.
+
+    Example:
+       (define rsn (RocksStorageNode \"rocks:///tmp/foo.rdb\"))
+       (define pxy (WriteThruProxy \"any name will do\"))
+       (cog-set-value! pxy (*-proxy-parts-*) rsn))
+
+    See also:
+       `*-proxy-close-*` to halt proxying.
+       `*-set-proxy-*` to declare the remote proxy.
+"
+	(PredicateNode "*-proxy-parts-*")
+)
+
 (define-public (*-proxy-open-*)
 "
   (PredicateNode \"*-proxy-open-*\") message
