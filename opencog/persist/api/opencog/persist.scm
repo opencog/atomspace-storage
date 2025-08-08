@@ -797,16 +797,11 @@
 		(dflt-setvalue pkey vv))
 )
 
-(define*-public (cog-set-proxy! PROXY #:optional (STORAGE #f))
+(define-public (*-set-proxy-*)
 "
- cog-set-proxy! PROXY [STORAGE] - Declare a proxy to the remote end.
+  (PredicateNode \"*-set-proxy-*\") message
 
-    Convenience wrapper for the (Predicate \"*-set-proxy-*\") message.
-    Deprecated; instead, just say
-       (cog-set-value! (StorageNode ...)
-          (Predicate \"*-set-proxy-*\") PROXY)
-
-    Declare a ProxyNode to the remote end of a network connection.
+    Declares a ProxyNode to the remote end of a network connection.
 
     ProxyNodes are StorageNodes that support the StorageNode API, and
     then satisfy API requests by passing them on to other StorageNodes.
@@ -818,13 +813,26 @@
     there is no way to access them directly; the `cog-proxy-open` command
     will perform that open.
 
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-set-proxy-*) (ProxyNode ...))
+
     See also:
-       `cog-proxy-open` to start proxying.
-       `cog-proxy-close` to stop proxying.
+       `*-proxy-open-*` to start proxying.
+       `*-proxy-close-*` to stop proxying.
 "
-	(define pkey (PredicateNode "*-set-proxy-*"))
-	(if STORAGE (sn-setvalue STORAGE pkey PROXY)
-		(dflt-setvalue pkey PROXY))
+	(PredicateNode "*-set-proxy-*")
+)
+
+(define*-public (cog-set-proxy! PROXY #:optional (STORAGE #f))
+"
+ cog-set-proxy! PROXY [STORAGE] - Declare a proxy to the remote end.
+
+    Convenience wrapper for the *-set-proxy-* message.
+    Same as
+       (cog-set-value! STORAGE (*-set-proxy-*) PROXY)
+"
+	(if STORAGE (sn-setvalue STORAGE (*-set-proxy-*) PROXY)
+		(dflt-setvalue (*-set-proxy-*) PROXY))
 )
 
 ; --------------------------------------------------------------------
