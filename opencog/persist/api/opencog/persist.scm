@@ -40,12 +40,13 @@
 	cog-delete!
 	cog-delete-recursive!
 	barrier
-	cog-erase!
 	load-atomspace
 	store-atomspace
+
 	load-frames
 	store-frames
 	delete-frame!
+	cog-erase!
 	monitor-storage)
 
 ;; -----------------------------------------------------
@@ -292,19 +293,6 @@
 	(if STORAGE (sn-barrier STORAGE) (dflt-barrier))
 )
 
-(define*-public (cog-erase! #:optional (STORAGE #f))
-"
- cog-erase! [STORAGE]
-
-    Erase the entire contents of storage.  Use with caution to avoid
-    massive data loss.
-
-    If the optional STORAGE argument is provided, then the erase will
-    be applied to it. It must be a StorageNode.
-"
-	(if STORAGE (sn-erase STORAGE) (dflt-erase))
-)
-
 (define*-public (load-atomspace #:optional (ATOMSPACE #f) (STORAGE #f))
 "
  load-atomspace [ATOMSPACE] [STORAGE] - load all atoms from storage.
@@ -331,7 +319,7 @@
     load-frames -- load DAG of AtomSpaces.
     store-atomspace -- store all Atoms in the AtomSpace.
 "
-	; Sort out which of two opional args showed up.
+	; Sort out which of two optional args showed up.
 	(if (and ATOMSPACE (cog-subtype? 'StorageNode (cog-type ATOMSPACE)))
 		(begin
 			(set! STORAGE ATOMSPACE)
@@ -380,83 +368,6 @@
 	(if (not ATOMSPACE) (set! ATOMSPACE (cog-atomspace)))
 	(if STORAGE (sn-store-atomspace ATOMSPACE STORAGE)
 		(dflt-store-atomspace ATOMSPACE))
-)
-
-(define*-public (load-frames #:optional (STORAGE #f))
-"
- load-frames [STORAGE] - load the DAG of AtomSpaces from storage.
-
-    This will load the DAG of AtomSpaces held in the storage server to
-    be created. This will only create the AtomSpaces; it will NOT
-    populate them with Atoms. These have to be either fetched in bulk,
-    or individually, using the usual methods.
-
-    If the optional STORAGE argument is provided, then it will be
-    used as the source of the load. It must be a StorageNode.
-
-    See also:
-    store-frames ATOMSPACE -- store the DAG of AtomSpaces to storage.
-    fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
-    fetch-query QUERY -- get all Atoms for a given QUERY.
-    load-referrers ATOM -- get every graph that contains ATOM.
-    load-atoms-of-type TYPE -- load only atoms of type TYPE.
-    load-atomspace -- load the entire contents of storage.
-"
-	(if STORAGE (sn-load-frames STORAGE) (dflt-load-frames))
-)
-
-(define*-public (store-frames ATOMSPACE #:optional (STORAGE #f))
-"
- store-frames ATOMSPACE [STORAGE] - store the DAG of AtomSpaces to storage.
-
-    This will store the DAG of AtomSpaces at ATOMSPACE and below, to
-    the storage server.  This will only store the DAG of the AtomSpaces;
-    it will NOT store their contents.  These have to be either stored in
-    bulk, or individually, using the usual methods.
-
-    If the optional STORAGE argument is provided, then it will be
-    used as the target of the store. It must be a StorageNode.
-
-    See also:
-    load-frames -- load the DAG of AtomSpaces from storage.
-    store-atomspace -- store the entire contents of an AtomSpace.
-    store-atom ATOM -- store an individual Atom.
-"
-	(if STORAGE
-		(sn-store-frames ATOMSPACE STORAGE)
-		(dflt-store-frames ATOMSPACE))
-)
-
-(define*-public (delete-frame! ATOMSPACE #:optional (STORAGE #f))
-"
- delete-frame! ATOMSPACE [STORAGE] - delete the contents of the AtomSpace.
-
-    This will delete all of the Atoms in the ATOMSPACE, as well as the
-    associated frame, so that it no longer appears in the frame DAG.
-    Note that this will also delete any Atoms that have been marked
-    hidden, and thus might cause the corresponding Atoms in lower frames
-    to become visible.
-
-    If the optional STORAGE argument is provided, then it will be
-    used as the target of the delete. It must be a StorageNode.
-
-    Caveats:
-    If STORAGE is specified, it must be open for writing.
-    If it is not specified, the AtomSpace must be attached to storage
-    that is open for writing.
-    At this time, only the top-most frame can be deleted.
-    The frame is deleted in storage only; the atoms remain in RAM
-    until all references to ATOMSPACE are gone. Use
-    `cog-atomspace-clear` to also remove these atoms.
-
-    See also:
-       load-frames -- load the DAG of AtomSpaces from storage.
-       store-frames ATOMSPACE -- store the DAG of AtomSpaces to storage.
-       cog-atomspace-clear -- extract all atoms in a frame.
-"
-	(if STORAGE
-		(sn-delete-frame ATOMSPACE STORAGE)
-		(dflt-delete-frame ATOMSPACE))
 )
 
 ;
@@ -653,6 +564,121 @@
 ; --------------------------------------------------------------------
 ; --------------------------------------------------------------------
 ; Deprecated calls. Remove soon.
+
+(define*-public (cog-erase! #:optional (STORAGE #f))
+"
+ cog-erase! [STORAGE]
+
+    Convenience wrapper for the (Predicate \"*-erase-*\") message.
+    Deprecated; instead, just say
+       (cog-set-value! (StorageNode ...)
+          (Predicate \"*-erase-*\") (VoidValue))
+
+    Erase the entire contents of storage.  Use with caution to avoid
+    massive data loss.
+
+    If the optional STORAGE argument is provided, then the erase will
+    be applied to it. It must be a StorageNode.
+"
+	(define pkey (PredicateNode "*-erase-*"))
+	(define vv (VoidValue))
+	(if STORAGE (sn-setvalue STORAGE pkey vv)
+		(dflt-setvalue pkey vv))
+)
+
+(define*-public (load-frames #:optional (STORAGE #f))
+"
+ load-frames [STORAGE] - load the DAG of AtomSpaces from storage.
+
+    Convenience wrapper for the (Predicate \"*-load-frames-*\") message.
+    Deprecated; instead, just say
+       (cog-value (StorageNode ...)
+          (Predicate \"*-load-frames-*\"))
+
+    This will load the DAG of AtomSpaces held in the storage server to
+    be created. This will only create the AtomSpaces; it will NOT
+    populate them with Atoms. These have to be either fetched in bulk,
+    or individually, using the usual methods.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the load. It must be a StorageNode.
+
+    See also:
+    store-frames ATOMSPACE -- store the DAG of AtomSpaces to storage.
+    fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
+    fetch-query QUERY -- get all Atoms for a given QUERY.
+    load-referrers ATOM -- get every graph that contains ATOM.
+    load-atoms-of-type TYPE -- load only atoms of type TYPE.
+    load-atomspace -- load the entire contents of storage.
+"
+	(define mkey (PredicateNode "*-load-frames-*"))
+	(cog-value->list
+		(if STORAGE (sn-getvalue STORAGE mkey) (dflt-getvalue mkey)))
+)
+
+(define*-public (store-frames ATOMSPACE #:optional (STORAGE #f))
+"
+ store-frames ATOMSPACE [STORAGE] - store the DAG of AtomSpaces to storage.
+
+    Convenience wrapper for the (Predicate \"*-store-frames-*\") message.
+    Deprecated; instead, just say
+       (cog-set-value! (StorageNode ...)
+          (Predicate \"*-store-frames-*\") ATOMSPACE)
+
+    This will store the DAG of AtomSpaces at ATOMSPACE and below, to
+    the storage server.  This will only store the DAG of the AtomSpaces;
+    it will NOT store their contents.  These have to be either stored in
+    bulk, or individually, using the usual methods.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
+
+    See also:
+    load-frames -- load the DAG of AtomSpaces from storage.
+    store-atomspace -- store the entire contents of an AtomSpace.
+    store-atom ATOM -- store an individual Atom.
+"
+	(define pkey (PredicateNode "*-store-frames-*"))
+	(if STORAGE (sn-setvalue STORAGE pkey ATOMSPACE)
+		(dflt-setvalue pkey ATOMSPACE))
+)
+
+(define*-public (delete-frame! ATOMSPACE #:optional (STORAGE #f))
+"
+ delete-frame! ATOMSPACE [STORAGE] - delete the contents of the AtomSpace.
+
+    Convenience wrapper for the (Predicate \"*-delete-frame-*\") message.
+    Deprecated; instead, just say
+       (cog-set-value! (StorageNode ...)
+          (Predicate \"*-delete-frame-*\") ATOMSPACE)
+
+    This will delete all of the Atoms in the ATOMSPACE, as well as the
+    associated frame, so that it no longer appears in the frame DAG.
+    Note that this will also delete any Atoms that have been marked
+    hidden, and thus might cause the corresponding Atoms in lower frames
+    to become visible.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the delete. It must be a StorageNode.
+
+    Caveats:
+    If STORAGE is specified, it must be open for writing.
+    If it is not specified, the AtomSpace must be attached to storage
+    that is open for writing.
+    At this time, only the top-most frame can be deleted.
+    The frame is deleted in storage only; the atoms remain in RAM
+    until all references to ATOMSPACE are gone. Use
+    `cog-atomspace-clear` to also remove these atoms.
+
+    See also:
+       load-frames -- load the DAG of AtomSpaces from storage.
+       store-frames ATOMSPACE -- store the DAG of AtomSpaces to storage.
+       cog-atomspace-clear -- extract all atoms in a frame.
+"
+	(define pkey (PredicateNode "*-delete-frame-*"))
+	(if STORAGE (sn-setvalue STORAGE pkey ATOMSPACE)
+		(dflt-setvalue pkey ATOMSPACE))
+)
 
 (define*-public (monitor-storage #:optional (STORAGE #f))
 "
