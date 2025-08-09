@@ -599,7 +599,7 @@
 			(let ((sn (cog-storage-node)))
 				(if (and sn (cog-connected? sn))
 					(begin (sn-setvalue sn (*-delete-*)
-						(LikValue (cog-atomspace) ATOM)) #t)
+						(LinkValue (cog-atomspace) ATOM)) #t)
 					(cog-extract! ATOM)))))
 )
 
