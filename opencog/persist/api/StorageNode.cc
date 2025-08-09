@@ -59,6 +59,10 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 
 	// Create a fast dispatch table by using case-statement
 	// branching, instead of string compare.
+	static constexpr uint32_t p_load_atomspace =
+		dispatch_hash("*-load-atomspace-*");
+	static constexpr uint32_t p_store_atomspace =
+		dispatch_hash("*-store-atomspace-*");
 	static constexpr uint32_t p_delete = dispatch_hash("*-delete-*");
 	static constexpr uint32_t p_delete_recursive =
 		dispatch_hash("*-delete-recursive-*");
@@ -91,6 +95,14 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 	const std::string& pred = key->get_name();
 	switch (dispatch_hash(pred.c_str()))
 	{
+		case p_load_atomspace:
+			COLL("*-store-atomspace-*");
+			load_atomspace(AtomSpaceCast(value).get());
+			return;
+		case p_store_atomspace:
+			COLL("*-store-atomspace-*");
+			store_atomspace(AtomSpaceCast(value).get());
+			return;
 		case p_delete:
 			COLL("*-delete-*");
 			remove_msg(key, value, false);
