@@ -214,13 +214,33 @@
 	(if STORAGE (sn-store-atom ATOM STORAGE) (dflt-store-atom ATOM))
 )
 
+(define-public (*-store-value-*)
+"
+  (PredicateNode \"*-store-value-*\") message.
+
+  Store a single Value on an Atom.
+
+    This will store the Value located at KEY on ATOM. This updates
+    (clobbers) the Value previously held in storage, replacing it by
+    the Value in the atomspace.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-store-value-*)
+                       (LinkValue ATOM KEY))
+
+    See also:
+    *-update-value-* -- perform an atomic read-modify-write.
+    *-store-atom-* -- store all values on an Atom.
+    *-fetch-value-* -- fetch just one Value.
+"
+	(PredicateNode "*-store-value-*")
+)
+
 (define*-public (store-value ATOM KEY #:optional (STORAGE #f))
 "
  store-value ATOM KEY [STORAGE]
 
-    Store the Value located at KEY on ATOM. This updates (clobbers)
-    the Value previously held in storage, replacing it by the Value
-    in the atomspace.
+    Convenience wrapper around the `*-store-value-*` message.
 
     If the optional STORAGE argument is provided, then it will be
     used as the target of the store. It must be a StorageNode.
@@ -230,12 +250,16 @@
        `store-atom` to store all values on an Atom.
        `fetch-value` to fetch just one Value.
 "
-	(if STORAGE (sn-store-value ATOM KEY STORAGE) (dflt-store-value ATOM KEY))
+	(if STORAGE
+		(sn-setvalue STORAGE (*-store-value-*) (LinkValue ATOM KEY))
+		(dflt-setvalue (*-store-value-*) (LinkValue ATOM KEY)))
 )
 
-(define*-public (update-value ATOM KEY DELTA #:optional (STORAGE #f))
+(define-public (*-update-value-*)
 "
- update-value ATOM KEY DELTA [STORAGE]
+  (PredicateNode \"*-update-value-*\") message.
+
+  Update a Value on an Atom.
 
     Update the Value located at KEY on ATOM, folding in DELTA. This
     performs an atomic read-modify-write of the Value located at KEY.
@@ -246,6 +270,24 @@
     update counts on ATOM, without having them clobber each-other with
     a non-atomic update.
 
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-update-value-*)
+                       (LinkValue ATOM KEY DELTA))
+
+    See also:
+    *-store-value-* -- store a single value on an Atom.
+    *-store-atom-* -- store all values on an Atom.
+    *-fetch-value-* -- fetch just one Value.
+"
+	(PredicateNode "*-update-value-*")
+)
+
+(define*-public (update-value ATOM KEY DELTA #:optional (STORAGE #f))
+"
+ update-value ATOM KEY DELTA [STORAGE]
+
+    Convenience wrapper around the `*-update-value-*` message.
+
     If the optional STORAGE argument is provided, then it will be
     used as the target of the store. It must be a StorageNode.
 
@@ -254,16 +296,38 @@
        `store-atom` to store all values on an Atom.
        `fetch-value` to fetch just one Value.
 "
-	(if STORAGE (sn-update-value ATOM KEY DELTA STORAGE)
-		(dflt-update-value ATOM KEY DELTA))
+	(if STORAGE
+		(sn-setvalue STORAGE (*-update-value-*) (LinkValue ATOM KEY DELTA))
+		(dflt-setvalue (*-update-value-*) (LinkValue ATOM KEY DELTA)))
+)
+
+(define-public (*-load-atoms-of-type-*)
+"
+  (PredicateNode \"*-load-atoms-of-type-*\") message.
+
+  Load atoms of a specific type from storage.
+
+    Fetch atoms of the given TYPE from storage. This fetches the
+    atoms, and all the associated values attached to them.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-load-atoms-of-type-*) TYPE)
+
+    Where TYPE is a TypeNode.
+
+    See also:
+    *-fetch-atom-* -- fetch an individual ATOM, and all Values on it.
+    *-load-atomspace-* -- Load all atoms.
+    *-load-frames-* -- load DAG of AtomSpaces.
+"
+	(PredicateNode "*-load-atoms-of-type-*")
 )
 
 (define*-public (load-atoms-of-type TYPE #:optional (STORAGE #f))
 "
  load-atoms-of-type TYPE [STORAGE]
 
-    Fetch atoms of the given TYPE from storage. This fetches the
-    atoms, and all the associated values attached to them.
+    Convenience wrapper around the `*-load-atoms-of-type-*` message.
 
     If the optional STORAGE argument is provided, then it will be
     used as the source of the load. It must be a StorageNode.
@@ -271,10 +335,11 @@
     See also:
     fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
     *-load-atomspace-* -- Load all atoms.
-    *-load-frames=* -- load DAG of AtomSpaces.
+    *-load-frames-* -- load DAG of AtomSpaces.
 "
-	(if STORAGE (sn-load-atoms-of-type TYPE STORAGE)
-		(dflt-load-atoms-of-type TYPE))
+	(if STORAGE
+		(sn-setvalue STORAGE (*-load-atoms-of-type-*) (TypeNode TYPE))
+		(dflt-setvalue (*-load-atoms-of-type-*) (TypeNode TYPE)))
 )
 
 (define-public (*-load-atomspace-*)
