@@ -51,8 +51,6 @@ private:
 	static void sn_store_value(Handle, Handle, Handle);
 	static void sn_update_value(Handle, Handle, ValuePtr, Handle);
 	static void sn_load_type(Type, Handle);
-	static void sn_load_atomspace(Handle, Handle);
-	static void sn_store_atomspace(Handle, Handle);
 	static void sn_setvalue(Handle, Handle, ValuePtr);
 	static ValuePtr sn_getvalue(Handle, Handle);
 
@@ -74,8 +72,6 @@ private:
 	void dflt_store_value(Handle, Handle);
 	void dflt_update_value(Handle, Handle, ValuePtr);
 	void dflt_load_type(Type);
-	void dflt_load_atomspace(Handle);
-	void dflt_store_atomspace(Handle);
 	void dflt_setvalue(Handle, ValuePtr);
 	ValuePtr dflt_getvalue(Handle);
 	Handle current_storage(void);

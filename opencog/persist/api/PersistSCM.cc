@@ -71,10 +71,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_update_value, "persist", false);
 	define_scheme_primitive("sn-load-atoms-of-type",
 	             &PersistSCM::sn_load_type, "persist", false);
-	define_scheme_primitive("sn-load-atomspace",
-	             &PersistSCM::sn_load_atomspace, "persist", false);
-	define_scheme_primitive("sn-store-atomspace",
-	             &PersistSCM::sn_store_atomspace, "persist", false);
 
 	define_scheme_primitive("sn-setvalue",
 	             &PersistSCM::sn_setvalue, "persist", false);
@@ -101,10 +97,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_update_value, this, "persist", false);
 	define_scheme_primitive("dflt-load-atoms-of-type",
 	             &PersistSCM::dflt_load_type, this, "persist", false);
-	define_scheme_primitive("dflt-load-atomspace",
-	             &PersistSCM::dflt_load_atomspace, this, "persist", false);
-	define_scheme_primitive("dflt-store-atomspace",
-	             &PersistSCM::dflt_store_atomspace, this, "persist", false);
 	define_scheme_primitive("dflt-setvalue",
 	             &PersistSCM::dflt_setvalue, this, "persist", false);
 	define_scheme_primitive("dflt-getvalue",
@@ -257,29 +249,6 @@ void PersistSCM::sn_load_type(Type t, Handle hsn)
 	stnp->fetch_all_atoms_of_type(t, asp.get());
 }
 
-void PersistSCM::sn_load_atomspace(Handle space, Handle hsn)
-{
-	GET_STNP;
-	if (space and space->get_type() == ATOM_SPACE)
-		stnp->load_atomspace(AtomSpaceCast(space).get());
-	else
-	{
-		const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("load-atomspace");
-		stnp->load_atomspace(asp.get());
-	}
-}
-
-void PersistSCM::sn_store_atomspace(Handle space, Handle hsn)
-{
-	GET_STNP;
-	if (space and space->get_type() == ATOM_SPACE)
-		stnp->store_atomspace(AtomSpaceCast(space).get());
-	else
-	{
-		const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("store-atomspace");
-		stnp->store_atomspace(asp.get());
-	}
-}
 
 void PersistSCM::sn_setvalue(Handle hsn, Handle key, ValuePtr val)
 {
@@ -373,29 +342,6 @@ void PersistSCM::dflt_load_type(Type t)
 	_sn->fetch_all_atoms_of_type(t, asp.get());
 }
 
-void PersistSCM::dflt_load_atomspace(Handle space)
-{
-	CHECK;
-	if (space and space->get_type() == ATOM_SPACE)
-		_sn->load_atomspace(AtomSpaceCast(space).get());
-	else
-	{
-		const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("load-atomspace");
-		_sn->load_atomspace(asp.get());
-	}
-}
-
-void PersistSCM::dflt_store_atomspace(Handle space)
-{
-	CHECK;
-	if (space and space->get_type() == ATOM_SPACE)
-		_sn->store_atomspace(AtomSpaceCast(space).get());
-	else
-	{
-		const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("store-atomspace");
-		_sn->store_atomspace(asp.get());
-	}
-}
 
 void PersistSCM::dflt_setvalue(Handle key, ValuePtr val)
 {

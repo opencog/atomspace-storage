@@ -270,22 +270,43 @@
 
     See also:
     fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
-    load-atomspace -- Load all atoms.
-    load-frames -- load DAG of AtomSpaces.
+    *-load-atomspace-* -- Load all atoms.
+    *-load-frames=* -- load DAG of AtomSpaces.
 "
 	(if STORAGE (sn-load-atoms-of-type TYPE STORAGE)
 		(dflt-load-atoms-of-type TYPE))
+)
+
+(define-public (*-load-atomspace-*)
+"
+  (PredicateNode \"*-load-atomspace-*\") message.
+
+  Load the entire AtomSpace from storage.
+
+    This will load the ENTIRE contents of the storage into the current
+    AtomSpace. Depending on the size of the storage, this may take a lot
+    of time.  During normal operation, a bulk-load is rarely required, as
+    individual atoms can always be fetched, one at a time.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-load-atomspace-*) (AtomSpace))
+
+    See also:
+    *-store-atomspace-* -- store the entire AtomSpace to storage.
+    *-load-frames-* -- load the DAG of AtomSpaces from storage.
+    *-fetch-atom-* -- fetch an individual ATOM, and all Values on it.
+    *-fetch-query-* -- get all Atoms for a given QUERY.
+    *-load-referrers-* -- get every graph that contains ATOM.
+    *-load-atoms-of-type-* -- load only atoms of type TYPE.
+"
+	(PredicateNode "*-load-atomspace-*")
 )
 
 (define*-public (load-atomspace #:optional (ATOMSPACE #f) (STORAGE #f))
 "
  load-atomspace [ATOMSPACE] [STORAGE] - load all atoms from storage.
 
-    This will cause ALL of the atoms in the open storage server to be
-    loaded into the current AtomSpace. This can be a very time-consuming
-    operation.  In normal operation, it is rarely necessary to load all
-    atoms; there are several ways to fetch subsets of atoms, or even one
-    at a time, when needed.
+    Convenience wrapper around *-load-atomspace-*.
 
     If the optional ATOMSPACE argument is provided, then the data will
     be restored to that AtomSpace, instead of the current AtomSpace.
@@ -310,25 +331,22 @@
 			(set! ATOMSPACE (cog-atomspace))))
 
 	(if (not ATOMSPACE) (set! ATOMSPACE (cog-atomspace)))
-	(if STORAGE (sn-load-atomspace ATOMSPACE STORAGE)
-		(dflt-load-atomspace ATOMSPACE))
+	(if STORAGE
+		(sn-setvalue STORAGE (*-load-atomspace-*) ATOMSPACE)
+		(dflt-setvalue (*-load-atomspace-*) ATOMSPACE))
 )
 
-(define*-public (store-atomspace #:optional (ATOMSPACE #f) (STORAGE #f))
+(define-public (*-store-atomspace-*)
 "
- store-atomspace [ATOMSPACE] [STORAGE] - Store all atoms to storage.
+  (PredicateNode \"*-store-atomspace-*\") message.
+
+  Store the entire AtomSpace to storage.
 
     This will dump the ENTIRE contents of the current AtomSpace to the
-    the currently-open storage.  Depending on the size of the AtomSpace,
-    this may take a lot of time.  During normal operation, a bulk-save
+    the currently-open storage. Depending on the size of the AtomSpace,
+    this may take a lot of time. During normal operation, a bulk-save
     is rarely required, as individual atoms can always be stored, one
     at a time.
-
-    If the optional ATOMSPACE argument is provided, then it will be
-    stored, instead of the current AtomSpace.
-
-    If the optional STORAGE argument is provided, then it will be
-    used as the target of the store. It must be a StorageNode.
 
     If the current AtomSpace sits on top of a stack of AtomSpaces, then
     only the shallowest visible Atoms in the current AtomSpace will be
@@ -337,6 +355,29 @@
     deeper AtomSpaces that are hidden/changed in the current AtomSpace
     will NOT be stored. In other words, the only Atoms and Values that
     are stored are those that are visible in the current AtomSpace.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-store-atomspace-*) ATOMSPACE)
+
+    See also:
+    *-load-atomspace-* -- load the entire AtomSpace from storage.
+    *-store-frames-* -- store the DAG of AtomSpaces to storage.
+    *-store-atom-* -- store an individual Atom.
+"
+	(PredicateNode "*-store-atomspace-*")
+)
+
+(define*-public (store-atomspace #:optional (ATOMSPACE #f) (STORAGE #f))
+"
+ store-atomspace [ATOMSPACE] [STORAGE] - Store all atoms to storage.
+
+    Convenience wrapper around the `*-store-atomspace-*` message.
+
+    If the optional ATOMSPACE argument is provided, then it will be
+    stored, instead of the current AtomSpace.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
 
     See also:
     load-atomspace -- load all Atoms in the AtomSpace.
@@ -350,8 +391,9 @@
 			(set! ATOMSPACE (cog-atomspace))))
 
 	(if (not ATOMSPACE) (set! ATOMSPACE (cog-atomspace)))
-	(if STORAGE (sn-store-atomspace ATOMSPACE STORAGE)
-		(dflt-store-atomspace ATOMSPACE))
+	(if STORAGE
+		(sn-setvalue STORAGE (*-store-atomspace-*) ATOMSPACE)
+		(dflt-setvalue (*-store-atomspace-*) ATOMSPACE))
 )
 
 ;
