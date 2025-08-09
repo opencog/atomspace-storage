@@ -94,7 +94,7 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 //
 // #define COLLISION_PROOF
 #ifdef COLLISION_PROOF
-	#define COLL(STR) if (0 == pred.compare(STR)) break;
+	#define COLL(STR) if (0 != pred.compare(STR)) break;
 #else
 	#define COLL(STR)
 #endif
