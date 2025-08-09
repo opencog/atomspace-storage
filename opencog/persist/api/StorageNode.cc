@@ -112,9 +112,14 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			return;
 		case p_load_atoms_of_type: {
 			COLL("*-load-atoms-of-type-*");
-			if (not value->is_type(TYPE_NODE)) return;
-			Type t = TypeNodeCast(HandleCast(value))->get_type();
-			fetch_all_atoms_of_type(t, getAtomSpace());
+			if (not value->is_type(LINK_VALUE)) return;
+			const ValueSeq& vsq(LinkValueCast(value)->value());
+			if (2 > vsq.size()) return;
+			if (not vsq[0]->is_type(ATOM_SPACE)) return;
+			if (not vsq[1]->is_type(TYPE_NODE)) return;
+			AtomSpace* as = (AtomSpace*) vsq[0].get();
+			Type t = TypeNodeCast(HandleCast(vsq[1]))->get_type();
+			loadType(as, t);
 			return;
 		}
 		case p_store_value: {
