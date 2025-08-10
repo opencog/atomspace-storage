@@ -118,7 +118,7 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			if (not vsq[0]->is_type(ATOM_SPACE)) return;
 			if (not vsq[1]->is_type(TYPE_NODE)) return;
 			AtomSpace* as = (AtomSpace*) vsq[0].get();
-			Type t = TypeNodeCast(HandleCast(vsq[1]))->get_type();
+			Type t = TypeNodeCast(HandleCast(vsq[1]))->get_kind();
 			loadType(as, t);
 			return;
 		}
