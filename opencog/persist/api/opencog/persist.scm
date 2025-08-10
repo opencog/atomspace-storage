@@ -236,7 +236,7 @@
 	(PredicateNode "*-store-value-*")
 )
 
-(define*-public (store-value ATOM KEY #:optional (STORAGE #f))
+(define*-public (store-value ATOM KEY #:optional (STORAGE (cog-storage-node)))
 "
  store-value ATOM KEY [STORAGE]
 
@@ -250,9 +250,7 @@
        `store-atom` to store all values on an Atom.
        `fetch-value` to fetch just one Value.
 "
-	(if STORAGE
-		(sn-setvalue STORAGE (*-store-value-*) (LinkValue ATOM KEY))
-		(dflt-setvalue (*-store-value-*) (LinkValue ATOM KEY)))
+	(sn-setvalue STORAGE (*-store-value-*) (LinkValue ATOM KEY))
 )
 
 (define-public (*-update-value-*)
@@ -282,7 +280,7 @@
 	(PredicateNode "*-update-value-*")
 )
 
-(define*-public (update-value ATOM KEY DELTA #:optional (STORAGE #f))
+(define*-public (update-value ATOM KEY DELTA #:optional (STORAGE (cog-storage-node)))
 "
  update-value ATOM KEY DELTA [STORAGE]
 
@@ -296,9 +294,7 @@
        `store-atom` to store all values on an Atom.
        `fetch-value` to fetch just one Value.
 "
-	(if STORAGE
-		(sn-setvalue STORAGE (*-update-value-*) (LinkValue ATOM KEY DELTA))
-		(dflt-setvalue (*-update-value-*) (LinkValue ATOM KEY DELTA)))
+	(sn-setvalue STORAGE (*-update-value-*) (LinkValue ATOM KEY DELTA))
 )
 
 (define-public (*-load-atoms-of-type-*)
@@ -323,7 +319,7 @@
 	(PredicateNode "*-load-atoms-of-type-*")
 )
 
-(define*-public (load-atoms-of-type TYPE #:optional (STORAGE #f))
+(define*-public (load-atoms-of-type TYPE #:optional (STORAGE (cog-storage-node)))
 "
  load-atoms-of-type TYPE [STORAGE]
 
@@ -337,9 +333,7 @@
     *-load-atomspace-* -- Load all atoms.
     *-load-frames-* -- load DAG of AtomSpaces.
 "
-	(if STORAGE
-		(sn-setvalue STORAGE (*-load-atoms-of-type-*) (TypeNode TYPE))
-		(dflt-setvalue (*-load-atoms-of-type-*) (TypeNode TYPE)))
+	(sn-setvalue STORAGE (*-load-atoms-of-type-*) (TypeNode TYPE))
 )
 
 (define-public (*-load-atomspace-*)
@@ -396,9 +390,8 @@
 			(set! ATOMSPACE (cog-atomspace))))
 
 	(if (not ATOMSPACE) (set! ATOMSPACE (cog-atomspace)))
-	(if STORAGE
-		(sn-setvalue STORAGE (*-load-atomspace-*) ATOMSPACE)
-		(dflt-setvalue (*-load-atomspace-*) ATOMSPACE))
+	(if (not STORAGE) (set! STORAGE (cog-storage-node)))
+	(sn-setvalue STORAGE (*-load-atomspace-*) ATOMSPACE)
 )
 
 (define-public (*-store-atomspace-*)
@@ -456,9 +449,8 @@
 			(set! ATOMSPACE (cog-atomspace))))
 
 	(if (not ATOMSPACE) (set! ATOMSPACE (cog-atomspace)))
-	(if STORAGE
-		(sn-setvalue STORAGE (*-store-atomspace-*) ATOMSPACE)
-		(dflt-setvalue (*-store-atomspace-*) ATOMSPACE))
+	(if (not STORAGE) (set! STORAGE (cog-storage-node)))
+	(sn-setvalue STORAGE (*-store-atomspace-*) ATOMSPACE)
 )
 
 ;
@@ -763,7 +755,7 @@
 	(PredicateNode "*-erase-*")
 )
 
-(define*-public (cog-erase! #:optional (STORAGE #f))
+(define*-public (cog-erase! #:optional (STORAGE (cog-storage-node)))
 "
  cog-erase! [STORAGE]
 
@@ -775,10 +767,7 @@
     If the optional STORAGE argument is provided, then the erase will
     be applied to it. It must be a StorageNode.
 "
-	(define vv (VoidValue))
-	(if STORAGE
-		(sn-setvalue STORAGE (*-erase-*) vv)
-		(dflt-setvalue (*-erase-*) vv))
+	(sn-setvalue STORAGE (*-erase-*) (VoidValue))
 )
 
 (define-public (*-load-frames-*)
@@ -847,7 +836,7 @@
 	(PredicateNode "*-store-frames-*")
 )
 
-(define*-public (store-frames ATOMSPACE #:optional (STORAGE #f))
+(define*-public (store-frames ATOMSPACE #:optional (STORAGE (cog-storage-node)))
 "
  store-frames ATOMSPACE [STORAGE] - store the DAG of AtomSpaces to storage.
 
@@ -858,9 +847,7 @@
     If the optional STORAGE argument is provided, then it will be
     used as the target of the store. It must be a StorageNode.
 "
-	(if STORAGE
-		(sn-setvalue STORAGE (*-store-frames-*) ATOMSPACE)
-		(dflt-setvalue (*-store-frames-*) ATOMSPACE))
+	(sn-setvalue STORAGE (*-store-frames-*) ATOMSPACE)
 )
 
 (define-public (*-delete-frame-*)
@@ -894,7 +881,7 @@
 	(PredicateNode "*-delete-frame-*")
 )
 
-(define*-public (delete-frame! ATOMSPACE #:optional (STORAGE #f))
+(define*-public (delete-frame! ATOMSPACE #:optional (STORAGE (cog-storage-node)))
 "
  delete-frame! ATOMSPACE [STORAGE] - delete the contents of the AtomSpace.
 
@@ -902,9 +889,7 @@
     Same as
        (cog-set-value! STORAGE (*-delete-frame-*) ATOMSPACE)
 "
-	(if STORAGE
-		(sn-setvalue STORAGE (*-delete-frame-*) ATOMSPACE)
-		(dflt-setvalue (*-delete-frame-*) ATOMSPACE))
+	(sn-setvalue STORAGE (*-delete-frame-*) ATOMSPACE)
 )
 
 (define-public (*-barrier-*)
@@ -923,7 +908,7 @@
 	(PredicateNode "*-barrier-*")
 )
 
-(define*-public (barrier #:optional (STORAGE #f))
+(define*-public (barrier #:optional (STORAGE (cog-storage-node)))
 "
  barrier [STORAGE]
 
@@ -934,9 +919,7 @@
     If the optional STORAGE argument is provided, then the barrier will
     be applied to it. It must be a StorageNode.
 "
-	(if STORAGE
-		(sn-setvalue STORAGE (*-barrier-*) (cog-atomspace))
-		(dflt-setvalue (*-barrier-*) (cog-atomspace)))
+	(sn-setvalue STORAGE (*-barrier-*) (cog-atomspace))
 )
 
 (define-public (*-monitor-*)
@@ -1063,7 +1046,7 @@
 	(PredicateNode "*-proxy-open-*")
 )
 
-(define*-public (cog-proxy-open #:optional (STORAGE #f))
+(define*-public (cog-proxy-open #:optional (STORAGE (cog-storage-node)))
 "
  cog-proxy-open [STORAGE] - Start proxying at the remote end.
 
@@ -1071,9 +1054,7 @@
     Same as
        (cog-set-value! STORAGE (*-proxy-open-*) (VoidValue))
 "
-	(define vv (VoidValue))
-	(if STORAGE (sn-setvalue STORAGE (*-proxy-open-*) vv)
-		(dflt-setvalue (*-proxy-open-*) vv))
+	(sn-setvalue STORAGE (*-proxy-open-*) (VoidValue))
 )
 
 (define-public (*-proxy-close-*)
@@ -1093,7 +1074,7 @@
 	(PredicateNode "*-proxy-close-*")
 )
 
-(define*-public (cog-proxy-close #:optional (STORAGE #f))
+(define*-public (cog-proxy-close #:optional (STORAGE (cog-storage-node)))
 "
  cog-proxy-close [STORAGE] - Stop proxying at the remote end.
 
@@ -1101,9 +1082,7 @@
     Same as
        (cog-set-value! STORAGE (*-proxy-close-*) (VoidValue))
 "
-	(define vv (VoidValue))
-	(if STORAGE (sn-setvalue STORAGE (*-proxy-close-*) vv)
-		(dflt-setvalue (*-proxy-close-*) vv))
+	(sn-setvalue STORAGE (*-proxy-close-*) (VoidValue))
 )
 
 (define-public (*-set-proxy-*)
@@ -1132,7 +1111,7 @@
 	(PredicateNode "*-set-proxy-*")
 )
 
-(define*-public (cog-set-proxy! PROXY #:optional (STORAGE #f))
+(define*-public (cog-set-proxy! PROXY #:optional (STORAGE (cog-storage-node)))
 "
  cog-set-proxy! PROXY [STORAGE] - Declare a proxy to the remote end.
 
@@ -1140,8 +1119,7 @@
     Same as
        (cog-set-value! STORAGE (*-set-proxy-*) PROXY)
 "
-	(if STORAGE (sn-setvalue STORAGE (*-set-proxy-*) PROXY)
-		(dflt-setvalue (*-set-proxy-*) PROXY))
+	(sn-setvalue STORAGE (*-set-proxy-*) PROXY)
 )
 
 ; --------------------------------------------------------------------
