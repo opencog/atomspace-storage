@@ -946,7 +946,7 @@
 	(PredicateNode "*-monitor-*")
 )
 
-(define*-public (monitor-storage #:optional (STORAGE #f))
+(define*-public (monitor-storage #:optional (STORAGE (cog-storage-node)))
 "
  monitor-storage [STORAGE]
 
@@ -954,10 +954,7 @@
     Same as
        (cog-value STORAGE (*-monitor-*))
 "
-   (cog-value-ref
-		(if STORAGE
-			(sn-getvalue STORAGE (*-monitor-*))
-			(dflt-getvalue (*-monitor-*))) 0)
+   (cog-value-ref (sn-getvalue STORAGE (*-monitor-*)) 0)
 )
 
 (define-public (*-proxy-parts-*)
