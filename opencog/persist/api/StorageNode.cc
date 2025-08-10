@@ -266,38 +266,6 @@ bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 	return exok;
 }
 
-//. Same as above, but using the message format.
-void StorageNode::remove_msg(Handle h, ValuePtr value, bool recursive)
-{
-	// Expect either delete of a single atom, or
-	// a LinkValue giving the AtomSpace and the Atom to delete.
-	if (value->is_type(ATOM))
-	{
-		Handle atm(HandleCast(value));
-		remove_atom(atm->getAtomSpace(), atm, recursive);
-		return;
-	}
-
-	// Assume a LinkValue of some kind.
-	const LinkValuePtr& lvp(LinkValueCast(value));
-	AtomSpacePtr asp;
-	for (const ValuePtr& vp: lvp->value())
-	{
-		if (vp->is_type(ATOM_SPACE))
-		{
-			asp = AtomSpaceCast(vp);
-			continue;
-		}
-		if (asp)
-			remove_atom(asp.get(), HandleCast(vp), recursive);
-		else
-		{
-			Handle atm(HandleCast(vp));
-			remove_atom(atm->getAtomSpace(), atm, recursive);
-		}
-	}
-}
-
 Handle StorageNode::fetch_atom(const Handle& h, AtomSpace* as)
 {
 	if (nullptr == h) return Handle::UNDEFINED;
@@ -434,6 +402,42 @@ void StorageNode::set_proxy(const Handle&)
 std::string StorageNode::monitor(void)
 {
 	return "This StorageNode does not implement a monitor.\n";
+}
+
+// ====================================================================
+// Message handlers.
+
+// Message handler for remove_atom. Handles several different
+// message formats, including those with embedded AtomSpaces.
+void StorageNode::remove_msg(Handle h, ValuePtr value, bool recursive)
+{
+	// Expect either delete of a single atom, or
+	// a LinkValue giving the AtomSpace and the Atom to delete.
+	if (value->is_type(ATOM))
+	{
+		Handle atm(HandleCast(value));
+		remove_atom(atm->getAtomSpace(), atm, recursive);
+		return;
+	}
+
+	// Assume a LinkValue of some kind.
+	const LinkValuePtr& lvp(LinkValueCast(value));
+	AtomSpacePtr asp;
+	for (const ValuePtr& vp: lvp->value())
+	{
+		if (vp->is_type(ATOM_SPACE))
+		{
+			asp = AtomSpaceCast(vp);
+			continue;
+		}
+		if (asp)
+			remove_atom(asp.get(), HandleCast(vp), recursive);
+		else
+		{
+			Handle atm(HandleCast(vp));
+			remove_atom(atm->getAtomSpace(), atm, recursive);
+		}
+	}
 }
 
 // ====================================================================
