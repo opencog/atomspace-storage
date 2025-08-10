@@ -49,6 +49,8 @@ protected:
 	void get_atoms_in_frame(const AtomSpace* as, HandleSeq& fseq) const
 		{ as->get_atoms_in_frame(fseq); }
 
+	void remove_msg(const ValuePtr&, bool recursive=false);
+	void load_atoms_of_type_msg(const ValuePtr&);
 public:
 	StorageNode(Type, std::string);
 	virtual ~StorageNode();
@@ -323,7 +325,6 @@ public:
 	bool remove_atom(AtomSpace*, Handle, bool recursive=false);
 	bool remove_atom(const AtomSpacePtr& as, Handle h, bool recursive=false)
 		{ return remove_atom(as.get(), h, recursive); }
-	void remove_msg(Handle, ValuePtr, bool recursive=false);
 };
 
 NODE_PTR_DECL(StorageNode)

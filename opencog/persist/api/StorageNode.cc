@@ -112,14 +112,7 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			return;
 		case p_load_atoms_of_type: {
 			COLL("*-load-atoms-of-type-*");
-			if (not value->is_type(LINK_VALUE)) return;
-			const ValueSeq& vsq(LinkValueCast(value)->value());
-			if (2 > vsq.size()) return;
-			if (not vsq[0]->is_type(ATOM_SPACE)) return;
-			if (not vsq[1]->is_type(TYPE_NODE)) return;
-			AtomSpace* as = (AtomSpace*) vsq[0].get();
-			Type t = TypeNodeCast(HandleCast(vsq[1]))->get_kind();
-			loadType(as, t);
+			load_atoms_of_type_msg(value);
 			return;
 		}
 		case p_store_value: {
@@ -140,11 +133,11 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		}
 		case p_delete:
 			COLL("*-delete-*");
-			remove_msg(key, value, false);
+			remove_msg(value, false);
 			return;
 		case p_delete_recursive:
 			COLL("*-delete-recursive-*");
-			remove_msg(key, value, true);
+			remove_msg(value, true);
 			return;
 		case p_barrier:
 			COLL("*-barrier-*");
@@ -196,29 +189,6 @@ ValuePtr StorageNode::getValue(const Handle& key) const
 		return createStringValue(const_cast<StorageNode*>(this)->monitor());
 
 	return Atom::getValue(key);
-}
-
-void StorageNode::proxy_open(void)
-{
-	throw RuntimeException(TRACE_INFO,
-		"This StorageNode does not implement proxying!");
-}
-
-void StorageNode::proxy_close(void)
-{
-	throw RuntimeException(TRACE_INFO,
-		"This StorageNode does not implement proxying!");
-}
-
-void StorageNode::set_proxy(const Handle&)
-{
-	throw RuntimeException(TRACE_INFO,
-		"This StorageNode does not implement proxying!");
-}
-
-std::string StorageNode::monitor(void)
-{
-	return "This StorageNode does not implement a monitor.\n";
 }
 
 // ====================================================================
@@ -287,38 +257,6 @@ bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 	postRemoveAtom(as, h, recursive, exok);
 
 	return exok;
-}
-
-//. Same as above, but using teh message format.
-void StorageNode::remove_msg(Handle h, ValuePtr value, bool recursive)
-{
-	// Expect either delete of a single atom, or
-	// a LinkValue giving the AtomSpace and the Atom to delete.
-	if (value->is_type(ATOM))
-	{
-		Handle atm(HandleCast(value));
-		remove_atom(atm->getAtomSpace(), atm, recursive);
-		return;
-	}
-
-	// Assume a LinkValue of some kind.
-	const LinkValuePtr& lvp(LinkValueCast(value));
-	AtomSpacePtr asp;
-	for (const ValuePtr& vp: lvp->value())
-	{
-		if (vp->is_type(ATOM_SPACE))
-		{
-			asp = AtomSpaceCast(vp);
-			continue;
-		}
-		if (asp)
-			remove_atom(asp.get(), HandleCast(vp), recursive);
-		else
-		{
-			Handle atm(HandleCast(vp));
-			remove_atom(atm->getAtomSpace(), atm, recursive);
-		}
-	}
 }
 
 Handle StorageNode::fetch_atom(const Handle& h, AtomSpace* as)
@@ -432,6 +370,116 @@ void StorageNode::store_frames(const Handle& has)
 void StorageNode::delete_frame(const Handle& has)
 {
 	return deleteFrame((AtomSpace*)has.get());
+}
+
+// ====================================================================
+
+void StorageNode::proxy_open(void)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not implement proxying!");
+}
+
+void StorageNode::proxy_close(void)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not implement proxying!");
+}
+
+void StorageNode::set_proxy(const Handle&)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not implement proxying!");
+}
+
+std::string StorageNode::monitor(void)
+{
+	return "This StorageNode does not implement a monitor.\n";
+}
+
+// ====================================================================
+// Message handlers.
+
+// Message handler for remove_atom. Message may be the single Atom
+// to be deleted, or a LinkValue giving a mixture of Atoms to be deleted,
+// preceded by the AtomSpaces they are to be removed from.
+void StorageNode::remove_msg(const ValuePtr& value, bool recursive)
+{
+	if (value->is_type(ATOM))
+	{
+		Handle atm(HandleCast(value));
+		remove_atom(atm->getAtomSpace(), atm, recursive);
+		return;
+	}
+
+	// Assume a LinkValue of some kind.
+	// ?? Do nothing? Or throw an error? XXX FIXME.
+	if (not value->is_type(LINK_VALUE)) return;
+
+	const LinkValuePtr& lvp(LinkValueCast(value));
+	AtomSpacePtr asp;
+	for (const ValuePtr& vp: lvp->value())
+	{
+		if (vp->is_type(ATOM_SPACE))
+		{
+			asp = AtomSpaceCast(vp);
+			continue;
+		}
+		if (asp)
+			remove_atom(asp.get(), HandleCast(vp), recursive);
+		else
+		{
+			Handle atm(HandleCast(vp));
+			remove_atom(atm->getAtomSpace(), atm, recursive);
+		}
+	}
+}
+
+// Message handler for load_atom_of_type. Message may be the single
+// Type to be loaded, or a LinkValue giving a mixture of types,
+// preceded by the AtomSpaces they are to loaded into.
+void StorageNode::load_atoms_of_type_msg(const ValuePtr& value)
+{
+	// Expect either a single Type, or a LinkValue of multiple
+	// types giving the AtomSpace and the Atom to delete.
+	if (value->is_type(TYPE_NODE))
+	{
+		Handle h(HandleCast(value));
+		Type t = TypeNodeCast(h)->get_kind();
+		loadType(h->getAtomSpace(), t);
+		return;
+	}
+
+	// Assume a LinkValue of some kind.
+	// ?? Do nothing? Or throw an error? XXX FIXME.
+	if (not value->is_type(LINK_VALUE)) return;
+
+	const LinkValuePtr& lvp(LinkValueCast(value));
+	AtomSpacePtr asp;
+	for (const ValuePtr& vp: lvp->value())
+	{
+		if (vp->is_type(ATOM_SPACE))
+		{
+			asp = AtomSpaceCast(vp);
+			continue;
+		}
+
+		// Ignore anything we don't understand.
+		// Or we could throw an exception here. I dunno.
+		if (not value->is_type(TYPE_NODE)) continue;
+
+		if (asp)
+		{
+			Type t = TypeNodeCast(HandleCast(vp))->get_kind();
+			loadType(asp.get(), t);
+		}
+		else
+		{
+			Handle h(HandleCast(vp));
+			Type t = TypeNodeCast(h)->get_kind();
+			loadType(h->getAtomSpace(), t);
+		}
+	}
 }
 
 // ====================================================================
