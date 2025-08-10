@@ -651,7 +651,7 @@
 	(PredicateNode "*-delete-recursive-*")
 )
 
-(define*-public (cog-delete! ATOM #:optional (STORAGE #f))
+(define*-public (cog-delete! ATOM #:optional (STORAGE (cog-storage-node)))
 "
  cog-delete! ATOM [STORAGE]
     Remove the indicated ATOM, but only if it has no incoming links.
@@ -692,17 +692,12 @@
 "
 	(if (< 0 (cog-incoming-size ATOM))
 		#f
-		(if STORAGE
-			(begin (sn-setvalue STORAGE (*-delete-*)
-				(LinkValue (cog-atomspace) ATOM)) #t)
-			(let ((sn (cog-storage-node)))
-				(if (and sn (cog-connected? sn))
-					(begin (sn-setvalue sn (*-delete-*)
-						(LinkValue (cog-atomspace) ATOM)) #t)
-					(cog-extract! ATOM)))))
+		(begin
+			(sn-setvalue STORAGE (*-delete-*)
+				(LinkValue (cog-atomspace) ATOM)) #t))
 )
 
-(define*-public (cog-delete-recursive! ATOM #:optional (STORAGE #f))
+(define*-public (cog-delete-recursive! ATOM #:optional (STORAGE (cog-storage-node)))
 "
  cog-delete-recursive! ATOM [STORAGE]
     Remove the indicated ATOM, and all atoms that point at it.
@@ -727,14 +722,8 @@
        cog-extract-recursive! -- Remove an atom form the AtomSpace only.
        delete-frame! -- Delete all the Atoms in the frame.
 "
-	(if STORAGE
-		(begin (sn-setvalue STORAGE (*-delete-recursive-*)
-			(LinkValue (cog-atomspace) ATOM)) #t)
-		(let ((sn (cog-storage-node)))
-			(if (and sn (cog-connected? sn))
-				(begin (sn-setvalue sn (*-delete-recursive-*)
-					(LinkValue (cog-atomspace) ATOM)) #t)
-				(cog-extract-recursive! ATOM))))
+	(sn-setvalue STORAGE (*-delete-recursive-*)
+		(LinkValue (cog-atomspace) ATOM))
 )
 
 ; --------------------------------------------------------------------
