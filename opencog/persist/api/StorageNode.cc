@@ -70,6 +70,14 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		dispatch_hash("*-store-value-*");
 	static constexpr uint32_t p_update_value =
 		dispatch_hash("*-update-value-*");
+	static constexpr uint32_t p_fetch_atom =
+		dispatch_hash("*-fetch-atom-*");
+	static constexpr uint32_t p_fetch_value =
+		dispatch_hash("*-fetch-value-*");
+	static constexpr uint32_t p_fetch_incoming_set =
+		dispatch_hash("*-fetch-incoming-set-*");
+	static constexpr uint32_t p_fetch_incoming_by_type =
+		dispatch_hash("*-fetch-incoming-by-type-*");
 	static constexpr uint32_t p_delete = dispatch_hash("*-delete-*");
 	static constexpr uint32_t p_delete_recursive =
 		dispatch_hash("*-delete-recursive-*");
@@ -129,6 +137,60 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			const ValueSeq& vsq(LinkValueCast(value)->value());
 			if (3 > vsq.size()) return;
 			update_value(HandleCast(vsq[0]), HandleCast(vsq[1]), vsq[2]);
+			return;
+		}
+		case p_fetch_atom: {
+			COLL("*-fetch-atom-*");
+			if (value->is_type(LINK_VALUE)) {
+				const ValueSeq& vsq(LinkValueCast(value)->value());
+				if (2 == vsq.size()) {
+					AtomSpace* as = AtomSpaceCast(vsq[0]).get();
+					fetch_atom(HandleCast(vsq[1]), as);
+				}
+			} else {
+				fetch_atom(HandleCast(value));
+			}
+			return;
+		}
+		case p_fetch_value: {
+			COLL("*-fetch-value-*");
+			if (not value->is_type(LINK_VALUE)) return;
+			const ValueSeq& vsq(LinkValueCast(value)->value());
+			if (3 == vsq.size()) {
+				AtomSpace* as = AtomSpaceCast(vsq[0]).get();
+				fetch_value(HandleCast(vsq[1]), HandleCast(vsq[2]), as);
+			} else if (2 == vsq.size()) {
+				fetch_value(HandleCast(vsq[0]), HandleCast(vsq[1]));
+			}
+			return;
+		}
+		case p_fetch_incoming_set: {
+			COLL("*-fetch-incoming-set-*");
+			if (value->is_type(LINK_VALUE)) {
+				const ValueSeq& vsq(LinkValueCast(value)->value());
+				if (2 == vsq.size()) {
+					AtomSpace* as = AtomSpaceCast(vsq[0]).get();
+					fetch_incoming_set(HandleCast(vsq[1]), false, as);
+				}
+			} else {
+				fetch_incoming_set(HandleCast(value), false);
+			}
+			return;
+		}
+		case p_fetch_incoming_by_type: {
+			COLL("*-fetch-incoming-by-type-*");
+			if (not value->is_type(LINK_VALUE)) return;
+			const ValueSeq& vsq(LinkValueCast(value)->value());
+			if (3 == vsq.size()) {
+				AtomSpace* as = AtomSpaceCast(vsq[0]).get();
+				Handle atom = HandleCast(vsq[1]);
+				Type t = TypeNodeCast(HandleCast(vsq[2]))->get_kind();
+				fetch_incoming_by_type(atom, t, as);
+			} else if (2 == vsq.size()) {
+				Handle atom = HandleCast(vsq[0]);
+				Type t = TypeNodeCast(HandleCast(vsq[1]))->get_kind();
+				fetch_incoming_by_type(atom, t);
+			}
 			return;
 		}
 		case p_delete:
