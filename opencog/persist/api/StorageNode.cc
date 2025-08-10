@@ -119,8 +119,11 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			COLL("*-store-value-*");
 			if (not value->is_type(LINK_VALUE)) return;
 			const ValueSeq& vsq(LinkValueCast(value)->value());
-			if (2 > vsq.size()) return;
-			store_value(HandleCast(vsq[0]), HandleCast(vsq[1]));
+			size_t nv = vsq.size();
+			if (2 > nv) return;
+			Handle atm(HandleCast(vsq[0]));
+			for (size_t i=1; i<nv; i++)
+				store_value(atm, HandleCast(vsq[i]));
 			return;
 		}
 		case p_update_value: {
