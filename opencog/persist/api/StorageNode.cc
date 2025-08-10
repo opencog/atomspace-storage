@@ -112,14 +112,7 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			return;
 		case p_load_atoms_of_type: {
 			COLL("*-load-atoms-of-type-*");
-			if (not value->is_type(LINK_VALUE)) return;
-			const ValueSeq& vsq(LinkValueCast(value)->value());
-			if (2 > vsq.size()) return;
-			if (not vsq[0]->is_type(ATOM_SPACE)) return;
-			if (not vsq[1]->is_type(TYPE_NODE)) return;
-			AtomSpace* as = (AtomSpace*) vsq[0].get();
-			Type t = TypeNodeCast(HandleCast(vsq[1]))->get_kind();
-			loadType(as, t);
+			load_atoms_of_type_msg(value);
 			return;
 		}
 		case p_store_value: {
@@ -407,12 +400,11 @@ std::string StorageNode::monitor(void)
 // ====================================================================
 // Message handlers.
 
-// Message handler for remove_atom. Handles several different
-// message formats, including those with embedded AtomSpaces.
+// Message handler for remove_atom. Message may be the single Atom
+// to be deleted, or a LinkValue giving a mixture of Atoms to be deleted,
+// preceded by the AtomSpaces they are to be removed from.
 void StorageNode::remove_msg(const ValuePtr& value, bool recursive)
 {
-	// Expect either delete of a single atom, or
-	// a LinkValue giving the AtomSpace and the Atom to delete.
 	if (value->is_type(ATOM))
 	{
 		Handle atm(HandleCast(value));
@@ -421,6 +413,9 @@ void StorageNode::remove_msg(const ValuePtr& value, bool recursive)
 	}
 
 	// Assume a LinkValue of some kind.
+	// ?? Do nothing? Or throw an error? XXX FIXME.
+	if (not value->is_type(LINK_VALUE)) return;
+
 	const LinkValuePtr& lvp(LinkValueCast(value));
 	AtomSpacePtr asp;
 	for (const ValuePtr& vp: lvp->value())
@@ -436,6 +431,53 @@ void StorageNode::remove_msg(const ValuePtr& value, bool recursive)
 		{
 			Handle atm(HandleCast(vp));
 			remove_atom(atm->getAtomSpace(), atm, recursive);
+		}
+	}
+}
+
+// Message handler for load_atom_of_type. Message may be the single
+// Type to be loaded, or a LinkValue giving a mixture of types,
+// preceded by the AtomSpaces they are to loaded into.
+void StorageNode::load_atoms_of_type_msg(const ValuePtr& value)
+{
+	// Expect either a single Type, or a LinkValue of multiple
+	// types giving the AtomSpace and the Atom to delete.
+	if (value->is_type(TYPE_NODE))
+	{
+		Handle h(HandleCast(value));
+		Type t = TypeNodeCast(h)->get_kind();
+		loadType(h->getAtomSpace(), t);
+		return;
+	}
+
+	// Assume a LinkValue of some kind.
+	// ?? Do nothing? Or throw an error? XXX FIXME.
+	if (not value->is_type(LINK_VALUE)) return;
+
+	const LinkValuePtr& lvp(LinkValueCast(value));
+	AtomSpacePtr asp;
+	for (const ValuePtr& vp: lvp->value())
+	{
+		if (vp->is_type(ATOM_SPACE))
+		{
+			asp = AtomSpaceCast(vp);
+			continue;
+		}
+
+		// Ignore anything we don't understand.
+		// Or we could throw an exception here. I dunno.
+		if (not value->is_type(TYPE_NODE)) continue;
+
+		if (asp)
+		{
+			Type t = TypeNodeCast(HandleCast(vp))->get_kind();
+			loadType(asp.get(), t);
+		}
+		else
+		{
+			Handle h(HandleCast(vp));
+			Type t = TypeNodeCast(h)->get_kind();
+			loadType(h->getAtomSpace(), t);
 		}
 	}
 }

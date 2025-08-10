@@ -338,10 +338,8 @@
     *-load-frames-* -- load DAG of AtomSpaces.
 "
 	(if STORAGE
-		(sn-setvalue STORAGE (*-load-atoms-of-type-*)
-			(LinkValue (cog-atomspace) (TypeNode TYPE)))
-		(dflt-setvalue (*-load-atoms-of-type-*)
-			(LinkValue (cog-atomspace) (TypeNode TYPE))))
+		(sn-setvalue STORAGE (*-load-atoms-of-type-*) (TypeNode TYPE))
+		(dflt-setvalue (*-load-atoms-of-type-*) (TypeNode TYPE)))
 )
 
 (define-public (*-load-atomspace-*)
