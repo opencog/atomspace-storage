@@ -307,6 +307,7 @@ ValuePtr PersistSCM::dflt_getvalue(Handle key)
 
 Handle PersistSCM::current_storage(void)
 {
+	if (_sn and not _sn->connected()) _sn = nullptr;
 	return Handle(_sn);
 }
 
