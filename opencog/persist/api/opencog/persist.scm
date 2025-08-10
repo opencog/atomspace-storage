@@ -786,7 +786,7 @@
 	(PredicateNode "*-load-frames-*")
 )
 
-(define*-public (load-frames #:optional (STORAGE #f))
+(define*-public (load-frames #:optional (STORAGE (cog-storage-node)))
 "
  load-frames [STORAGE] - load the DAG of AtomSpaces from storage.
 
@@ -797,10 +797,7 @@
     If the optional STORAGE argument is provided, then it will be
     used as the source of the load. It must be a StorageNode.
 "
-	(cog-value->list
-		(if STORAGE
-			(sn-getvalue STORAGE (*-load-frames-*))
-			(dflt-getvalue (*-load-frames-*))))
+	(cog-value->list (sn-getvalue STORAGE (*-load-frames-*)))
 )
 
 (define-public (*-store-frames-*)
