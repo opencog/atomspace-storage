@@ -85,10 +85,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_fetch_query4, this, "persist", false);
 	define_scheme_primitive("dflt-store-atom",
 	             &PersistSCM::dflt_store_atom, this, "persist", false);
-	define_scheme_primitive("dflt-setvalue",
-	             &PersistSCM::dflt_setvalue, this, "persist", false);
-	define_scheme_primitive("dflt-getvalue",
-	             &PersistSCM::dflt_getvalue, this, "persist", false);
 }
 
 // =====================================================================
@@ -128,8 +124,16 @@ void PersistSCM::open(Handle hsn)
 			"StorageNode %s is already open!",
 			hsn->to_short_string().c_str());
 
-	// It can happen that _sn was deleted earlier. Clobber
-	// the smart pointer so use count goes to zero, and the
+	// It can happen that, due to user error, stnp looks to be closed,
+	// but the StorageNode dtor has not run, and so it still seems to
+	// be open. One solution is to force all use counts on the smart
+	// pointers to go to zero (done further below). Another is to just
+	// double-check the URL, and force the close. Seems that we need to
+	// do both: belt and suspenders.
+	if (_sn and _sn->get_name() == stnp->get_name())
+		close(Handle(_sn));
+
+	// Clobber the smart pointer so use count goes to zero, and the
 	// StorageNode dtor runs (which then closes the connection.)
 	if (_sn and nullptr == _sn->getAtomSpace()) _sn = nullptr;
 
@@ -292,21 +296,9 @@ Handle PersistSCM::dflt_store_atom(Handle h)
 	return h;
 }
 
-
-void PersistSCM::dflt_setvalue(Handle key, ValuePtr val)
-{
-	CHECK;
-	_sn->setValue(key, val);
-}
-
-ValuePtr PersistSCM::dflt_getvalue(Handle key)
-{
-	CHECK;
-	return _sn->getValue(key);
-}
-
 Handle PersistSCM::current_storage(void)
 {
+	if (_sn and not _sn->connected()) _sn = nullptr;
 	return Handle(_sn);
 }
 
