@@ -66,8 +66,6 @@ private:
 	Handle dflt_fetch_query2(Handle, Handle);
 	Handle dflt_fetch_query4(Handle, Handle, Handle, bool);
 	Handle dflt_store_atom(Handle);
-	void dflt_setvalue(Handle, ValuePtr);
-	ValuePtr dflt_getvalue(Handle);
 	Handle current_storage(void);
 
 public:

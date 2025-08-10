@@ -85,10 +85,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_fetch_query4, this, "persist", false);
 	define_scheme_primitive("dflt-store-atom",
 	             &PersistSCM::dflt_store_atom, this, "persist", false);
-	define_scheme_primitive("dflt-setvalue",
-	             &PersistSCM::dflt_setvalue, this, "persist", false);
-	define_scheme_primitive("dflt-getvalue",
-	             &PersistSCM::dflt_getvalue, this, "persist", false);
 }
 
 // =====================================================================
@@ -298,19 +294,6 @@ Handle PersistSCM::dflt_store_atom(Handle h)
 	CHECK;
 	_sn->store_atom(h);
 	return h;
-}
-
-
-void PersistSCM::dflt_setvalue(Handle key, ValuePtr val)
-{
-	CHECK;
-	_sn->setValue(key, val);
-}
-
-ValuePtr PersistSCM::dflt_getvalue(Handle key)
-{
-	CHECK;
-	return _sn->getValue(key);
 }
 
 Handle PersistSCM::current_storage(void)
