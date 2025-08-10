@@ -23,6 +23,7 @@
 
 #include <string>
 
+#include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -63,6 +64,12 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		dispatch_hash("*-load-atomspace-*");
 	static constexpr uint32_t p_store_atomspace =
 		dispatch_hash("*-store-atomspace-*");
+	static constexpr uint32_t p_load_atoms_of_type =
+		dispatch_hash("*-load-atoms-of-type-*");
+	static constexpr uint32_t p_store_value =
+		dispatch_hash("*-store-value-*");
+	static constexpr uint32_t p_update_value =
+		dispatch_hash("*-update-value-*");
 	static constexpr uint32_t p_delete = dispatch_hash("*-delete-*");
 	static constexpr uint32_t p_delete_recursive =
 		dispatch_hash("*-delete-recursive-*");
@@ -87,7 +94,7 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 //
 // #define COLLISION_PROOF
 #ifdef COLLISION_PROOF
-	#define COLL(STR) if (0 == pred.compare(STR)) break;
+	#define COLL(STR) if (0 != pred.compare(STR)) break;
 #else
 	#define COLL(STR)
 #endif
@@ -96,13 +103,41 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 	switch (dispatch_hash(pred.c_str()))
 	{
 		case p_load_atomspace:
-			COLL("*-store-atomspace-*");
+			COLL("*-load-atomspace-*");
 			load_atomspace(AtomSpaceCast(value).get());
 			return;
 		case p_store_atomspace:
 			COLL("*-store-atomspace-*");
 			store_atomspace(AtomSpaceCast(value).get());
 			return;
+		case p_load_atoms_of_type: {
+			COLL("*-load-atoms-of-type-*");
+			if (not value->is_type(LINK_VALUE)) return;
+			const ValueSeq& vsq(LinkValueCast(value)->value());
+			if (2 > vsq.size()) return;
+			if (not vsq[0]->is_type(ATOM_SPACE)) return;
+			if (not vsq[1]->is_type(TYPE_NODE)) return;
+			AtomSpace* as = (AtomSpace*) vsq[0].get();
+			Type t = TypeNodeCast(HandleCast(vsq[1]))->get_kind();
+			loadType(as, t);
+			return;
+		}
+		case p_store_value: {
+			COLL("*-store-value-*");
+			if (not value->is_type(LINK_VALUE)) return;
+			const ValueSeq& vsq(LinkValueCast(value)->value());
+			if (2 > vsq.size()) return;
+			store_value(HandleCast(vsq[0]), HandleCast(vsq[1]));
+			return;
+		}
+		case p_update_value: {
+			COLL("*-update-value-*");
+			if (not value->is_type(LINK_VALUE)) return;
+			const ValueSeq& vsq(LinkValueCast(value)->value());
+			if (3 > vsq.size()) return;
+			update_value(HandleCast(vsq[0]), HandleCast(vsq[1]), vsq[2]);
+			return;
+		}
 		case p_delete:
 			COLL("*-delete-*");
 			remove_msg(key, value, false);

@@ -65,12 +65,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_fetch_query4, "persist", false);
 	define_scheme_primitive("sn-store-atom",
 	             &PersistSCM::sn_store_atom, "persist", false);
-	define_scheme_primitive("sn-store-value",
-	             &PersistSCM::sn_store_value, "persist", false);
-	define_scheme_primitive("sn-update-value",
-	             &PersistSCM::sn_update_value, "persist", false);
-	define_scheme_primitive("sn-load-atoms-of-type",
-	             &PersistSCM::sn_load_type, "persist", false);
 
 	define_scheme_primitive("sn-setvalue",
 	             &PersistSCM::sn_setvalue, "persist", false);
@@ -91,12 +85,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_fetch_query4, this, "persist", false);
 	define_scheme_primitive("dflt-store-atom",
 	             &PersistSCM::dflt_store_atom, this, "persist", false);
-	define_scheme_primitive("dflt-store-value",
-	             &PersistSCM::dflt_store_value, this, "persist", false);
-	define_scheme_primitive("dflt-update-value",
-	             &PersistSCM::dflt_update_value, this, "persist", false);
-	define_scheme_primitive("dflt-load-atoms-of-type",
-	             &PersistSCM::dflt_load_type, this, "persist", false);
 	define_scheme_primitive("dflt-setvalue",
 	             &PersistSCM::dflt_setvalue, this, "persist", false);
 	define_scheme_primitive("dflt-getvalue",
@@ -230,25 +218,6 @@ Handle PersistSCM::sn_store_atom(Handle h, Handle hsn)
 	return h;
 }
 
-void PersistSCM::sn_store_value(Handle h, Handle key, Handle hsn)
-{
-	GET_STNP;
-	stnp->store_value(h, key);
-}
-
-void PersistSCM::sn_update_value(Handle h, Handle key, ValuePtr delta, Handle hsn)
-{
-	GET_STNP;
-	stnp->update_value(h, key, delta);
-}
-
-void PersistSCM::sn_load_type(Type t, Handle hsn)
-{
-	GET_STNP;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("load-atoms-of-type");
-	stnp->fetch_all_atoms_of_type(t, asp.get());
-}
-
 
 void PersistSCM::sn_setvalue(Handle hsn, Handle key, ValuePtr val)
 {
@@ -321,25 +290,6 @@ Handle PersistSCM::dflt_store_atom(Handle h)
 	CHECK;
 	_sn->store_atom(h);
 	return h;
-}
-
-void PersistSCM::dflt_store_value(Handle h, Handle key)
-{
-	CHECK;
-	_sn->store_value(h, key);
-}
-
-void PersistSCM::dflt_update_value(Handle h, Handle key, ValuePtr delta)
-{
-	CHECK;
-	_sn->update_value(h, key, delta);
-}
-
-void PersistSCM::dflt_load_type(Type t)
-{
-	CHECK;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("load-atoms-of-type");
-	_sn->fetch_all_atoms_of_type(t, asp.get());
 }
 
 

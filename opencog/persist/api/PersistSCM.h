@@ -48,9 +48,6 @@ private:
 	static Handle sn_fetch_query2(Handle, Handle, Handle);
 	static Handle sn_fetch_query4(Handle, Handle, Handle, bool, Handle);
 	static Handle sn_store_atom(Handle, Handle);
-	static void sn_store_value(Handle, Handle, Handle);
-	static void sn_update_value(Handle, Handle, ValuePtr, Handle);
-	static void sn_load_type(Type, Handle);
 	static void sn_setvalue(Handle, Handle, ValuePtr);
 	static ValuePtr sn_getvalue(Handle, Handle);
 
@@ -69,9 +66,6 @@ private:
 	Handle dflt_fetch_query2(Handle, Handle);
 	Handle dflt_fetch_query4(Handle, Handle, Handle, bool);
 	Handle dflt_store_atom(Handle);
-	void dflt_store_value(Handle, Handle);
-	void dflt_update_value(Handle, Handle, ValuePtr);
-	void dflt_load_type(Type);
 	void dflt_setvalue(Handle, ValuePtr);
 	ValuePtr dflt_getvalue(Handle);
 	Handle current_storage(void);
