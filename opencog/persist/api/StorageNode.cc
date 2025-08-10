@@ -140,11 +140,11 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		}
 		case p_delete:
 			COLL("*-delete-*");
-			remove_msg(key, value, false);
+			remove_msg(value, false);
 			return;
 		case p_delete_recursive:
 			COLL("*-delete-recursive-*");
-			remove_msg(key, value, true);
+			remove_msg(value, true);
 			return;
 		case p_barrier:
 			COLL("*-barrier-*");
@@ -409,7 +409,7 @@ std::string StorageNode::monitor(void)
 
 // Message handler for remove_atom. Handles several different
 // message formats, including those with embedded AtomSpaces.
-void StorageNode::remove_msg(Handle h, ValuePtr value, bool recursive)
+void StorageNode::remove_msg(const ValuePtr& value, bool recursive)
 {
 	// Expect either delete of a single atom, or
 	// a LinkValue giving the AtomSpace and the Atom to delete.
