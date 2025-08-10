@@ -198,29 +198,6 @@ ValuePtr StorageNode::getValue(const Handle& key) const
 	return Atom::getValue(key);
 }
 
-void StorageNode::proxy_open(void)
-{
-	throw RuntimeException(TRACE_INFO,
-		"This StorageNode does not implement proxying!");
-}
-
-void StorageNode::proxy_close(void)
-{
-	throw RuntimeException(TRACE_INFO,
-		"This StorageNode does not implement proxying!");
-}
-
-void StorageNode::set_proxy(const Handle&)
-{
-	throw RuntimeException(TRACE_INFO,
-		"This StorageNode does not implement proxying!");
-}
-
-std::string StorageNode::monitor(void)
-{
-	return "This StorageNode does not implement a monitor.\n";
-}
-
 // ====================================================================
 
 void StorageNode::barrier(AtomSpace* as)
@@ -289,7 +266,7 @@ bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 	return exok;
 }
 
-//. Same as above, but using teh message format.
+//. Same as above, but using the message format.
 void StorageNode::remove_msg(Handle h, ValuePtr value, bool recursive)
 {
 	// Expect either delete of a single atom, or
@@ -432,6 +409,31 @@ void StorageNode::store_frames(const Handle& has)
 void StorageNode::delete_frame(const Handle& has)
 {
 	return deleteFrame((AtomSpace*)has.get());
+}
+
+// ====================================================================
+
+void StorageNode::proxy_open(void)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not implement proxying!");
+}
+
+void StorageNode::proxy_close(void)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not implement proxying!");
+}
+
+void StorageNode::set_proxy(const Handle&)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not implement proxying!");
+}
+
+std::string StorageNode::monitor(void)
+{
+	return "This StorageNode does not implement a monitor.\n";
 }
 
 // ====================================================================
