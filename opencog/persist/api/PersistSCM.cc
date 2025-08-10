@@ -128,8 +128,16 @@ void PersistSCM::open(Handle hsn)
 			"StorageNode %s is already open!",
 			hsn->to_short_string().c_str());
 
-	// It can happen that _sn was deleted earlier. Clobber
-	// the smart pointer so use count goes to zero, and the
+	// It can happen that, due to user error, stnp looks to be closed,
+	// but the StorageNode dtor has not run, and so it still seems to
+	// be open. One solution is to force all use counts on the smart
+	// pointers to go to zero (done further below). Another is to just
+	// double-check the URL, and force the close. Seems that we need to
+	// do both: belt and suspenders.
+	if (_sn and _sn->get_name() == stnp->get_name())
+		close(Handle(_sn));
+
+	// Clobber the smart pointer so use count goes to zero, and the
 	// StorageNode dtor runs (which then closes the connection.)
 	if (_sn and nullptr == _sn->getAtomSpace()) _sn = nullptr;
 
