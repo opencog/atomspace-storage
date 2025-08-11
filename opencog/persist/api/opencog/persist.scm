@@ -27,28 +27,7 @@
 	cog-open
 	cog-close
 	cog-connected?
-	cog-storage-node
-
-	fetch-atom
-	fetch-value
-	fetch-incoming-set
-	fetch-incoming-by-type
-	fetch-query
-	store-atom
-	store-value
-	update-value
-	load-atoms-of-type
-	cog-delete!
-	cog-delete-recursive!
-	load-atomspace
-	store-atomspace
-
-	load-frames
-	store-frames
-	delete-frame!
-	cog-erase!
-	barrier
-	monitor-storage)
+	cog-storage-node)
 
 ;; -----------------------------------------------------
 ;;
