@@ -135,9 +135,18 @@
        `fetch-value` to get only one Value.
        `store-atom` to store all Values.
 "
+	; Need to use sn-setvalue here, instead of cog-set-value! in order
+	; to get correct behavior for working with frames. This is due to
+	; an unpatched bug: calling cog-set-value! in some frame where
+	; the storage node is only in a lower frame causes a COW of that
+	; StorageNode into that frame. But the COW is a copy, and that
+	; copy isn't actually open. So sn-setvalue just bypasses the COW
+	; and everything works. I'm not sure what the best long-term fix
+	; for this is. At any rate, XXX FIXME.
+	;
 	; For backwards compat, throw a C++ exception if not open.
 	(if STORAGE
-		(cog-set-value! STORAGE (*-fetch-atom-*)
+		(sn-setvalue STORAGE (*-fetch-atom-*)
 			(LinkValue (cog-atomspace) ATOM))
 		(throw 'C++-EXCEPTION fetch-atom "StorageNode is not open for reading!"))
 	ATOM
