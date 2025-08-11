@@ -573,12 +573,12 @@
      `load-referrers` to fetch all graphs containing an Atom.
 "
 	(if (nil? METADATA)
-		(dflt-fetch-query-2args QUERY KEY)
+		(sn-fetch-query-2args QUERY KEY (cog-storage-node))
 		(if (cog-subtype? METADATA 'StorageNode)
 			(sn-fetch-query-2args QUERY KEY METADATA)
 			(if STORAGE
 				(sn-fetch-query-4args QUERY KEY METADATA FRESH STORAGE)
-				(dflt-fetch-query-4args QUERY KEY METADATA FRESH))))
+				(sn-fetch-query-4args QUERY KEY METADATA FRESH (cog-storage-node)))))
 )
 
 ; --------------------------------------------------------------------

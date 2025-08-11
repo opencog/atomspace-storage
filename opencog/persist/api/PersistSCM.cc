@@ -51,14 +51,6 @@ void PersistSCM::init(void)
 	// define_scheme_primitive(..., false); means that these functions
 	// will NOT be `define-public` and just plain `define`. Thus,
 	// accessible within the module, but not outside of it.
-	define_scheme_primitive("sn-fetch-atom",
-	             &PersistSCM::sn_fetch_atom, "persist", false);
-	define_scheme_primitive("sn-fetch-value",
-	             &PersistSCM::sn_fetch_value, "persist", false);
-	define_scheme_primitive("sn-fetch-incoming-set",
-	             &PersistSCM::sn_fetch_incoming_set, "persist", false);
-	define_scheme_primitive("sn-fetch-incoming-by-type",
-	             &PersistSCM::sn_fetch_incoming_by_type, "persist", false);
 	define_scheme_primitive("sn-fetch-query-2args",
 	             &PersistSCM::sn_fetch_query2, "persist", false);
 	define_scheme_primitive("sn-fetch-query-4args",
@@ -70,11 +62,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_setvalue, "persist", false);
 	define_scheme_primitive("sn-getvalue",
 	             &PersistSCM::sn_getvalue, "persist", false);
-
-	define_scheme_primitive("dflt-fetch-query-2args",
-	             &PersistSCM::dflt_fetch_query2, this, "persist", false);
-	define_scheme_primitive("dflt-fetch-query-4args",
-	             &PersistSCM::dflt_fetch_query4, this, "persist", false);
 }
 
 // =====================================================================
@@ -157,33 +144,15 @@ bool PersistSCM::connected(Handle hsn)
 
 // =====================================================================
 
-Handle PersistSCM::sn_fetch_atom(Handle h, Handle hsn)
+/**
+ * Store the single atom to the backing store hanging off the
+ * atom-space.
+ */
+Handle PersistSCM::sn_store_atom(Handle h, Handle hsn)
 {
 	GET_STNP;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-atom");
-	return stnp->fetch_atom(h, asp.get());
-}
-
-Handle PersistSCM::sn_fetch_value(Handle h, Handle key, Handle hsn)
-{
-	GET_STNP;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-value");
-	return stnp->fetch_value(h, key, asp.get());
-}
-
-Handle PersistSCM::sn_fetch_incoming_set(Handle h, Handle hsn)
-{
-	GET_STNP;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-incoming-set");
-	// The "false" flag here means that the fetch is NOT recursive.
-	return stnp->fetch_incoming_set(h, false, asp.get());
-}
-
-Handle PersistSCM::sn_fetch_incoming_by_type(Handle h, Type t, Handle hsn)
-{
-	GET_STNP;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-incoming-by-type");
-	return stnp->fetch_incoming_by_type(h, t, asp.get());
+	stnp->store_atom(h);
+	return h;
 }
 
 Handle PersistSCM::sn_fetch_query2(Handle query, Handle key, Handle hsn)
@@ -201,18 +170,6 @@ Handle PersistSCM::sn_fetch_query4(Handle query, Handle key,
 	return stnp->fetch_query(query, key, meta, fresh, asp.get());
 }
 
-/**
- * Store the single atom to the backing store hanging off the
- * atom-space.
- */
-Handle PersistSCM::sn_store_atom(Handle h, Handle hsn)
-{
-	GET_STNP;
-	stnp->store_atom(h);
-	return h;
-}
-
-
 void PersistSCM::sn_setvalue(Handle hsn, Handle key, ValuePtr val)
 {
 	GET_STNP;
@@ -226,25 +183,6 @@ ValuePtr PersistSCM::sn_getvalue(Handle hsn, Handle key)
 }
 
 // =====================================================================
-
-#define CHECK \
-	if (nullptr == _sn) \
-		throw RuntimeException(TRACE_INFO, "No open connection to storage!");
-
-Handle PersistSCM::dflt_fetch_query2(Handle query, Handle key)
-{
-	CHECK;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-query");
-	return _sn->fetch_query(query, key, Handle::UNDEFINED, false, asp.get());
-}
-
-Handle PersistSCM::dflt_fetch_query4(Handle query, Handle key,
-                                Handle meta, bool fresh)
-{
-	CHECK;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-query");
-	return _sn->fetch_query(query, key, meta, fresh, asp.get());
-}
 
 Handle PersistSCM::current_storage(void)
 {

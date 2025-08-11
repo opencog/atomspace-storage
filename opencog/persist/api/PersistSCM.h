@@ -41,10 +41,6 @@ private:
 	void init(void);
 
 	// These take the storage-node to use as final argument.
-	static Handle sn_fetch_atom(Handle, Handle);
-	static Handle sn_fetch_value(Handle, Handle, Handle);
-	static Handle sn_fetch_incoming_set(Handle, Handle);
-	static Handle sn_fetch_incoming_by_type(Handle, Type, Handle);
 	static Handle sn_fetch_query2(Handle, Handle, Handle);
 	static Handle sn_fetch_query4(Handle, Handle, Handle, bool, Handle);
 	static Handle sn_store_atom(Handle, Handle);
@@ -59,8 +55,6 @@ private:
 	// which all the functions below use.
 	static StorageNodePtr _sn;
 
-	Handle dflt_fetch_query2(Handle, Handle);
-	Handle dflt_fetch_query4(Handle, Handle, Handle, bool);
 	Handle current_storage(void);
 
 public:
