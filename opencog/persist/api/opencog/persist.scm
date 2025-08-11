@@ -100,7 +100,9 @@
        `*-open-*` to open a connection.
        `*-connected?-*` to obtain the connection status.
        `*-monitor-*` to print connection information.
-")
+"
+	(PredicateNode "*-close-*")
+)
 
 (define-public (cog-close STORAGE)
 "
