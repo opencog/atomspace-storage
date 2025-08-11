@@ -26,6 +26,25 @@
 ;; compat, mostly. New users should use messages, directly.
 (define *-current-storage-node-* #f)
 
+(define-public (cog-storage-node)
+"
+ cog-storage-node
+
+    Return the currently open StorageNode. Returns an invalid handle
+	 if the previously-open StorageNode was closed.  If there are
+    multiple open connections, this will return only the first one
+    to have been opened. If it has been closed, this will return
+    an invalid handle, even if others may have been opened later.
+
+    See also:
+       `cog-open` to open a connection.
+       `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status.
+       `monitor-storage` to print connection information.
+"
+	*-current-storage-node-*
+)
+
 ;; -----------------------------------------------------
 ;;
 (define-public (*-close-*)
@@ -54,15 +73,16 @@
 	(PredicateNode "*-close-*")
 )
 
-(define-public (cog-close STORAGE)
+(define*-public (cog-close #:optional (STORAGE (cog-storage-node)))
 "
- cog-close STORAGE-ATOM
+ cog-close [STORAGE]
 
     Convenience wrapper around the `*-close-*` message.
 
-    Close an open connection to the indicated STORAGE-ATOM. Closing the
-    connection disables further communication on the connection. The
-    STORAGE-ATOM indicates which connection to close.
+    Close an open connection to STORAGE. Closing the connection
+    disables further communication on the connection. The optional
+    STORAGE indicates which connection to close; if not specified,
+    the currently open connection will be closed.
 
     Examples:
        (cog-close (PostgresStorage \"postgres:///example-db?user=foo&password=bar\"))
@@ -75,7 +95,8 @@
        `cog-storage-node` to obtain the current connection.
        `monitor-storage` to print connection information.
 "
-	(cog-set-value! STORAGE (*-close-*) (VoidValue))
+	(if STORAGE
+		(cog-set-value! STORAGE (*-close-*) (VoidValue)))
 	(set! *-current-storage-node-* #f)
 
 	;; Garbage collection needed to force the StorageNode dtor
@@ -158,13 +179,13 @@
        `*-monitor-*` to print connection information.
 ")
 
-(define-public (cog-connected? STORAGE)
+(define*-public (cog-connected? #:optional (STORAGE (cog-storage-node)))
 "
- cog-connected? STORAGE-ATOM
+ cog-connected? [STORAGE]
 
     Convenience wrapper around the `*-connected?-*` message.
 
-    Return #t if there is an open connection to STORAGE-ATOM.
+    Return #t if there is an open connection to STORAGE.
     Connections are opened with `cog-open` and closed with `cog-close`.
 
     See also:
@@ -173,27 +194,10 @@
        `cog-storage-node` to obtain the current connection.
        `monitor-storage` to print connection information.
 "
-	(define boo (cog-get-value STORAGE (*-connected?-*)))
-	(not (eq? 0 (cog-value-ref boo 0)))
-)
-
-(define-public (cog-storage-node)
-"
- cog-storage-node
-
-    Return the currently open StorageNode. Returns an invalid handle
-	 if the previously-open StorageNode was closed.  If there are
-    multiple open connections, this will return only the first one
-    to have been opened. If it has been closed, this will return
-    an invalid handle, even if others may have been opened later.
-
-    See also:
-       `cog-open` to open a connection.
-       `cog-close` to close a connection.
-       `cog-connected?` to obtain the connection status.
-       `monitor-storage` to print connection information.
-"
-	*-current-storage-node-*
+	(if STORAGE
+		(let ((boo (cog-get-value STORAGE (*-connected?-*))))
+			(not (eq? 0 (cog-value-ref boo 0))))
+		#f)
 )
 
 (define-public (*-fetch-atom-*)
