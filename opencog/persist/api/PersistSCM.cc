@@ -51,9 +51,6 @@ void PersistSCM::init(void)
 	// define_scheme_primitive(..., false); means that these functions
 	// will NOT be `define-public` and just plain `define`. Thus,
 	// accessible within the module, but not outside of it.
-	define_scheme_primitive("sn-store-atom",
-	             &PersistSCM::sn_store_atom, "persist", false);
-
 	define_scheme_primitive("sn-setvalue",
 	             &PersistSCM::sn_setvalue, "persist", false);
 	define_scheme_primitive("sn-getvalue",
@@ -139,17 +136,6 @@ bool PersistSCM::connected(Handle hsn)
 }
 
 // =====================================================================
-
-/**
- * Store the single atom to the backing store hanging off the
- * atom-space.
- */
-Handle PersistSCM::sn_store_atom(Handle h, Handle hsn)
-{
-	GET_STNP;
-	stnp->store_atom(h);
-	return h;
-}
 
 void PersistSCM::sn_setvalue(Handle hsn, Handle key, ValuePtr val)
 {

@@ -66,6 +66,8 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		dispatch_hash("*-store-atomspace-*");
 	static constexpr uint32_t p_load_atoms_of_type =
 		dispatch_hash("*-load-atoms-of-type-*");
+	static constexpr uint32_t p_store_atom =
+		dispatch_hash("*-store-atom-*");
 	static constexpr uint32_t p_store_value =
 		dispatch_hash("*-store-value-*");
 	static constexpr uint32_t p_update_value =
@@ -123,6 +125,19 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		case p_load_atoms_of_type: {
 			COLL("*-load-atoms-of-type-*");
 			load_atoms_of_type_msg(value);
+			return;
+		}
+		case p_store_atom: {
+			COLL("*-store-atom-*");
+			if (value->is_type(ATOM))
+			{
+				store_atom(HandleCast(value));
+				return;
+			}
+			if (not value->is_type(LINK_VALUE)) return;
+			const ValueSeq& vsq(LinkValueCast(value)->value());
+			for (const ValuePtr& vp : vsq)
+				store_atom(HandleCast(vp));
 			return;
 		}
 		case p_store_value: {

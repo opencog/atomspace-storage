@@ -28,6 +28,7 @@
 	cog-close
 	cog-connected?
 	cog-storage-node
+
 	fetch-atom
 	fetch-value
 	fetch-incoming-set
@@ -287,6 +288,28 @@
 	ATOM
 )
 
+(define-public (*-store-atom-*)
+"
+  (PredicateNode \"*-store-atom-*\") message.
+
+  Store one or more Atoms and all of their associated keys and values
+  to storage.
+
+    This updates (clobbers) the values previously held in storage,
+    replacing them by the values in the atomspace.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-store-atom-*) ATOM)
+       (cog-set-value! (StorageNode ...) (*-store-atom-*)
+                       (LinkValue ATOM1 ATOM2 ...))
+
+    See also:
+    *-store-value-* -- to store one (ore more) Values.
+    *-fetch-atom-* -- to fetch all Values on an Atom.
+"
+	(PredicateNode "*-store-atom-*")
+)
+
 (define*-public (store-atom ATOM #:optional (STORAGE (cog-storage-node)))
 "
  store-atom ATOM [STORAGE]
@@ -302,7 +325,8 @@
        `store-value` to store just one Value.
        `fetch-atom` to fetch all Values on an Atom.
 "
-	(sn-store-atom ATOM STORAGE)
+	(sn-setvalue STORAGE (*-store-atom-*) ATOM)
+	ATOM
 )
 
 (define-public (*-store-value-*)
