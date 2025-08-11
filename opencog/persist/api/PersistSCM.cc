@@ -71,20 +71,10 @@ void PersistSCM::init(void)
 	define_scheme_primitive("sn-getvalue",
 	             &PersistSCM::sn_getvalue, "persist", false);
 
-	define_scheme_primitive("dflt-fetch-atom",
-	             &PersistSCM::dflt_fetch_atom, this, "persist", false);
-	define_scheme_primitive("dflt-fetch-value",
-	             &PersistSCM::dflt_fetch_value, this, "persist", false);
-	define_scheme_primitive("dflt-fetch-incoming-set",
-	             &PersistSCM::dflt_fetch_incoming_set, this, "persist", false);
-	define_scheme_primitive("dflt-fetch-incoming-by-type",
-	             &PersistSCM::dflt_fetch_incoming_by_type, this, "persist", false);
 	define_scheme_primitive("dflt-fetch-query-2args",
 	             &PersistSCM::dflt_fetch_query2, this, "persist", false);
 	define_scheme_primitive("dflt-fetch-query-4args",
 	             &PersistSCM::dflt_fetch_query4, this, "persist", false);
-	define_scheme_primitive("dflt-store-atom",
-	             &PersistSCM::dflt_store_atom, this, "persist", false);
 }
 
 // =====================================================================
@@ -241,35 +231,6 @@ ValuePtr PersistSCM::sn_getvalue(Handle hsn, Handle key)
 	if (nullptr == _sn) \
 		throw RuntimeException(TRACE_INFO, "No open connection to storage!");
 
-Handle PersistSCM::dflt_fetch_atom(Handle h)
-{
-	CHECK;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-atom");
-	return _sn->fetch_atom(h, asp.get());
-}
-
-Handle PersistSCM::dflt_fetch_value(Handle h, Handle key)
-{
-	CHECK;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-value");
-	return _sn->fetch_value(h, key, asp.get());
-}
-
-Handle PersistSCM::dflt_fetch_incoming_set(Handle h)
-{
-	CHECK;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-incoming-set");
-	// The "false" flag here means that the fetch is NOT recursive.
-	return _sn->fetch_incoming_set(h, false, asp.get());
-}
-
-Handle PersistSCM::dflt_fetch_incoming_by_type(Handle h, Type t)
-{
-	CHECK;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-incoming-by-type");
-	return _sn->fetch_incoming_by_type(h, t, asp.get());
-}
-
 Handle PersistSCM::dflt_fetch_query2(Handle query, Handle key)
 {
 	CHECK;
@@ -283,17 +244,6 @@ Handle PersistSCM::dflt_fetch_query4(Handle query, Handle key,
 	CHECK;
 	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-query");
 	return _sn->fetch_query(query, key, meta, fresh, asp.get());
-}
-
-/**
- * Store the single atom to the backing store hanging off the
- * atom-space.
- */
-Handle PersistSCM::dflt_store_atom(Handle h)
-{
-	CHECK;
-	_sn->store_atom(h);
-	return h;
 }
 
 Handle PersistSCM::current_storage(void)

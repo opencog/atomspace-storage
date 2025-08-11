@@ -59,13 +59,8 @@ private:
 	// which all the functions below use.
 	static StorageNodePtr _sn;
 
-	Handle dflt_fetch_atom(Handle);
-	Handle dflt_fetch_value(Handle, Handle);
-	Handle dflt_fetch_incoming_set(Handle);
-	Handle dflt_fetch_incoming_by_type(Handle, Type);
 	Handle dflt_fetch_query2(Handle, Handle);
 	Handle dflt_fetch_query4(Handle, Handle, Handle, bool);
-	Handle dflt_store_atom(Handle);
 	Handle current_storage(void);
 
 public:

@@ -275,7 +275,7 @@
 	ATOM
 )
 
-(define*-public (store-atom ATOM #:optional (STORAGE #f))
+(define*-public (store-atom ATOM #:optional (STORAGE (cog-storage-node)))
 "
  store-atom ATOM [STORAGE]
 
@@ -290,7 +290,7 @@
        `store-value` to store just one Value.
        `fetch-atom` to fetch all Values on an Atom.
 "
-	(if STORAGE (sn-store-atom ATOM STORAGE) (dflt-store-atom ATOM))
+	(sn-store-atom ATOM STORAGE)
 )
 
 (define-public (*-store-value-*)
