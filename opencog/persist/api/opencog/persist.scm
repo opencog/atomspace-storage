@@ -234,8 +234,11 @@
        `fetch-value` to get only one Value.
        `store-atom` to store all Values.
 "
-	(sn-setvalue STORAGE (*-fetch-atom-*)
-		(LinkValue (cog-atomspace) ATOM))
+	; For backwards compat, throw a C++ exception if not open.
+	(if STORAGE
+		(cog-set-value! STORAGE (*-fetch-atom-*)
+			(LinkValue (cog-atomspace) ATOM))
+		(throw 'C++-EXCEPTION fetch-atom "StorageNode is not open for reading!"))
 	ATOM
 )
 
@@ -403,7 +406,10 @@
        `store-value` to store just one Value.
        `fetch-atom` to fetch all Values on an Atom.
 "
-	(sn-setvalue STORAGE (*-store-atom-*) ATOM)
+	; For backwards compat, throw a C++ exception if not open.
+	(if STORAGE
+		(cog-set-value! STORAGE (*-store-atom-*) ATOM)
+		(throw 'C++-EXCEPTION cog-open "StorageNode is not open for writing!"))
 	ATOM
 )
 
