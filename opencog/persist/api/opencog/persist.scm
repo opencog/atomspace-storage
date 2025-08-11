@@ -28,56 +28,6 @@
 
 ;; -----------------------------------------------------
 ;;
-(define-public (*-open-*)
-"
-  (Predicate \"*-open-*\") message
-
-    Open a connection to the indicated STORAGE-ATOM. An open connection
-    allows Atoms to be sent/received along this connection.
-
-    Examples:
-       (cog-set-value!
-			(PostgresStorage \"postgres:///example-db?user=foo&password=bar\")
-			(*-open-*) (VoidValue))
-       (cog-set-value!
-			(RocksStorage \"rocks:///tmp/my-rocks-db\")
-			(*-open-*) (VoidValue))
-       (cog-set-value!
-			(CogserverStorage \"cog://localhost:17001\")
-			(*-open-*) (VoidValue))
-
-    See also:
-       `*-close-*` to close a connection.
-       `*-connected?-*` to obtain the connection status.
-       `*-monitor-*` to print connection information.
-"
-	(PredicateNode "*-open-*")
-)
-
-(define-public (cog-open STORAGE)
-"
- cog-open STORAGE-ATOM
-
-    Convenience wrapper around the `*-open-*` message.
-
-    Open a connection to the indicated STORAGE-ATOM. An open connection
-    allows Atoms to be sent/received along this connection.
-
-    Examples:
-       (cog-open (PostgresStorage \"postgres:///example-db?user=foo&password=bar\"))
-       (cog-open (RocksStorage \"rocks:///tmp/my-rocks-db\"))
-       (cog-open (CogserverStorage \"cog://localhost:17001\"))
-
-    See also:
-       `cog-close` to close a connection.
-       `cog-connected?` to obtain the connection status.
-       `cog-storage-node` to obtain the current connection.
-       `monitor-storage` to print connection information.
-"
-	(cog-set-value! STORAGE (*-open-*) (VoidValue))
-	(set! *-current-storage-node-* STORAGE)
-)
-
 (define-public (*-close-*)
 "
   (Predicate \"*-close-*\") message
@@ -127,6 +77,56 @@
 "
 	(cog-set-value! STORAGE (*-close-*) (VoidValue))
 	(set! *-current-storage-node-* #f)
+)
+
+(define-public (*-open-*)
+"
+  (Predicate \"*-open-*\") message
+
+    Open a connection to the indicated STORAGE-ATOM. An open connection
+    allows Atoms to be sent/received along this connection.
+
+    Examples:
+       (cog-set-value!
+			(PostgresStorage \"postgres:///example-db?user=foo&password=bar\")
+			(*-open-*) (VoidValue))
+       (cog-set-value!
+			(RocksStorage \"rocks:///tmp/my-rocks-db\")
+			(*-open-*) (VoidValue))
+       (cog-set-value!
+			(CogserverStorage \"cog://localhost:17001\")
+			(*-open-*) (VoidValue))
+
+    See also:
+       `*-close-*` to close a connection.
+       `*-connected?-*` to obtain the connection status.
+       `*-monitor-*` to print connection information.
+"
+	(PredicateNode "*-open-*")
+)
+
+(define-public (cog-open STORAGE)
+"
+ cog-open STORAGE-ATOM
+
+    Convenience wrapper around the `*-open-*` message.
+
+    Open a connection to the indicated STORAGE-ATOM. An open connection
+    allows Atoms to be sent/received along this connection.
+
+    Examples:
+       (cog-open (PostgresStorage \"postgres:///example-db?user=foo&password=bar\"))
+       (cog-open (RocksStorage \"rocks:///tmp/my-rocks-db\"))
+       (cog-open (CogserverStorage \"cog://localhost:17001\"))
+
+    See also:
+       `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
+"
+	(cog-set-value! STORAGE (*-open-*) (VoidValue))
+	(set! *-current-storage-node-* STORAGE)
 )
 
 (define-public (*-connected?-*)
