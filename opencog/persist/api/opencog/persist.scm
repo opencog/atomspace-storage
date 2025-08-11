@@ -22,69 +22,11 @@
 
 (include-from-path "opencog/persist/types/storage_types.scm")
 
-; This avoids complaints, when the docs are set, below.
-(export
-	cog-open
-	cog-close
-	cog-connected?
-	cog-storage-node)
+;; Global. Maybe should be per-fluid? I dunno, this is for backwards
+;; compat, mostly. New users should use messages, directly.
+(define *-current-storage-node-* #f)
 
-;; -----------------------------------------------------
-;;
-(set-procedure-property! cog-open 'documentation
-"
- cog-open STORAGE-ATOM
-
-    Open a connection to the indicated STORAGE-ATOM. An open connection
-    allows Atoms to be sent/received along this connection.
-
-    Examples:
-       (cog-open (PostgresStorage \"postgres:///example-db?user=foo&password=bar\"))
-       (cog-open (RocksStorage \"rocks:///tmp/my-rocks-db\"))
-       (cog-open (CogserverStorage \"cog://localhost:17001\"))
-
-    See also:
-       `cog-close` to close a connection.
-       `cog-connected?` to obtain the connection status.
-       `cog-storage-node` to obtain the current connection.
-       `monitor-storage` to print connection information.
-")
-
-(set-procedure-property! cog-close 'documentation
-"
- cog-close STORAGE-ATOM
-
-    Close an open connection to the indicated STORAGE-ATOM. Closing the
-    connection disables further communication on the connection. The
-    STORAGE-ATOM indicates which connection to close.
-
-    Examples:
-       (cog-close (PostgresStorage \"postgres:///example-db?user=foo&password=bar\"))
-       (cog-close (RocksStorage \"rocks:///tmp/my-rocks-db\"))
-       (cog-close (CogserverStorage \"cog://localhost:17001\"))
-
-    See also:
-       `cog-open` to open a connection.
-       `cog-connected?` to obtain the connection status.
-       `cog-storage-node` to obtain the current connection.
-       `monitor-storage` to print connection information.
-")
-
-(set-procedure-property! cog-connected? 'documentation
-"
- cog-connected? STORAGE-ATOM
-
-    Return #t if there is an open connection to STORAGE-ATOM.
-    Connections are opened with `cog-open` and closed with `cog-close`.
-
-    See also:
-       `cog-open` to open a connection.
-       `cog-close` to close a connection.
-       `cog-storage-node` to obtain the current connection.
-       `monitor-storage` to print connection information.
-")
-
-(set-procedure-property! cog-storage-node 'documentation
+(define-public (cog-storage-node)
 "
  cog-storage-node
 
@@ -99,7 +41,164 @@
        `cog-close` to close a connection.
        `cog-connected?` to obtain the connection status.
        `monitor-storage` to print connection information.
+"
+	*-current-storage-node-*
+)
+
+;; -----------------------------------------------------
+;;
+(define-public (*-close-*)
+"
+  (Predicate \"*-close-*\") message
+
+    Close an open connection. Closing the connection disables further
+	 communication on the connection.
+
+    Examples:
+       (cog-set-value!
+			(PostgresStorage \"postgres:///example-db?user=foo&password=bar\")
+			(*-close-*) (VoidValue))
+       (cog-set-value!
+			(RocksStorage \"rocks:///tmp/my-rocks-db\")
+			(*-close-*) (VoidValue))
+       (cog-set-value!
+			(CogserverStorage \"cog://localhost:17001\")
+			(*-close-*) (VoidValue))
+
+    See also:
+       `*-open-*` to open a connection.
+       `*-connected?-*` to obtain the connection status.
+       `*-monitor-*` to print connection information.
+"
+	(PredicateNode "*-close-*")
+)
+
+(define*-public (cog-close #:optional (STORAGE (cog-storage-node)))
+"
+ cog-close [STORAGE]
+
+    Convenience wrapper around the `*-close-*` message.
+
+    Close an open connection to STORAGE. Closing the connection
+    disables further communication on the connection. The optional
+    STORAGE indicates which connection to close; if not specified,
+    the currently open connection will be closed.
+
+    Examples:
+       (cog-close (PostgresStorage \"postgres:///example-db?user=foo&password=bar\"))
+       (cog-close (RocksStorage \"rocks:///tmp/my-rocks-db\"))
+       (cog-close (CogserverStorage \"cog://localhost:17001\"))
+
+    See also:
+       `cog-open` to open a connection.
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
+"
+	(if STORAGE
+		(sn-setvalue STORAGE (*-close-*) (VoidValue)))
+	(set! *-current-storage-node-* #f)
+
+	;; Garbage collection needed to force the StorageNode dtor
+	;; to run. If not run, it gets stuck in an open state. Might
+	;; be a bug in RocksStorageNode? Might be a user error, the
+	;; user forgot to close?  Not sure.
+	(gc)
+)
+
+(define-public (*-open-*)
+"
+  (Predicate \"*-open-*\") message
+
+    Open a connection to the indicated STORAGE-ATOM. An open connection
+    allows Atoms to be sent/received along this connection.
+
+    Examples:
+       (cog-set-value!
+			(PostgresStorage \"postgres:///example-db?user=foo&password=bar\")
+			(*-open-*) (VoidValue))
+       (cog-set-value!
+			(RocksStorage \"rocks:///tmp/my-rocks-db\")
+			(*-open-*) (VoidValue))
+       (cog-set-value!
+			(CogserverStorage \"cog://localhost:17001\")
+			(*-open-*) (VoidValue))
+
+    See also:
+       `*-close-*` to close a connection.
+       `*-connected?-*` to obtain the connection status.
+       `*-monitor-*` to print connection information.
+"
+	(PredicateNode "*-open-*")
+)
+
+(define-public (cog-open STORAGE)
+"
+ cog-open STORAGE-ATOM
+
+    Convenience wrapper around the `*-open-*` message.
+
+    Open a connection to the indicated STORAGE-ATOM. An open connection
+    allows Atoms to be sent/received along this connection.
+
+    Examples:
+       (cog-open (PostgresStorage \"postgres:///example-db?user=foo&password=bar\"))
+       (cog-open (RocksStorage \"rocks:///tmp/my-rocks-db\"))
+       (cog-open (CogserverStorage \"cog://localhost:17001\"))
+
+    See also:
+       `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
+"
+	(if *-current-storage-node-*
+		(sn-setvalue STORAGE (*-close-*) (VoidValue)))
+
+	;; Garbage collection needed to force the StorageNode dtor
+	;; to run. If not run, it gets stuck in an open state. Might
+	;; be a bug in RocksStorageNode? Might be a user error, the
+	;; user forgot to close?  Not sure.
+	(gc)
+
+	(sn-setvalue STORAGE (*-open-*) (VoidValue))
+	(set! *-current-storage-node-* STORAGE)
+)
+
+(define-public (*-connected?-*)
+"
+  (Predicate \"*-connected?-*\") message
+
+    Used to query the open/close status of the STORAGE-ATOM.
+    Return (BoolValue 1) if there is an open connection to STORAGE-ATOM.
+    Connections are opened with `*-open-*` and closed with `*-close-*`.
+
+    See also:
+       `*-open-*` to open a connection.
+       `*-close-*` to close a connection.
+       `*-monitor-*` to print connection information.
 ")
+
+(define*-public (cog-connected? #:optional (STORAGE (cog-storage-node)))
+"
+ cog-connected? [STORAGE]
+
+    Convenience wrapper around the `*-connected?-*` message.
+
+    Return #t if there is an open connection to STORAGE.
+    Connections are opened with `cog-open` and closed with `cog-close`.
+
+    See also:
+       `cog-open` to open a connection.
+       `cog-close` to close a connection.
+       `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
+"
+	(if STORAGE
+		(let ((boo (cog-value STORAGE (*-connected?-*))))
+			(not (eq? 0 (cog-value-ref boo 0))))
+		#f)
+)
 
 (define-public (*-fetch-atom-*)
 "

@@ -24,6 +24,7 @@
 #include <string>
 
 #include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -60,6 +61,11 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 
 	// Create a fast dispatch table by using case-statement
 	// branching, instead of string compare.
+	static constexpr uint32_t p_open =
+		dispatch_hash("*-open-*");
+	static constexpr uint32_t p_close =
+		dispatch_hash("*-close-*");
+
 	static constexpr uint32_t p_load_atomspace =
 		dispatch_hash("*-load-atomspace-*");
 	static constexpr uint32_t p_store_atomspace =
@@ -72,6 +78,7 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		dispatch_hash("*-store-value-*");
 	static constexpr uint32_t p_update_value =
 		dispatch_hash("*-update-value-*");
+
 	static constexpr uint32_t p_fetch_atom =
 		dispatch_hash("*-fetch-atom-*");
 	static constexpr uint32_t p_fetch_value =
@@ -82,6 +89,7 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		dispatch_hash("*-fetch-incoming-by-type-*");
 	static constexpr uint32_t p_fetch_query =
 		dispatch_hash("*-fetch-query-*");
+
 	static constexpr uint32_t p_delete = dispatch_hash("*-delete-*");
 	static constexpr uint32_t p_delete_recursive =
 		dispatch_hash("*-delete-recursive-*");
@@ -114,6 +122,14 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 	const std::string& pred = key->get_name();
 	switch (dispatch_hash(pred.c_str()))
 	{
+		case p_open:
+			COLL("*-open-*");
+			open();
+			return;
+		case p_close:
+			COLL("*-close-*");
+			close();
+			return;
 		case p_load_atomspace:
 			COLL("*-load-atomspace-*");
 			load_atomspace(AtomSpaceCast(value).get());
@@ -297,6 +313,9 @@ ValuePtr StorageNode::getValue(const Handle& key) const
 		return Atom::getValue(key);
 
 	const std::string& pred(key->get_name());
+
+	if (0 == pred.compare("*-connected?-*"))
+		return createBoolValue(const_cast<StorageNode*>(this)->connected());
 
 	if (0 == pred.compare("*-load-frames-*"))
 		return createLinkValue(const_cast<StorageNode*>(this)->load_frames());
