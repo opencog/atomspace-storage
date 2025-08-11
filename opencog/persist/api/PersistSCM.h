@@ -46,9 +46,6 @@ private:
 
 public:
 	PersistSCM(void);
-
-	// Obsolete. Remove whenever.
-	static void set_connection(const StorageNodePtr&) {}
 }; // class
 
 /** @}*/
