@@ -546,6 +546,40 @@
 
 ;
 ; --------------------------------------------------------------------
+(define-public (*-fetch-query-*)
+"
+  (PredicateNode \"*-fetch-query-*\") message.
+
+  Perform a query at the storage server and load results.
+
+    Perform the QUERY at the storage server, and load the results into
+    the AtomSpace. The results will be returned directly and also cached
+    at KEY. The QUERY must be either a JoinLink, MeetLink or QueryLink.
+
+    This can be thought of as a generalization of load-referrers,
+    fetch-incoming-set and fetch-incoming-by-type. Thus, the
+    simplest JoinLink is effectively the same thing as load-referrers,
+    while a JoinLink with a depth of one is the same thing as
+    fetch-incoming-set, and a JoinLink with a type restriction is the
+    same thing as fetch-incoming-by-type.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-fetch-query-*)
+                       (LinkValue QUERY KEY))
+       (cog-set-value! (StorageNode ...) (*-fetch-query-*)
+                       (LinkValue QUERY KEY METADATA FRESH))
+       (cog-set-value! (StorageNode ...) (*-fetch-query-*)
+                       (LinkValue ATOMSPACE QUERY KEY METADATA FRESH))
+
+    Where FRESH is either (TrueLink) for true or (FalseLink) for false.
+
+    See also:
+    *-fetch-incoming-set-* -- to fetch the incoming set of an Atom.
+    *-load-referrers-* -- to fetch all graphs containing an Atom.
+"
+	(PredicateNode "*-fetch-query-*")
+)
+
 (define*-public (fetch-query QUERY KEY
 	#:optional (METADATA '()) (FRESH #f) (STORAGE #f))
 "
@@ -584,13 +618,25 @@
      `fetch-incoming-set` to fetch the incoing set of an Atom.
      `load-referrers` to fetch all graphs containing an Atom.
 "
+	; Handle the different parameter combinations
 	(if (nil? METADATA)
-		(sn-fetch-query-2args QUERY KEY (cog-storage-node))
+		; Simple case: just QUERY and KEY
+		(begin
+			(if (not STORAGE) (set! STORAGE (cog-storage-node)))
+			(sn-setvalue STORAGE (*-fetch-query-*)
+				(LinkValue (cog-atomspace) QUERY KEY)))
+		; METADATA provided
 		(if (cog-subtype? METADATA 'StorageNode)
-			(sn-fetch-query-2args QUERY KEY METADATA)
-			(if STORAGE
-				(sn-fetch-query-4args QUERY KEY METADATA FRESH STORAGE)
-				(sn-fetch-query-4args QUERY KEY METADATA FRESH (cog-storage-node)))))
+			; oh wait; METADATA is actually a StorageNode
+			(sn-setvalue METADATA (*-fetch-query-*)
+				(LinkValue (cog-atomspace) QUERY KEY))
+			; METADATA is a real metadata handle
+			(begin
+				(if (not STORAGE) (set! STORAGE (cog-storage-node)))
+				(sn-setvalue STORAGE (*-fetch-query-*)
+					(LinkValue (cog-atomspace) QUERY KEY METADATA
+						(if FRESH (TrueLink) (FalseLink)))))))
+	QUERY
 )
 
 ; --------------------------------------------------------------------

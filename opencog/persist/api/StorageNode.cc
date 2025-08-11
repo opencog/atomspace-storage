@@ -78,6 +78,8 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		dispatch_hash("*-fetch-incoming-set-*");
 	static constexpr uint32_t p_fetch_incoming_by_type =
 		dispatch_hash("*-fetch-incoming-by-type-*");
+	static constexpr uint32_t p_fetch_query =
+		dispatch_hash("*-fetch-query-*");
 	static constexpr uint32_t p_delete = dispatch_hash("*-delete-*");
 	static constexpr uint32_t p_delete_recursive =
 		dispatch_hash("*-delete-recursive-*");
@@ -226,6 +228,10 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			}
 			return;
 		}
+		case p_fetch_query:
+			COLL("*-fetch-query-*");
+			fetch_query_msg(value);
+			return;
 		case p_delete:
 			COLL("*-delete-*");
 			remove_msg(value, false);
@@ -574,6 +580,37 @@ void StorageNode::load_atoms_of_type_msg(const ValuePtr& value)
 			Type t = TypeNodeCast(h)->get_kind();
 			loadType(h->getAtomSpace(), t);
 		}
+	}
+}
+
+void StorageNode::fetch_query_msg(const ValuePtr& value)
+{
+	if (not value->is_type(LINK_VALUE)) return;
+	const ValueSeq& vsq(LinkValueCast(value)->value());
+	size_t nv = vsq.size();
+	// Format:
+	// [AtomSpace, Query, Key, Metadata, Fresh] or
+	// [Query, Key, Metadata, Fresh] or
+	// [Query, Key]
+	// This is a blargle-mess but I don't feel like cleaning up today.
+	// XXX FIXME this should be cleaned up when serious users arrive.
+	if (5 <= nv && vsq[0]->is_type(ATOM_SPACE)) {
+		AtomSpace* as = AtomSpaceCast(vsq[0]).get();
+		Handle query = HandleCast(vsq[1]);
+		Handle key = HandleCast(vsq[2]);
+		Handle metadata = HandleCast(vsq[3]);
+		bool fresh = vsq[4]->get_type() == TRUE_LINK;
+		fetch_query(query, key, metadata, fresh, as);
+	} else if (4 == nv) {
+		Handle query = HandleCast(vsq[0]);
+		Handle key = HandleCast(vsq[1]);
+		Handle metadata = HandleCast(vsq[2]);
+		bool fresh = vsq[3]->get_type() == TRUE_LINK;
+		fetch_query(query, key, metadata, fresh);
+	} else if (2 == nv) {
+		Handle query = HandleCast(vsq[0]);
+		Handle key = HandleCast(vsq[1]);
+		fetch_query(query, key, Handle::UNDEFINED, false);
 	}
 }
 

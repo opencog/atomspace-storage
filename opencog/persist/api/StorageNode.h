@@ -51,6 +51,7 @@ protected:
 
 	void remove_msg(const ValuePtr&, bool recursive=false);
 	void load_atoms_of_type_msg(const ValuePtr&);
+	void fetch_query_msg(const ValuePtr&);
 public:
 	StorageNode(Type, std::string);
 	virtual ~StorageNode();
