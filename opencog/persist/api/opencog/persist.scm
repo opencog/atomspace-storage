@@ -98,12 +98,6 @@
 	(if STORAGE
 		(sn-setvalue STORAGE (*-close-*) (VoidValue)))
 	(set! *-current-storage-node-* #f)
-
-	;; Garbage collection needed to force the StorageNode dtor
-	;; to run. If not run, it gets stuck in an open state. Might
-	;; be a bug in RocksStorageNode? Might be a user error, the
-	;; user forgot to close?  Not sure.
-	(gc)
 )
 
 (define-public (*-open-*)
@@ -154,12 +148,6 @@
 "
 	(if *-current-storage-node-*
 		(sn-setvalue STORAGE (*-close-*) (VoidValue)))
-
-	;; Garbage collection needed to force the StorageNode dtor
-	;; to run. If not run, it gets stuck in an open state. Might
-	;; be a bug in RocksStorageNode? Might be a user error, the
-	;; user forgot to close?  Not sure.
-	(gc)
 
 	(sn-setvalue STORAGE (*-open-*) (VoidValue))
 	(set! *-current-storage-node-* STORAGE)
