@@ -121,13 +121,30 @@
        `monitor-storage` to print connection information.
 ")
 
-(define*-public (fetch-atom ATOM #:optional (STORAGE #f))
+(define-public (*-fetch-atom-*)
+"
+  (PredicateNode "*-fetch-atom-*") message.
+
+  Fetch all of the Values on the indicated ATOM from storage.
+
+    This updates (clobbers) all of the values in the atomspace,
+    and replaces them with the ones fetched from storage.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-fetch-atom-*) ATOM)
+
+    See also:
+    *-fetch-value-* -- to get only one Value.
+    *-store-atom-* -- to store all Values.
+"
+	(PredicateNode "*-fetch-atom-*")
+)
+
+(define*-public (fetch-atom ATOM #:optional (STORAGE (cog-storage-node)))
 "
  fetch-atom ATOM [STORAGE]
 
-    Fetch all of the Values on the indicated ATOM from storage.
-    This updates (clobbers) all of the values in the atomspace,
-    and replaces them with the ones fetched from storage.
+    Convenience wrapper around the `*-fetch-atom-*` message.
 
     If the optional STORAGE argument is provided, then it will be
     used as the source of the fetch. It must be a StorageNode.
@@ -136,16 +153,36 @@
        `fetch-value` to get only one Value.
        `store-atom` to store all Values.
 "
-	(if STORAGE (sn-fetch-atom ATOM STORAGE) (dflt-fetch-atom ATOM))
+	(sn-setvalue STORAGE (*-fetch-atom-*)
+		(LinkValue (cog-atomspace) ATOM))
+	ATOM
 )
 
-(define*-public (fetch-value ATOM KEY #:optional (STORAGE #f))
+(define-public (*-fetch-value-*)
+"
+  (PredicateNode "*-fetch-value-*") message.
+
+  Fetch from storage the Value located at KEY on ATOM.
+
+    This updates (clobbers) any current Value stored at KEY,
+    replacing it with the one fetched from storage.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-fetch-value-*)
+                       (LinkValue ATOM KEY))
+
+    See also:
+    *-fetch-atom-* -- to get all Values.
+    *-store-value-* -- to store only one Value.
+"
+	(PredicateNode "*-fetch-value-*")
+)
+
+(define*-public (fetch-value ATOM KEY #:optional (STORAGE (cog-storage-node)))
 "
  fetch-value ATOM KEY [STORAGE]
 
-    Fetch from storage the Value located at KEY on ATOM.
-    This updates (clobbers) any current Value stored at KEY,
-    replacing it with the one fetched from storage.
+    Convenience wrapper around the `*-fetch-value-*` message.
 
     If the optional STORAGE argument is provided, then it will be
     used as the source of the fetch. It must be a StorageNode.
@@ -154,15 +191,36 @@
        `fetch-atom` to get all Values.
        `store-value` to store only one Value.
 "
-	(if STORAGE (sn-fetch-value ATOM KEY STORAGE) (dflt-fetch-value ATOM KEY))
+	(sn-setvalue STORAGE (*-fetch-value-*)
+		(LinkValue (cog-atomspace) ATOM KEY))
+	ATOM
 )
 
-(define*-public (fetch-incoming-set ATOM #:optional (STORAGE #f))
+(define-public (*-fetch-incoming-set-*)
+"
+  (PredicateNode "*-fetch-incoming-set-*") message.
+
+  Fetch the incoming set of the ATOM from storage.
+
+    The fetch is NOT recursive. See `load-referrers` for a recursive
+    fetch.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-fetch-incoming-set-*) ATOM)
+
+    See also:
+    *-load-referrers-* -- to get every graph that contains an Atom.
+    *-fetch-incoming-by-type-* -- to fetch a subset of a given type.
+    *-fetch-query-* -- to fetch a query-defined collection of Atoms.
+"
+	(PredicateNode "*-fetch-incoming-set-*")
+)
+
+(define*-public (fetch-incoming-set ATOM #:optional (STORAGE (cog-storage-node)))
 "
  fetch-incoming-set ATOM [STORAGE]
 
-    Fetch the incoming set of the ATOM from storage. The fetch is
-    NOT recursive.  See `load-referrers` for a recursive fetch.
+    Convenience wrapper around the `*-fetch-incoming-set-*` message.
 
     If the optional STORAGE argument is provided, then it will be
     used as the source of the fetch. It must be a StorageNode.
@@ -172,17 +230,37 @@
       `fetch-incoming-by-type` to fetch a subset of a given type.
       `fetch-query` to fetch a query-defined collection of Atoms.
 "
-	(if STORAGE (sn-fetch-incoming-set ATOM STORAGE)
-		(dflt-fetch-incoming-set ATOM))
+	(sn-setvalue STORAGE (*-fetch-incoming-set-*)
+		(LinkValue (cog-atomspace) ATOM))
+	ATOM
 )
 
-(define*-public (fetch-incoming-by-type ATOM TYPE #:optional (STORAGE #f))
+(define-public (*-fetch-incoming-by-type-*)
+"
+  (PredicateNode "*-fetch-incoming-by-type-*") message.
+
+  Fetch those links of the incoming set of ATOM that are of type TYPE.
+
+    This is a more limited fetch than the one done by
+    `*-fetch-incoming-set-*` and can be useful when the incoming set
+    is large.
+
+    Usage:
+       (cog-set-value! (StorageNode ...) (*-fetch-incoming-by-type-*)
+                       (LinkValue ATOM (TypeNode TYPE)))
+
+    See also:
+    *-fetch-incoming-set-* -- to fetch all of the incoming set.
+    *-fetch-query-* -- to fetch a query-defined collection of Atoms.
+"
+	(PredicateNode "*-fetch-incoming-by-type-*")
+)
+
+(define*-public (fetch-incoming-by-type ATOM TYPE #:optional (STORAGE (cog-storage-node)))
 "
  fetch-incoming-by-type ATOM TYPE [STORAGE]
 
-    Fetch those links of the incoming set of ATOM that are of type TYPE.
-    This is a more limited fetch than the one done by `fetch-incoming-set`
-    and can be useful when the incoming set is large.
+    Convenience wrapper around the `*-fetch-incoming-by-type-*` message.
 
     If the optional STORAGE argument is provided, then it will be
     used as the source of the fetch. It must be a StorageNode.
@@ -192,8 +270,9 @@
       `fetch-incoming-set` to fetch all of the incoming set.
       `fetch-query` to fetch a query-defined collection of Atoms.
 "
-	(if STORAGE (sn-fetch-incoming-by-type TYPE STORAGE)
-		(dflt-fetch-incoming-by-type ATOM TYPE))
+	(sn-setvalue STORAGE (*-fetch-incoming-by-type-*)
+		(LinkValue (cog-atomspace) ATOM (TypeNode TYPE)))
+	ATOM
 )
 
 (define*-public (store-atom ATOM #:optional (STORAGE #f))
