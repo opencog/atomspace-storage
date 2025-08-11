@@ -195,7 +195,7 @@
        `monitor-storage` to print connection information.
 "
 	(if STORAGE
-		(let ((boo (cog-get-value STORAGE (*-connected?-*))))
+		(let ((boo (cog-value STORAGE (*-connected?-*))))
 			(not (eq? 0 (cog-value-ref boo 0))))
 		#f)
 )
