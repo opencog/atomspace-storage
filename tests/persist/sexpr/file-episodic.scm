@@ -154,9 +154,9 @@
 	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem"))))
 
 (test-assert "base-count" (equal? 18 (count-all)))
-(test-assert "space1-count" (equal? 12
+(test-assert "space1-count" (equal? 11
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
-(test-assert "space2-count" (equal? 10
+(test-assert "space2-count" (equal? 9
 	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem")))))
 
 ; Verify that the contents are as expected
