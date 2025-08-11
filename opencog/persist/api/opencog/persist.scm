@@ -77,6 +77,12 @@
 "
 	(cog-set-value! STORAGE (*-close-*) (VoidValue))
 	(set! *-current-storage-node-* #f)
+
+	;; Garbage collection needed to force the StorageNode dtor
+	;; to run. If not run, it gets stuck in an open state. Might
+	;; be a bug in RocksStorageNode? Might be a user error, the
+	;; user forgot to close?  Not sure.
+	(gc)
 )
 
 (define-public (*-open-*)
@@ -125,6 +131,15 @@
        `cog-storage-node` to obtain the current connection.
        `monitor-storage` to print connection information.
 "
+	(if *-current-storage-node-*
+		(cog-set-value! STORAGE (*-close-*) (VoidValue)))
+
+	;; Garbage collection needed to force the StorageNode dtor
+	;; to run. If not run, it gets stuck in an open state. Might
+	;; be a bug in RocksStorageNode? Might be a user error, the
+	;; user forgot to close?  Not sure.
+	(gc)
+
 	(cog-set-value! STORAGE (*-open-*) (VoidValue))
 	(set! *-current-storage-node-* STORAGE)
 )
