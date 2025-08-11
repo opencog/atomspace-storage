@@ -127,8 +127,11 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			COLL("*-store-value-*");
 			if (not value->is_type(LINK_VALUE)) return;
 			const ValueSeq& vsq(LinkValueCast(value)->value());
-			if (2 > vsq.size()) return;
-			store_value(HandleCast(vsq[0]), HandleCast(vsq[1]));
+			size_t nv = vsq.size();
+			if (2 > nv) return;
+			Handle atm(HandleCast(vsq[0]));
+			for (size_t i=1; i<nv; i++)
+				store_value(atm, HandleCast(vsq[i]));
 			return;
 		}
 		case p_update_value: {
@@ -141,14 +144,22 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 		}
 		case p_fetch_atom: {
 			COLL("*-fetch-atom-*");
-			if (value->is_type(LINK_VALUE)) {
-				const ValueSeq& vsq(LinkValueCast(value)->value());
-				if (2 == vsq.size()) {
-					AtomSpace* as = AtomSpaceCast(vsq[0]).get();
-					fetch_atom(HandleCast(vsq[1]), as);
-				}
-			} else {
+			if (value->is_type(ATOM))
+			{
 				fetch_atom(HandleCast(value));
+				return;
+			}
+			if (not value->is_type(LINK_VALUE)) return;
+			const ValueSeq& vsq(LinkValueCast(value)->value());
+			AtomSpace* as = getAtomSpace();
+			for (const ValuePtr& vp : vsq)
+			{
+				if (vp->is_type (ATOM_SPACE))
+				{
+					as = AtomSpaceCast(HandleCast(vp)).get();
+					continue;
+				}
+				fetch_atom(HandleCast(vp), as);
 			}
 			return;
 		}
@@ -156,24 +167,38 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			COLL("*-fetch-value-*");
 			if (not value->is_type(LINK_VALUE)) return;
 			const ValueSeq& vsq(LinkValueCast(value)->value());
-			if (3 == vsq.size()) {
+			size_t nv = vsq.size();
+			// Format: [AtomSpace, Atom, Key1, Key2, ...] or [Atom, Key1, Key2, ...]
+			if (3 <= nv && vsq[0]->is_type(ATOM_SPACE)) {
 				AtomSpace* as = AtomSpaceCast(vsq[0]).get();
-				fetch_value(HandleCast(vsq[1]), HandleCast(vsq[2]), as);
-			} else if (2 == vsq.size()) {
-				fetch_value(HandleCast(vsq[0]), HandleCast(vsq[1]));
+				Handle atm = HandleCast(vsq[1]);
+				for (size_t i=2; i<nv; i++)
+					fetch_value(atm, HandleCast(vsq[i]), as);
+			} else if (2 <= nv) {
+				Handle atm = HandleCast(vsq[0]);
+				for (size_t i=1; i<nv; i++)
+					fetch_value(atm, HandleCast(vsq[i]));
 			}
 			return;
 		}
 		case p_fetch_incoming_set: {
 			COLL("*-fetch-incoming-set-*");
-			if (value->is_type(LINK_VALUE)) {
-				const ValueSeq& vsq(LinkValueCast(value)->value());
-				if (2 == vsq.size()) {
-					AtomSpace* as = AtomSpaceCast(vsq[0]).get();
-					fetch_incoming_set(HandleCast(vsq[1]), false, as);
-				}
-			} else {
+			if (value->is_type(ATOM))
+			{
 				fetch_incoming_set(HandleCast(value), false);
+				return;
+			}
+			if (not value->is_type(LINK_VALUE)) return;
+			const ValueSeq& vsq(LinkValueCast(value)->value());
+			AtomSpace* as = getAtomSpace();
+			for (const ValuePtr& vp : vsq)
+			{
+				if (vp->is_type (ATOM_SPACE))
+				{
+					as = AtomSpaceCast(HandleCast(vp)).get();
+					continue;
+				}
+				fetch_incoming_set(HandleCast(vp), false, as);
 			}
 			return;
 		}
@@ -181,15 +206,23 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			COLL("*-fetch-incoming-by-type-*");
 			if (not value->is_type(LINK_VALUE)) return;
 			const ValueSeq& vsq(LinkValueCast(value)->value());
-			if (3 == vsq.size()) {
+			size_t nv = vsq.size();
+			// Format: [AtomSpace, Atom1, Type1, Atom2, Type2, ...] or [Atom1, Type1, Atom2, Type2, ...]
+			if (3 <= nv && vsq[0]->is_type(ATOM_SPACE)) {
 				AtomSpace* as = AtomSpaceCast(vsq[0]).get();
-				Handle atom = HandleCast(vsq[1]);
-				Type t = TypeNodeCast(HandleCast(vsq[2]))->get_kind();
-				fetch_incoming_by_type(atom, t, as);
-			} else if (2 == vsq.size()) {
-				Handle atom = HandleCast(vsq[0]);
-				Type t = TypeNodeCast(HandleCast(vsq[1]))->get_kind();
-				fetch_incoming_by_type(atom, t);
+				// Process pairs of (Atom, Type) starting from index 1
+				for (size_t i=1; i+1<nv; i+=2) {
+					Handle atom = HandleCast(vsq[i]);
+					Type t = TypeNodeCast(HandleCast(vsq[i+1]))->get_kind();
+					fetch_incoming_by_type(atom, t, as);
+				}
+			} else if (2 <= nv) {
+				// Process pairs of (Atom, Type) starting from index 0
+				for (size_t i=0; i+1<nv; i+=2) {
+					Handle atom = HandleCast(vsq[i]);
+					Type t = TypeNodeCast(HandleCast(vsq[i+1]))->get_kind();
+					fetch_incoming_by_type(atom, t);
+				}
 			}
 			return;
 		}

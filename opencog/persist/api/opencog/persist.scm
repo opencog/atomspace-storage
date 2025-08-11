@@ -125,13 +125,15 @@
 "
   (PredicateNode "*-fetch-atom-*") message.
 
-  Fetch all of the Values on the indicated ATOM from storage.
+  Fetch all of the Values on one or more ATOMs from storage.
 
     This updates (clobbers) all of the values in the atomspace,
     and replaces them with the ones fetched from storage.
 
     Usage:
        (cog-set-value! (StorageNode ...) (*-fetch-atom-*) ATOM)
+       (cog-set-value! (StorageNode ...) (*-fetch-atom-*)
+                       (LinkValue ATOMSPACE ATOM1 ATOM2 ...))
 
     See also:
     *-fetch-value-* -- to get only one Value.
@@ -162,14 +164,18 @@
 "
   (PredicateNode "*-fetch-value-*") message.
 
-  Fetch from storage the Value located at KEY on ATOM.
+  Fetch from storage one or more Values on an ATOM.
 
-    This updates (clobbers) any current Value stored at KEY,
-    replacing it with the one fetched from storage.
+    This updates (clobbers) any current Values stored at the KEYs,
+    replacing them with the ones fetched from storage.
 
     Usage:
        (cog-set-value! (StorageNode ...) (*-fetch-value-*)
                        (LinkValue ATOM KEY))
+       (cog-set-value! (StorageNode ...) (*-fetch-value-*)
+                       (LinkValue ATOM KEY1 KEY2 ...))
+       (cog-set-value! (StorageNode ...) (*-fetch-value-*)
+                       (LinkValue ATOMSPACE ATOM KEY1 KEY2 ...))
 
     See also:
     *-fetch-atom-* -- to get all Values.
@@ -200,13 +206,15 @@
 "
   (PredicateNode "*-fetch-incoming-set-*") message.
 
-  Fetch the incoming set of the ATOM from storage.
+  Fetch the incoming set of one or more ATOMs from storage.
 
     The fetch is NOT recursive. See `load-referrers` for a recursive
     fetch.
 
     Usage:
        (cog-set-value! (StorageNode ...) (*-fetch-incoming-set-*) ATOM)
+       (cog-set-value! (StorageNode ...) (*-fetch-incoming-set-*)
+                       (LinkValue ATOMSPACE ATOM1 ATOM2 ...))
 
     See also:
     *-load-referrers-* -- to get every graph that contains an Atom.
@@ -239,15 +247,19 @@
 "
   (PredicateNode "*-fetch-incoming-by-type-*") message.
 
-  Fetch those links of the incoming set of ATOM that are of type TYPE.
+  Fetch those links of the incoming set that are of specific types.
 
     This is a more limited fetch than the one done by
     `*-fetch-incoming-set-*` and can be useful when the incoming set
-    is large.
+    is large. Can process multiple atom-type pairs in one call.
 
     Usage:
        (cog-set-value! (StorageNode ...) (*-fetch-incoming-by-type-*)
                        (LinkValue ATOM (TypeNode TYPE)))
+       (cog-set-value! (StorageNode ...) (*-fetch-incoming-by-type-*)
+                       (LinkValue ATOM1 (TypeNode TYPE1) ATOM2 (TypeNode TYPE2) ...))
+       (cog-set-value! (StorageNode ...) (*-fetch-incoming-by-type-*)
+                       (LinkValue ATOMSPACE ATOM1 (TypeNode TYPE1) ATOM2 (TypeNode TYPE2) ...))
 
     See also:
     *-fetch-incoming-set-* -- to fetch all of the incoming set.
@@ -275,7 +287,7 @@
 	ATOM
 )
 
-(define*-public (store-atom ATOM #:optional (STORAGE #f))
+(define*-public (store-atom ATOM #:optional (STORAGE (cog-storage-node)))
 "
  store-atom ATOM [STORAGE]
 
@@ -290,7 +302,7 @@
        `store-value` to store just one Value.
        `fetch-atom` to fetch all Values on an Atom.
 "
-	(if STORAGE (sn-store-atom ATOM STORAGE) (dflt-store-atom ATOM))
+	(sn-store-atom ATOM STORAGE)
 )
 
 (define-public (*-store-value-*)
