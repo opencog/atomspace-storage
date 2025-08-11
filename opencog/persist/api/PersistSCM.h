@@ -40,23 +40,15 @@ class PersistSCM : public ModuleWrap
 private:
 	void init(void);
 
-	// These take the storage-node to use as final argument.
+	// These take the storage-node to use as first argument.
 	static void sn_setvalue(Handle, Handle, ValuePtr);
 	static ValuePtr sn_getvalue(Handle, Handle);
 
-	void open(Handle);
-	void close(Handle);
-	bool connected(Handle);
-
-	// Single global default storage node,
-	// which all the functions below use.
-	static StorageNodePtr _sn;
-
-	Handle current_storage(void);
-
 public:
 	PersistSCM(void);
-	static void set_connection(const StorageNodePtr& sn) { _sn = sn; }
+
+	// Obsolete. Remove whenever.
+	static void set_connection(const StorageNodePtr&) {}
 }; // class
 
 /** @}*/

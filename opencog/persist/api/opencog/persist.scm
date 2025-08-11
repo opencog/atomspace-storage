@@ -22,18 +22,43 @@
 
 (include-from-path "opencog/persist/types/storage_types.scm")
 
-; This avoids complaints, when the docs are set, below.
-(export
-	cog-open
-	cog-close
-	cog-connected?
-	cog-storage-node)
+;; Global. Maybe should be per-fluid? I dunno, this is for backwards
+;; compat, mostly. New users should use messages, directly.
+(define *-current-storage-node-* #f)
 
 ;; -----------------------------------------------------
 ;;
-(set-procedure-property! cog-open 'documentation
+(define-public (*-open-*)
+"
+  (Predicate \"*-open-*\") message
+
+    Open a connection to the indicated STORAGE-ATOM. An open connection
+    allows Atoms to be sent/received along this connection.
+
+    Examples:
+       (cog-set-value!
+			(PostgresStorage \"postgres:///example-db?user=foo&password=bar\")
+			(*-open-*) (VoidValue))
+       (cog-set-value!
+			(RocksStorage \"rocks:///tmp/my-rocks-db\")
+			(*-open-*) (VoidValue))
+       (cog-set-value!
+			(CogserverStorage \"cog://localhost:17001\")
+			(*-open-*) (VoidValue))
+
+    See also:
+       `*-close-*` to close a connection.
+       `*-connected?-*` to obtain the connection status.
+       `*-monitor-*` to print connection information.
+"
+	(PredicateNode "*-open-*")
+)
+
+(define-public (cog-open STORAGE)
 "
  cog-open STORAGE-ATOM
+
+    Convenience wrapper around the `*-open-*` message.
 
     Open a connection to the indicated STORAGE-ATOM. An open connection
     allows Atoms to be sent/received along this connection.
@@ -48,11 +73,40 @@
        `cog-connected?` to obtain the connection status.
        `cog-storage-node` to obtain the current connection.
        `monitor-storage` to print connection information.
+"
+	(cog-set-value! STORAGE (*-open-*) (VoidValue))
+	(set! *-current-storage-node-* STORAGE)
+)
+
+(define-public (*-close-*)
+"
+  (Predicate \"*-close-*\") message
+
+    Close an open connection. Closing the connection disables further
+	 communication on the connection.
+
+    Examples:
+       (cog-set-value!
+			(PostgresStorage \"postgres:///example-db?user=foo&password=bar\")
+			(*-close-*) (VoidValue))
+       (cog-set-value!
+			(RocksStorage \"rocks:///tmp/my-rocks-db\")
+			(*-close-*) (VoidValue))
+       (cog-set-value!
+			(CogserverStorage \"cog://localhost:17001\")
+			(*-close-*) (VoidValue))
+
+    See also:
+       `*-open-*` to open a connection.
+       `*-connected?-*` to obtain the connection status.
+       `*-monitor-*` to print connection information.
 ")
 
-(set-procedure-property! cog-close 'documentation
+(define-public (cog-close STORAGE)
 "
  cog-close STORAGE-ATOM
+
+    Convenience wrapper around the `*-close-*` message.
 
     Close an open connection to the indicated STORAGE-ATOM. Closing the
     connection disables further communication on the connection. The
@@ -68,11 +122,30 @@
        `cog-connected?` to obtain the connection status.
        `cog-storage-node` to obtain the current connection.
        `monitor-storage` to print connection information.
+"
+	(cog-set-value! STORAGE (*-close-*) (VoidValue))
+	(set! *-current-storage-node-* #f)
+)
+
+(define-public (*-connected?-*)
+"
+  (Predicate \"*-connected?-*\") message
+
+    Used to query the open/close status of the STORAGE-ATOM.
+    Return (BoolValue 1) if there is an open connection to STORAGE-ATOM.
+    Connections are opened with `*-open-*` and closed with `*-close-*`.
+
+    See also:
+       `*-open-*` to open a connection.
+       `*-close-*` to close a connection.
+       `*-monitor-*` to print connection information.
 ")
 
-(set-procedure-property! cog-connected? 'documentation
+(define-public (cog-connected? STORAGE)
 "
  cog-connected? STORAGE-ATOM
+
+    Convenience wrapper around the `*-connected?-*` message.
 
     Return #t if there is an open connection to STORAGE-ATOM.
     Connections are opened with `cog-open` and closed with `cog-close`.
@@ -82,9 +155,12 @@
        `cog-close` to close a connection.
        `cog-storage-node` to obtain the current connection.
        `monitor-storage` to print connection information.
-")
+"
+	(define boo (cog-get-value STORAGE (*-connected?-*)))
+	(not (eq? 0 (cog-value-ref boo 0)))
+)
 
-(set-procedure-property! cog-storage-node 'documentation
+(define-public (cog-storage-node)
 "
  cog-storage-node
 
@@ -99,7 +175,9 @@
        `cog-close` to close a connection.
        `cog-connected?` to obtain the connection status.
        `monitor-storage` to print connection information.
-")
+"
+	*-current-storage-node-*
+)
 
 (define-public (*-fetch-atom-*)
 "

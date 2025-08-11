@@ -39,15 +39,6 @@ PersistSCM::PersistSCM(void)
 
 void PersistSCM::init(void)
 {
-	define_scheme_primitive("cog-open",
-	             &PersistSCM::open, this, "persist");
-	define_scheme_primitive("cog-close",
-	             &PersistSCM::close, this, "persist");
-	define_scheme_primitive("cog-connected?",
-	             &PersistSCM::connected, this, "persist");
-	define_scheme_primitive("cog-storage-node",
-	             &PersistSCM::current_storage, this, "persist");
-
 	// define_scheme_primitive(..., false); means that these functions
 	// will NOT be `define-public` and just plain `define`. Thus,
 	// accessible within the module, but not outside of it.
@@ -84,59 +75,6 @@ void PersistSCM::init(void)
 			nameserver().getTypeName(hsn->get_type()).c_str()); \
 	}
 
-StorageNodePtr PersistSCM::_sn;
-
-void PersistSCM::open(Handle hsn)
-{
-	GET_STNP;
-	if (stnp->connected())
-		throw RuntimeException(TRACE_INFO,
-			"StorageNode %s is already open!",
-			hsn->to_short_string().c_str());
-
-	// It can happen that, due to user error, stnp looks to be closed,
-	// but the StorageNode dtor has not run, and so it still seems to
-	// be open. One solution is to force all use counts on the smart
-	// pointers to go to zero (done further below). Another is to just
-	// double-check the URL, and force the close. Seems that we need to
-	// do both: belt and suspenders.
-	if (_sn and _sn->get_name() == stnp->get_name())
-		close(Handle(_sn));
-
-	// Clobber the smart pointer so use count goes to zero, and the
-	// StorageNode dtor runs (which then closes the connection.)
-	if (_sn and nullptr == _sn->getAtomSpace()) _sn = nullptr;
-
-	// Like above, but the same StorageNode in a different AtomSpace!?
-	// if (_sn and *_sn == *stnp) _sn = nullptr;
-
-	stnp->open();
-
-	if (nullptr == _sn) _sn = stnp;
-}
-
-void PersistSCM::close(Handle hsn)
-{
-	GET_STNP;
-	if (not stnp->connected())
-		throw RuntimeException(TRACE_INFO,
-			"StorageNode %s is not open!",
-			hsn->to_short_string().c_str());
-
-	stnp->close();
-
-	if (stnp == _sn) _sn = nullptr;
-}
-
-bool PersistSCM::connected(Handle hsn)
-{
-	StorageNodePtr stnp = StorageNodeCast(hsn);
-	if (nullptr == stnp) return false;
-	return stnp->connected();
-}
-
-// =====================================================================
-
 void PersistSCM::sn_setvalue(Handle hsn, Handle key, ValuePtr val)
 {
 	GET_STNP;
@@ -150,12 +88,6 @@ ValuePtr PersistSCM::sn_getvalue(Handle hsn, Handle key)
 }
 
 // =====================================================================
-
-Handle PersistSCM::current_storage(void)
-{
-	if (_sn and not _sn->connected()) _sn = nullptr;
-	return Handle(_sn);
-}
 
 void opencog_persist_init(void)
 {
