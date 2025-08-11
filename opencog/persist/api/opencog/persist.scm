@@ -96,7 +96,7 @@
        `monitor-storage` to print connection information.
 "
 	(if STORAGE
-		(cog-set-value! STORAGE (*-close-*) (VoidValue)))
+		(sn-setvalue STORAGE (*-close-*) (VoidValue)))
 	(set! *-current-storage-node-* #f)
 
 	;; Garbage collection needed to force the StorageNode dtor
@@ -153,7 +153,7 @@
        `monitor-storage` to print connection information.
 "
 	(if *-current-storage-node-*
-		(cog-set-value! STORAGE (*-close-*) (VoidValue)))
+		(sn-setvalue STORAGE (*-close-*) (VoidValue)))
 
 	;; Garbage collection needed to force the StorageNode dtor
 	;; to run. If not run, it gets stuck in an open state. Might
@@ -161,7 +161,7 @@
 	;; user forgot to close?  Not sure.
 	(gc)
 
-	(cog-set-value! STORAGE (*-open-*) (VoidValue))
+	(sn-setvalue STORAGE (*-open-*) (VoidValue))
 	(set! *-current-storage-node-* STORAGE)
 )
 
