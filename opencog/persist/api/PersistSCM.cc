@@ -51,10 +51,6 @@ void PersistSCM::init(void)
 	// define_scheme_primitive(..., false); means that these functions
 	// will NOT be `define-public` and just plain `define`. Thus,
 	// accessible within the module, but not outside of it.
-	define_scheme_primitive("sn-fetch-query-2args",
-	             &PersistSCM::sn_fetch_query2, "persist", false);
-	define_scheme_primitive("sn-fetch-query-4args",
-	             &PersistSCM::sn_fetch_query4, "persist", false);
 	define_scheme_primitive("sn-store-atom",
 	             &PersistSCM::sn_store_atom, "persist", false);
 
@@ -153,21 +149,6 @@ Handle PersistSCM::sn_store_atom(Handle h, Handle hsn)
 	GET_STNP;
 	stnp->store_atom(h);
 	return h;
-}
-
-Handle PersistSCM::sn_fetch_query2(Handle query, Handle key, Handle hsn)
-{
-	GET_STNP;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-query");
-	return stnp->fetch_query(query, key, Handle::UNDEFINED, false, asp.get());
-}
-
-Handle PersistSCM::sn_fetch_query4(Handle query, Handle key,
-                                Handle meta, bool fresh, Handle hsn)
-{
-	GET_STNP;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-query");
-	return stnp->fetch_query(query, key, meta, fresh, asp.get());
 }
 
 void PersistSCM::sn_setvalue(Handle hsn, Handle key, ValuePtr val)

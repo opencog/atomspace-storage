@@ -41,8 +41,6 @@ private:
 	void init(void);
 
 	// These take the storage-node to use as final argument.
-	static Handle sn_fetch_query2(Handle, Handle, Handle);
-	static Handle sn_fetch_query4(Handle, Handle, Handle, bool, Handle);
 	static Handle sn_store_atom(Handle, Handle);
 	static void sn_setvalue(Handle, Handle, ValuePtr);
 	static ValuePtr sn_getvalue(Handle, Handle);
