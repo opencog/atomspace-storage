@@ -125,9 +125,9 @@
 	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem"))))
 
 ; 11 loaded plus three FileStorageNodes
-; Plus two more: (Predicate "*-store-atomspace-*")
-; and (Predicate "*-load-atomspace-*")
-(test-assert "base-count" (equal? 16 (count-all)))
+; Plus four more: (Predicate "*-store-atomspace-*")
+; and (Predicate "*-load-atomspace-*") and *-open-* and *-close-*
+(test-assert "base-count" (equal? 18 (count-all)))
 (test-assert "space1-count" (equal? 0
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
 (test-assert "space2-count" (equal? 0
@@ -153,10 +153,10 @@
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))
 	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem"))))
 
-(test-assert "base-count" (equal? 16 (count-all)))
-(test-assert "space1-count" (equal? 10
+(test-assert "base-count" (equal? 18 (count-all)))
+(test-assert "space1-count" (equal? 12
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
-(test-assert "space2-count" (equal? 8
+(test-assert "space2-count" (equal? 10
 	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem")))))
 
 ; Verify that the contents are as expected
