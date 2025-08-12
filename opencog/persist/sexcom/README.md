@@ -90,3 +90,15 @@ in this direction has been done, but it is not been completed.  The
 `SpaceFrame`, `SpaceDiamond`, `SpaceWye` and `FrameDelete` unit tests
 in the `atomspace-cog` git repo do not run/do not pass. Getting those
 to run and pass requires additional work to be done here.
+
+***Important TODO*** Convert all this to the "message passing format"
+as now visible in `../api/opencog/persist.scm` and in
+`../api/StorageNode.cc`, This format does things by sending messages
+with the `cog-set-value!` method. This design avoids having to use
+custom s-expressions, and avoids a dependency on guile, and, most
+importantly, elevates messages to something that is a native part of
+Atomese, rather than a side-car. This is important. The code in this
+dir predates the invention of messaging; its kind of an early attempt.
+Now that the idea is clear, the code here needs to be migrated to
+the messaging API. This would then allow native Atomese to really be
+native, even in string form, and accessible via the Atomese flow system.
