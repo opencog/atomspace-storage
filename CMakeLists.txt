@@ -165,20 +165,6 @@ IF (CXXTEST_FOUND)
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
-	ADD_CUSTOM_TARGET(test_mono
-		DEPENDS tests
-		WORKING_DIRECTORY tests/persist/monospace
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Monospace tests..."
-	)
-
-	ADD_CUSTOM_TARGET(test_multi
-		DEPENDS tests
-		WORKING_DIRECTORY tests/persist/storage
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Multispace tests..."
-	)
-
 ENDIF (CXXTEST_FOUND)
 
 ADD_CUSTOM_TARGET(cscope
