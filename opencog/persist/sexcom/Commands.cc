@@ -268,6 +268,8 @@ std::string Commands::cog_incoming_set(const std::string& cmd)
 		h = _proxy->fetch_incoming_set(h, false, as);
 		_proxy->barrier();
 	}
+	else
+		h = as->get_atom(h);
 
 	std::string alist = "(";
 	for (const Handle& hi : h->getIncomingSet())
