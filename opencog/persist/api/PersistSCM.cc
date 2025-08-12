@@ -21,10 +21,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
-#include "PersistSCM.h"
+#include <opencog/guile/SchemeModule.h>
+#include <opencog/persist/api/StorageNode.h>
+
+namespace opencog
+{
+class PersistSCM : public ModuleWrap
+{
+private:
+	void init(void);
+
+	// Set a value on an atom directly, instead of going through
+	// the AtomSpace.
+	static void direct_setvalue(Handle, Handle, ValuePtr);
+
+public:
+	PersistSCM(void);
+}; // class
+
+}  // namespace
+
+extern "C" {
+void opencog_persist_init(void);
+};
 
 using namespace opencog;
 
