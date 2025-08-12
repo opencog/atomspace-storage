@@ -382,7 +382,7 @@
                        (LinkValue ATOM1 ATOM2 ...))
 
     See also:
-    *-store-value-* -- to store one (ore more) Values.
+    *-store-value-* -- to store one (or more) Values.
     *-fetch-atom-* -- to fetch all Values on an Atom.
 "
 	(PredicateNode "*-store-atom-*")

@@ -30,7 +30,7 @@ namespace opencog
 
 /// Implement Jenkins' One-at-a-Time hash.
 /// For these very short strings, I cannot think of a faster hash.
-/// The 4-byte-at-a-time hashes require knowng the string legnth :-(
+/// The 4-byte-at-a-time hashes require knowng the string length :-(
 static constexpr uint32_t dispatch_hash(const char* s)
 {
 	uint32_t hash = 0;

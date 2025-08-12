@@ -1,7 +1,7 @@
 /*
  * opencog/persist/api/BackingStore.h
  *
- * Implements an interface class for client-server communitcations.
+ * Implements an interface class for client-server communications.
  *
  * Copyright (C) 2009, 2013, 2020, 2022 Linas Vepstas <linasvepstas@gmail.com>
  *
@@ -332,7 +332,7 @@ class BackingStore
 		 * all values attached to it, that the backing store knows
 		 * about.
 		 *
-		 * Unusued. Present for backwards-compatibility only.
+		 * Unused. Present for backwards-compatibility only.
 		 */
 		virtual Handle getNode(Type, const char *) {
 			throw IOException(TRACE_INFO, "Implementation is buggy!");
