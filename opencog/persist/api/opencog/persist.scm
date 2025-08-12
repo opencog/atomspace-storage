@@ -1048,7 +1048,7 @@
     If the optional STORAGE argument is provided, then it will be
     used as the source of the load. It must be a StorageNode.
 "
-	(cog-value->list (sn-getvalue STORAGE (*-load-frames-*)))
+	(cog-value->list (cog-value STORAGE (*-load-frames-*)))
 )
 
 (define-public (*-store-frames-*)
@@ -1191,7 +1191,7 @@
     Same as
        (cog-value STORAGE (*-monitor-*))
 "
-   (cog-value-ref (sn-getvalue STORAGE (*-monitor-*)) 0)
+   (cog-value-ref STORAGE (*-monitor-*) 0)
 )
 
 (define-public (*-proxy-parts-*)

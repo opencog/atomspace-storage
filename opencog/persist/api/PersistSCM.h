@@ -42,7 +42,6 @@ private:
 
 	// These take the storage-node to use as first argument.
 	static void sn_setvalue(Handle, Handle, ValuePtr);
-	static ValuePtr sn_getvalue(Handle, Handle);
 
 public:
 	PersistSCM(void);

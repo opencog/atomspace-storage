@@ -44,8 +44,6 @@ void PersistSCM::init(void)
 	// accessible within the module, but not outside of it.
 	define_scheme_primitive("sn-setvalue",
 	             &PersistSCM::sn_setvalue, "persist", false);
-	define_scheme_primitive("sn-getvalue",
-	             &PersistSCM::sn_getvalue, "persist", false);
 }
 
 // =====================================================================
@@ -79,12 +77,6 @@ void PersistSCM::sn_setvalue(Handle hsn, Handle key, ValuePtr val)
 {
 	GET_STNP;
 	stnp->setValue(key, val);
-}
-
-ValuePtr PersistSCM::sn_getvalue(Handle hsn, Handle key)
-{
-	GET_STNP;
-	return stnp->getValue(key);
 }
 
 // =====================================================================
