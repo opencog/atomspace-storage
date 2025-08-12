@@ -28,7 +28,6 @@ CYTHON_ADD_MODULE_PYX(storage
 	"../../storage/storage_types.h")
 
 ADD_LIBRARY(storage_cython SHARED
-	PersistCython.cc
 	storage.cpp
 )
 
