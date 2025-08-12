@@ -34,9 +34,6 @@ class PersistSCM : public ModuleWrap
 {
 private:
 	void init(void);
-
-	// Set a value on an atom directly, instead of going through
-	// the AtomSpace.
 	static void direct_setvalue(Handle, Handle, ValuePtr);
 
 public:
@@ -71,6 +68,35 @@ void PersistSCM::init(void)
 
 // =====================================================================
 
+// Guile wrapper to set a value on an Atom directly, instead of going
+// through the AtomSpace. By "set a value", we really mean "send a
+// message to a StorageNode": this is specialized to work for
+// StorageNodes only.
+//
+// This method is a historical artifact, and should be eventually
+// eliminated; in most cases, the user can/should use cog-setvalue!
+// function directly. However, there's a bug...
+//
+// The cog-setvalue! function calls AtomSpace::SetValue() which does
+// some checking regarding frames and read-only AtomSpaces, and only
+// then calls Atom::SetValue() as appropriate, possibly performing a
+// copy-on-write (COW) of the Atom. And this is the right thing to do ...
+// mostly. When using frames (AtomSpaces layered one on top another),
+// an accidental COW of the StorageNode results in hard-to-debug errors,
+// because the COW'ed StorageNode will have a different connection to
+// the underlying Storage. And we don't want that.
+//
+// The correct long-term fix is to avoid/prevent the COW of Atoms,
+// such as StorageNodes, that are used to send messages. But fixing
+// this is hard, because the frame code is tangled and complicated.
+// And low priority, because kind of no one uses frames, more or less.
+// Except for the unit tests, which use them heavily.
+//
+// So, for backwards compat, for the scheme bindings only, we implement
+// the direct setvalue below. The unit tests, and the framing API in
+// general, probably needs some kind of redo to work nicely, easily,
+// rapidly, correctly.
+//
 void PersistSCM::direct_setvalue(Handle hsn, Handle key, ValuePtr val)
 {
 	if (not nameserver().isA(hsn->get_type(), STORAGE_NODE)) {
