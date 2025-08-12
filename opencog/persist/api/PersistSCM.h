@@ -40,8 +40,9 @@ class PersistSCM : public ModuleWrap
 private:
 	void init(void);
 
-	// These take the storage-node to use as first argument.
-	static void sn_setvalue(Handle, Handle, ValuePtr);
+	// Set a value on an atom directly, instead of going through
+	// the AtomSpace.
+	static void direct_setvalue(Handle, Handle, ValuePtr);
 
 public:
 	PersistSCM(void);

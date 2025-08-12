@@ -96,7 +96,7 @@
        `monitor-storage` to print connection information.
 "
 	(if STORAGE
-		(sn-setvalue STORAGE (*-close-*) (VoidValue)))
+		(direct-setvalue! STORAGE (*-close-*) (VoidValue)))
 	(set! *-current-storage-node-* #f)
 )
 
@@ -147,9 +147,9 @@
        `monitor-storage` to print connection information.
 "
 	(if *-current-storage-node-*
-		(sn-setvalue STORAGE (*-close-*) (VoidValue)))
+		(direct-setvalue! STORAGE (*-close-*) (VoidValue)))
 
-	(sn-setvalue STORAGE (*-open-*) (VoidValue))
+	(direct-setvalue! STORAGE (*-open-*) (VoidValue))
 	(set! *-current-storage-node-* STORAGE)
 )
 
@@ -222,18 +222,18 @@
        `fetch-value` to get only one Value.
        `store-atom` to store all Values.
 "
-	; Need to use sn-setvalue here, instead of cog-set-value! in order
+	; Need to use direct-setvalue! here, instead of cog-set-value! in order
 	; to get correct behavior for working with frames. This is due to
 	; an unpatched bug: calling cog-set-value! in some frame where
 	; the storage node is only in a lower frame causes a COW of that
 	; StorageNode into that frame. But the COW is a copy, and that
-	; copy isn't actually open. So sn-setvalue just bypasses the COW
+	; copy isn't actually open. So direct-setvalue! just bypasses the COW
 	; and everything works. I'm not sure what the best long-term fix
 	; for this is. At any rate, XXX FIXME.
 	;
 	; For backwards compat, throw a C++ exception if not open.
 	(if STORAGE
-		(sn-setvalue STORAGE (*-fetch-atom-*)
+		(direct-setvalue! STORAGE (*-fetch-atom-*)
 			(LinkValue (cog-atomspace) ATOM))
 		(throw 'C++-EXCEPTION fetch-atom "StorageNode is not open for reading!"))
 	ATOM
@@ -276,7 +276,7 @@
        `fetch-atom` to get all Values.
        `store-value` to store only one Value.
 "
-	(sn-setvalue STORAGE (*-fetch-value-*)
+	(direct-setvalue! STORAGE (*-fetch-value-*)
 		(LinkValue (cog-atomspace) ATOM KEY))
 	ATOM
 )
@@ -317,7 +317,7 @@
       `fetch-incoming-by-type` to fetch a subset of a given type.
       `fetch-query` to fetch a query-defined collection of Atoms.
 "
-	(sn-setvalue STORAGE (*-fetch-incoming-set-*)
+	(direct-setvalue! STORAGE (*-fetch-incoming-set-*)
 		(LinkValue (cog-atomspace) ATOM))
 	ATOM
 )
@@ -361,7 +361,7 @@
       `fetch-incoming-set` to fetch all of the incoming set.
       `fetch-query` to fetch a query-defined collection of Atoms.
 "
-	(sn-setvalue STORAGE (*-fetch-incoming-by-type-*)
+	(direct-setvalue! STORAGE (*-fetch-incoming-by-type-*)
 		(LinkValue (cog-atomspace) ATOM (TypeNode TYPE)))
 	ATOM
 )
@@ -403,18 +403,18 @@
        `store-value` to store just one Value.
        `fetch-atom` to fetch all Values on an Atom.
 "
-	; Need to use sn-setvalue here, instead of cog-set-value! in order
+	; Need to use direct-setvalue! here, instead of cog-set-value! in order
 	; to get correct behavior for working with frames. This is due to
 	; an unpatched bug: calling cog-set-value! in some frame where
 	; the storage node is only in a lower frame causes a COW of that
 	; StorageNode into that frame. But the COW is a copy, and that
-	; copy isn't actually open. So sn-setvalue just bypasses the COW
+	; copy isn't actually open. So direct-setvalue! just bypasses the COW
 	; and everything works. I'm not sure what the best long-term fix
 	; for this is. At any rate, XXX FIXME.
 	;
 	; For backwards compat, throw a C++ exception if not open.
 	(if STORAGE
-		(sn-setvalue STORAGE (*-store-atom-*) ATOM)
+		(direct-setvalue! STORAGE (*-store-atom-*) ATOM)
 		(throw 'C++-EXCEPTION cog-open "StorageNode is not open for writing!"))
 	ATOM
 )
@@ -455,7 +455,7 @@
        `store-atom` to store all values on an Atom.
        `fetch-value` to fetch just one Value.
 "
-	(sn-setvalue STORAGE (*-store-value-*) (LinkValue ATOM KEY))
+	(direct-setvalue! STORAGE (*-store-value-*) (LinkValue ATOM KEY))
 )
 
 (define-public (*-update-value-*)
@@ -499,7 +499,7 @@
        `store-atom` to store all values on an Atom.
        `fetch-value` to fetch just one Value.
 "
-	(sn-setvalue STORAGE (*-update-value-*) (LinkValue ATOM KEY DELTA))
+	(direct-setvalue! STORAGE (*-update-value-*) (LinkValue ATOM KEY DELTA))
 )
 
 (define-public (*-load-atoms-of-type-*)
@@ -538,7 +538,7 @@
     *-load-atomspace-* -- Load all atoms.
     *-load-frames-* -- load DAG of AtomSpaces.
 "
-	(sn-setvalue STORAGE (*-load-atoms-of-type-*) (TypeNode TYPE))
+	(direct-setvalue! STORAGE (*-load-atoms-of-type-*) (TypeNode TYPE))
 )
 
 (define-public (*-load-atomspace-*)
@@ -596,7 +596,7 @@
 
 	(if (not ATOMSPACE) (set! ATOMSPACE (cog-atomspace)))
 	(if (not STORAGE) (set! STORAGE (cog-storage-node)))
-	(sn-setvalue STORAGE (*-load-atomspace-*) ATOMSPACE)
+	(direct-setvalue! STORAGE (*-load-atomspace-*) ATOMSPACE)
 )
 
 (define-public (*-store-atomspace-*)
@@ -655,7 +655,7 @@
 
 	(if (not ATOMSPACE) (set! ATOMSPACE (cog-atomspace)))
 	(if (not STORAGE) (set! STORAGE (cog-storage-node)))
-	(sn-setvalue STORAGE (*-store-atomspace-*) ATOMSPACE)
+	(direct-setvalue! STORAGE (*-store-atomspace-*) ATOMSPACE)
 )
 
 ;
@@ -737,17 +737,17 @@
 		; Simple case: just QUERY and KEY
 		(begin
 			(if (not STORAGE) (set! STORAGE (cog-storage-node)))
-			(sn-setvalue STORAGE (*-fetch-query-*)
+			(direct-setvalue! STORAGE (*-fetch-query-*)
 				(LinkValue (cog-atomspace) QUERY KEY)))
 		; METADATA provided
 		(if (cog-subtype? METADATA 'StorageNode)
 			; oh wait; METADATA is actually a StorageNode
-			(sn-setvalue METADATA (*-fetch-query-*)
+			(direct-setvalue! METADATA (*-fetch-query-*)
 				(LinkValue (cog-atomspace) QUERY KEY))
 			; METADATA is a real metadata handle
 			(begin
 				(if (not STORAGE) (set! STORAGE (cog-storage-node)))
-				(sn-setvalue STORAGE (*-fetch-query-*)
+				(direct-setvalue! STORAGE (*-fetch-query-*)
 					(LinkValue (cog-atomspace) QUERY KEY METADATA
 						(if FRESH (TrueLink) (FalseLink)))))))
 	QUERY
@@ -944,7 +944,7 @@
 	(if (< 0 (cog-incoming-size ATOM))
 		#f
 		(begin
-			(sn-setvalue STORAGE (*-delete-*)
+			(direct-setvalue! STORAGE (*-delete-*)
 				(LinkValue (cog-atomspace) ATOM)) #t))
 )
 
@@ -973,7 +973,7 @@
        cog-extract-recursive! -- Remove an atom form the AtomSpace only.
        delete-frame! -- Delete all the Atoms in the frame.
 "
-	(sn-setvalue STORAGE (*-delete-recursive-*)
+	(direct-setvalue! STORAGE (*-delete-recursive-*)
 		(LinkValue (cog-atomspace) ATOM))
 )
 
@@ -1007,7 +1007,7 @@
     If the optional STORAGE argument is provided, then the erase will
     be applied to it. It must be a StorageNode.
 "
-	(sn-setvalue STORAGE (*-erase-*) (VoidValue))
+	(direct-setvalue! STORAGE (*-erase-*) (VoidValue))
 )
 
 (define-public (*-load-frames-*)
@@ -1084,7 +1084,7 @@
     If the optional STORAGE argument is provided, then it will be
     used as the target of the store. It must be a StorageNode.
 "
-	(sn-setvalue STORAGE (*-store-frames-*) ATOMSPACE)
+	(direct-setvalue! STORAGE (*-store-frames-*) ATOMSPACE)
 )
 
 (define-public (*-delete-frame-*)
@@ -1126,7 +1126,7 @@
     Same as
        (cog-set-value! STORAGE (*-delete-frame-*) ATOMSPACE)
 "
-	(sn-setvalue STORAGE (*-delete-frame-*) ATOMSPACE)
+	(direct-setvalue! STORAGE (*-delete-frame-*) ATOMSPACE)
 )
 
 (define-public (*-barrier-*)
@@ -1156,7 +1156,7 @@
     If the optional STORAGE argument is provided, then the barrier will
     be applied to it. It must be a StorageNode.
 "
-	(sn-setvalue STORAGE (*-barrier-*) (cog-atomspace))
+	(direct-setvalue! STORAGE (*-barrier-*) (cog-atomspace))
 )
 
 (define-public (*-monitor-*)
@@ -1288,7 +1288,7 @@
     Same as
        (cog-set-value! STORAGE (*-proxy-open-*) (VoidValue))
 "
-	(sn-setvalue STORAGE (*-proxy-open-*) (VoidValue))
+	(direct-setvalue! STORAGE (*-proxy-open-*) (VoidValue))
 )
 
 (define-public (*-proxy-close-*)
@@ -1316,7 +1316,7 @@
     Same as
        (cog-set-value! STORAGE (*-proxy-close-*) (VoidValue))
 "
-	(sn-setvalue STORAGE (*-proxy-close-*) (VoidValue))
+	(direct-setvalue! STORAGE (*-proxy-close-*) (VoidValue))
 )
 
 (define-public (*-set-proxy-*)
@@ -1353,7 +1353,7 @@
     Same as
        (cog-set-value! STORAGE (*-set-proxy-*) PROXY)
 "
-	(sn-setvalue STORAGE (*-set-proxy-*) PROXY)
+	(direct-setvalue! STORAGE (*-set-proxy-*) PROXY)
 )
 
 ; --------------------------------------------------------------------

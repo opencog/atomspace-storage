@@ -42,40 +42,37 @@ void PersistSCM::init(void)
 	// define_scheme_primitive(..., false); means that these functions
 	// will NOT be `define-public` and just plain `define`. Thus,
 	// accessible within the module, but not outside of it.
-	define_scheme_primitive("sn-setvalue",
-	             &PersistSCM::sn_setvalue, "persist", false);
+	define_scheme_primitive("direct-setvalue!",
+	             &PersistSCM::direct_setvalue, "persist", false);
 }
 
 // =====================================================================
 
-// South Texas Nuclear Project
-#define GET_STNP \
-	if (not nameserver().isA(hsn->get_type(), STORAGE_NODE)) { \
-		throw RuntimeException(TRACE_INFO, \
-			"Expecting StorageNode, got %s", hsn->to_short_string().c_str()); \
-	} \
- \
-	StorageNodePtr stnp = StorageNodeCast(hsn); \
- \
-	/* The cast will fail, if the dynamic library that defines the type */ \
-	/* isn't loaded. This is the user's job. They can do it by saying */ \
-	/* (use-modules (opencog persist-foo)) */ \
-	if (nullptr == stnp) { \
-		if (hsn->get_type() == STORAGE_NODE) { \
-			throw RuntimeException(TRACE_INFO, \
-				"A StorageNode cannot be used directly; " \
-				"only it's sub-types provide the needed implementation!"); \
-		} \
-		throw RuntimeException(TRACE_INFO, \
-			"Not opened; please load module that defines %s\n" \
-			"Like so: (use-modules (opencog persist-foo))\n" \
-			"where `foo` is the module providing the node.", \
-			nameserver().getTypeName(hsn->get_type()).c_str()); \
+void PersistSCM::direct_setvalue(Handle hsn, Handle key, ValuePtr val)
+{
+	if (not nameserver().isA(hsn->get_type(), STORAGE_NODE)) {
+		throw RuntimeException(TRACE_INFO,
+			"Expecting StorageNode, got %s", hsn->to_short_string().c_str());
 	}
 
-void PersistSCM::sn_setvalue(Handle hsn, Handle key, ValuePtr val)
-{
-	GET_STNP;
+	StorageNodePtr stnp = StorageNodeCast(hsn);
+
+	/* The cast will fail, if the dynamic library that defines the type */
+	/* isn't loaded. This is the user's job. They can do it by saying */
+	/* (use-modules (opencog persist-foo)) */
+	if (nullptr == stnp) {
+		if (hsn->get_type() == STORAGE_NODE) {
+			throw RuntimeException(TRACE_INFO,
+				"A StorageNode cannot be used directly; "
+				"only it's sub-types provide the needed implementation!");
+		}
+		throw RuntimeException(TRACE_INFO,
+			"Not opened; please load module that defines %s\n"
+			"Like so: (use-modules (opencog persist-foo))\n"
+			"where `foo` is the module providing the node.",
+			nameserver().getTypeName(hsn->get_type()).c_str());
+	}
+
 	stnp->setValue(key, val);
 }
 
