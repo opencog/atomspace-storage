@@ -61,6 +61,7 @@ class SexprEval : public GenericEval
 		SexprEval(const AtomSpacePtr&);
 	public:
 		virtual ~SexprEval();
+		virtual std::string get_name(void) const { return "SexprEval"; }
 
 		virtual void begin_eval(void);
 		virtual void eval_expr(const std::string&);

@@ -55,6 +55,7 @@ class JsonEval : public GenericEval
 		JsonEval(const AtomSpacePtr&);
 	public:
 		virtual ~JsonEval();
+		virtual std::string get_name(void) const { return "JsonEval"; }
 
 		virtual void begin_eval(void);
 		virtual void eval_expr(const std::string&);
