@@ -8,11 +8,14 @@
 // world, and accept the messages that define the storage API.
 STORAGE_NODE <- OBJECT_NODE
 //
-// Specific storage nodes. Most of these are implemented in other git
-// repos, and not here. Look for git repos called "atomspace-xxx" for
-// approrpiate values of "xxx".
-POSTGRES_STORAGE_NODE <- STORAGE_NODE
+// Specific storage nodes. FileStoreageNode is implemented here, because
+// it is so simple. The others are implemented in other git repos,
+// according to the type.
 FILE_STORAGE_NODE <- STORAGE_NODE
+
+// The old, deprecated Postgres driver. See
+// https://github.com/opencog/atomspace-pgres
+// POSTGRES_STORAGE_NODE <- STORAGE_NODE
 
 // Mono is a single-atomspace version of Rocks.
 MONO_STORAGE_NODE <- STORAGE_NODE
@@ -23,8 +26,6 @@ COG_SIMPLE_STORAGE_NODE <- STORAGE_NODE
 COG_STORAGE_NODE <- STORAGE_NODE
 
 // Experimental SQL I/O interfaces in atomspace-bridge git repo
-// Remove FOREIGN_STORAGE_NODE after April 2023
-FOREIGN_STORAGE_NODE <- STORAGE_NODE
 BRIDGE_STORAGE_NODE <- STORAGE_NODE
 
 // There is no IPFS_STORAGE_NODE nor DHT_STORAGE_NODE because these
