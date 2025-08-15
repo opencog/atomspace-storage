@@ -30,8 +30,9 @@ FILE_STORAGE_NODE <- STORAGE_NODE
 // COG_SIMPLE_STORAGE_NODE <- STORAGE_NODE
 // COG_STORAGE_NODE <- STORAGE_NODE
 
-// Experimental SQL I/O interfaces in atomspace-bridge git repo
-BRIDGE_STORAGE_NODE <- STORAGE_NODE
+// Experimental SQL I/O interfaces.
+// See https://github.com/opencog/atomspace-bridge
+// BRIDGE_STORAGE_NODE <- STORAGE_NODE
 
 // The IPFS_STORAGE_NODE and DHT_STORAGE_NODE are not defined
 // either here, or in the corresponding get repos. This is because
