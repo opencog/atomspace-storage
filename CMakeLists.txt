@@ -18,6 +18,11 @@ IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0045 NEW)
 ENDIF (COMMAND CMAKE_POLICY)
 
+# Python venv seems to need this.
+IF(CMAKE_VERSION VERSION_GREATER 3.31)
+	CMAKE_POLICY(SET CMP0177 NEW)
+ENDIF(CMAKE_VERSION VERSION_GREATER 3.31)
+
 PROJECT(atomspace-storage)
 
 # ----------------------------------------------------------
@@ -91,13 +96,12 @@ ENDIF (NOT CXXTEST_FOUND)
 include(OpenCogFindGuile)
 include(OpenCogFindPython)
 
-
 # Check for boost. We need dynamic-linked, threaded libs by default.
 # This is use for the file backend.
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
 
-FIND_PACKAGE(Boost) ### OPTIONAL_COMPONENTS system)
+FIND_PACKAGE(Boost CONFIG)
 IF (Boost_FOUND)
 	SET(HAVE_BOOST 1)
 	ADD_DEFINITIONS(-DHAVE_BOOST)
