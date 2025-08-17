@@ -315,7 +315,10 @@ ValuePtr StorageNode::getValue(const Handle& key) const
 	const std::string& pred(key->get_name());
 
 	if (0 == pred.compare("*-connected?-*"))
-		return createBoolValue(const_cast<StorageNode*>(this)->connected());
+	{
+		bool is_con = const_cast<StorageNode*>(this)->connected();
+		return createBoolValue(is_con);
+	}
 
 	if (0 == pred.compare("*-load-frames-*"))
 		return createLinkValue(const_cast<StorageNode*>(this)->load_frames());
