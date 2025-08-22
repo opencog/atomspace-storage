@@ -280,7 +280,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.version({})
 	if (versn == act)
 	{
-		RETURN(ATOMSPACE_VERSION_STRING);
+		RETURN("\"" ATOMSPACE_VERSION_STRING "\"");
 	}
 
 	// -----------------------------------------------
