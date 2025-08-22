@@ -11,7 +11,7 @@ just enough to interact with the AtomSpace, and nothing more.
 
 Status
 ------
-**Version 0.9.3.** There is enough here to be usable for basic things.
+**Version 1.0.0.** There is enough here to be usable for basic things.
 Support for multiple AtomSpaces is missing.  A convenience call for
 setting multiple values at the same time is missing.
 
@@ -240,6 +240,14 @@ following limitations apply:
 * The order of the tags must be as documented above. So, for example,
   to specify an Atom, the Atom type must come first.
 
+JSON WebSockets Demo
+--------------------
+The CogServer provides a WebSockets interface that can be used to create
+interactive web pages. Taake a look at the
+https://github.com/opencog/cogserver/master/tree/examples/websockets
+page for a basic WebSockets demo, and the
+https://github.com/opencog/cogserver/master/tree/examples/visualizer
+for a simple AtomSpace visualizer demo.
 
 Using MCP
 ---------
@@ -272,7 +280,3 @@ See https://github.com/opencog/cogserver/master/tree/examples/mcp for
 details.
 
 
-JavaScript API
---------------
-Version 0.0.0 of a JavaScript API for this thing can be found at
-https://github.com/opencog/atomspace-js
