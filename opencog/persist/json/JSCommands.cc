@@ -89,7 +89,8 @@ static std::string retmsgerr(const std::string& errmsg)
 // Because MCP is not really JSON, (see below) we cannot return booleans
 // as booleans; they must be strings. So add some extra quotes to them.
 #define RETURN(RV) { \
-	if (js_mode) return RV "\n"; \
+	if (js_mode) \
+		return "{ \"success\": true, \"result\": " RV "}\n"; \
 	return "{\"content\": [{\"type\":\"text\", \"text\": \"" RV "\"}]}\n"; }
 
 // Sigh. So MCP is not really JSON, it's pseudo-json. It does use
@@ -101,7 +102,8 @@ static std::string retmsgerr(const std::string& errmsg)
 // Claude Code seems to grok this at some level, so we're good for now.
 // I personally think it's ugly and annoying but whatever.
 #define RETURNSTR(RV) { \
-	if (js_mode) return RV + "\n"; \
+	if (js_mode) \
+		return std::string("{ \"success\": true, \"result\": ") + RV + "}\n"; \
 	/* return "{\"content\": [{\"type\":\"text\", \"text\": " + RV + "}]}\n"; } */ \
 	std::string srv(RV); \
 	std::replace(srv.begin(), srv.end(), '\n', ' '); \
