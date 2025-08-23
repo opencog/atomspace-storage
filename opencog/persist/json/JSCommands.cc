@@ -193,6 +193,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t stval = std::hash<std::string>{}("setValue");
 	static const size_t execu = std::hash<std::string>{}("execute");
 	static const size_t extra = std::hash<std::string>{}("extract");
+	static const size_t rpcnt = std::hash<std::string>{}("reportCounts");
 
 	// Ignore comments, blank lines
 	size_t cpos = cmd.find_first_not_of(" \n\t");
@@ -593,6 +594,32 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		bool ok = as->extract_atom(h, recursive);
 		if (ok) RETURN("true");
 		RETURN("false");
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.reportCounts()
+	// Returns a list of atom types and their counts (non-zero only)
+	if (rpcnt == act)
+	{
+		std::string rv = "{\n";
+		bool first = true;
+
+		// Get all types from the NameServer
+		std::vector<Type> all_types;
+		nameserver().getChildrenRecursive(ATOM, std::back_inserter(all_types));
+
+		// Iterate through all types and get counts
+		for (Type t : all_types)
+		{
+			size_t count = as->get_num_atoms_of_type(t, false);
+			if (count > 0)
+			{
+				if (not first) { rv += ",\n"; } else { first = false; }
+				rv += "  \"" + nameserver().getTypeName(t) + "\": " + std::to_string(count);
+			}
+		}
+		rv += "\n}";
+		RETURNSTR(rv);
 	}
 
 	// -----------------------------------------------
