@@ -487,7 +487,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	}
 
 	// -----------------------------------------------
-	// AtomSpace.getIncoming({ "type": "ConceptNode", "name": "foo"})
+	// AtomSpace.getIncoming({"type": "Concept", "name": "foo"})
+	// AtomSpace.getIncoming({"type": "Concept", "name": "foo"}, "Evaluation")
 	if (gtinc == act)
 	{
 		GET_ATOM("[]");
