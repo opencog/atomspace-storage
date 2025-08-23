@@ -191,6 +191,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t settv = std::hash<std::string>{}("setTV");
 	static const size_t gtkey = std::hash<std::string>{}("getKeys");
 	static const size_t gtval = std::hash<std::string>{}("getValues");
+	static const size_t gtvak = std::hash<std::string>{}("getValueAtKey");
 	static const size_t stval = std::hash<std::string>{}("setValue");
 	static const size_t execu = std::hash<std::string>{}("execute");
 	static const size_t extra = std::hash<std::string>{}("extract");
@@ -545,6 +546,24 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		GET_ATOM("[]");
 		RETURNSTR(Json::encode_atom_values(h));
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.getValueAtKey({ "type": "ConceptNode", "name": "foo",
+	//                           "key": { "type": "PredicateNode", "name": "keewee" } })
+	// Returns the value at the specified key for the given atom
+	if (gtvak == act)
+	{
+		size_t save_pos = pos;
+		GET_ATOM("null");
+		epos = save_pos;
+		GET_KEY;
+
+		// Get the value at the key
+		ValuePtr v = h->getValue(k);
+		if (nullptr == v) RETURN("null");
+
+		RETURNSTR(Json::encode_value(v));
 	}
 
 	// -----------------------------------------------
