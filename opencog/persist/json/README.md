@@ -244,9 +244,9 @@ JSON WebSockets Demo
 --------------------
 The CogServer provides a WebSockets interface that can be used to create
 interactive web pages. Taake a look at the
-https://github.com/opencog/cogserver/master/tree/examples/websockets
+https://github.com/opencog/cogserver/tree/master/examples/websockets
 page for a basic WebSockets demo, and the
-https://github.com/opencog/cogserver/master/tree/examples/visualizer
+https://github.com/opencog/cogserver/tree/master/examples/visualizer
 for a simple AtomSpace visualizer demo.
 
 Using MCP
@@ -276,7 +276,7 @@ examples that actually work:
 
 Additional info can be found in the cogserver examples directory. This
 includes a CLAUDE.md file explaining Atomese.
-See https://github.com/opencog/cogserver/master/tree/examples/mcp for
+See https://github.com/opencog/cogserver/tree/master/examples/mcp for
 details.
 
 
