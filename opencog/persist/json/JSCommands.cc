@@ -133,26 +133,26 @@ static std::string retmsgerr(const std::string& errmsg)
 
 #define GET_ATOM(rv) \
 	Handle h = Json::decode_atom(cmd, pos, epos); \
-	if (nullptr == h) RETURN(rv); \
+	if (nullptr == h) reterr(cmd); \
 	h = as->get_atom(h); \
 	if (nullptr == h) RETURN(rv);
 
 #define ADD_ATOM \
 	Handle h = Json::decode_atom(cmd, pos, epos); \
-	if (nullptr == h) RETURN("false"); \
+	if (nullptr == h) reterr(cmd); \
 	h = as->add_atom(h); \
-	if (nullptr == h) RETURN("false");
+	if (nullptr == h) retmsgerr("No such Atom");
 
 #define GET_KEY \
 	pos = cmd.find("\"key\":", epos); \
-	if (std::string::npos == pos) RETURN("false"); \
+	if (std::string::npos == pos) reterr(cmd); \
 	pos += 6; \
 	epos = cmd.size(); \
 	Handle k = Json::decode_atom(cmd, pos, epos); \
-	if (nullptr == k) RETURN("false"); \
+	if (nullptr == k) reterr(cmd); \
 	k = as->add_atom(k); \
 	pos = cmd.find(',', epos); \
-	if (std::string::npos == pos) RETURN("false");
+	if (std::string::npos == pos) retmsgerr("No such Key");
 
 #define GET_VALUE \
 	pos = cmd.find("\"value\":", pos); \
@@ -160,12 +160,12 @@ static std::string retmsgerr(const std::string& errmsg)
 		pos += 8; \
 	else { \
 		pos = cmd.find("\"values\":", pos); \
-		if (std::string::npos == pos) RETURN("false"); \
+		if (std::string::npos == pos) reterr(cmd); \
 		pos += 9; \
 	} \
 	epos = cmd.size(); \
 	ValuePtr v = Json::decode_value(cmd, pos, epos); \
-	if (nullptr == v) RETURN("false");
+	if (nullptr == v) reterr(cmd);
 
 /// The cogserver provides a network API to send/receive Atoms, encoded
 /// as JSON, over the internet. This is NOT as efficient as the
@@ -555,7 +555,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gtvak == act)
 	{
 		size_t save_pos = pos;
-		GET_ATOM("null");
+		ADD_ATOM;
 		epos = save_pos;
 		GET_KEY;
 
