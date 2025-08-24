@@ -63,6 +63,10 @@ std::string McpPlugAtomSpace::get_tool_descriptions() const
 		"\"recursive\": {\"type\": \"boolean\", \"description\": \"Whether to get all supertypes recursively\"}}, "
 		"\"required\": [\"type\"]}");
 
+	// reportCounts
+	add_tool(json, "reportCounts", "A report of how many Atoms there are in the AtomSpace, organized by Atom type.",
+		"{\"type\": \"object\", \"properties\": {}, \"required\": []}");
+
 	// getAtoms
 	add_tool(json, "getAtoms", "Get all atoms of a specific type from the AtomSpace",
 		"{\"type\": \"object\", \"properties\": {"
@@ -133,6 +137,23 @@ std::string McpPlugAtomSpace::get_tool_descriptions() const
 		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}, "
 		"\"value\": {\"type\": \"object\", \"description\": \"The truth value to set\"}}, "
 		"\"required\": [\"type\", \"value\"]}");
+
+	// getKeys
+	add_tool(json, "getKey", "Get all keys attached to an atom",
+		"{\"type\": \"object\", \"properties\": {"
+		"\"type\": {\"type\": \"string\", \"description\": \"The atom type\"}, "
+		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
+		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}}, "
+		"\"required\": [\"type\"]}");
+
+	// getValueAtKey
+	add_tool(json, "getValueAtKey", "Get the value on an atom located at a given key",
+		"{\"type\": \"object\", \"properties\": {"
+		"\"type\": {\"type\": \"string\", \"description\": \"The atom type\"}, "
+		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
+		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}, "
+		"\"key\": {\"type\": \"object\", \"description\": \"The key atom\"}}, "
+		"\"required\": [\"type\", \"key\", \"value\"]}");
 
 	// getValues
 	add_tool(json, "getValues", "Get all values attached to an atom",
