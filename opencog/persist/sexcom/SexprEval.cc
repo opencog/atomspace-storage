@@ -85,10 +85,14 @@ std::string SexprEval::poll_result()
 void SexprEval::begin_eval()
 {
 	std::lock_guard<std::mutex> lock(_mtx);
+	size_t cnt = 0;
 	while (0 < _answer.size())
 	{
-		logger().warn("This shouldn't happen!");
+		logger().warn("SexprEval::begin_eval: This shouldn't happen!  Buffer not empty, size=%lu", _answer.size());
+
 		usleep(100);
+		cnt++;
+		if (10000 * 60 < cnt) break;
 	}
 	_answer.clear();
 }
