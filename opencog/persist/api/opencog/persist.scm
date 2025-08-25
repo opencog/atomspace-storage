@@ -165,7 +165,9 @@
        `*-open-*` to open a connection.
        `*-close-*` to close a connection.
        `*-monitor-*` to print connection information.
-")
+"
+	(PredicateNode "*-connected?-*")
+)
 
 (define*-public (cog-connected? #:optional (STORAGE (cog-storage-node)))
 "
