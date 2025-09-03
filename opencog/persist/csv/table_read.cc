@@ -26,6 +26,7 @@
 #include <iomanip>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/sort.hpp>
@@ -33,9 +34,7 @@
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/util/iostreamContainer.h>
 #include <opencog/util/oc_omp.h>
-#include <opencog/util/comprehension.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/BoolValue.h>
