@@ -22,15 +22,12 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <algorithm>
 #include <atomic>
+#include <cctype>
 #include <iomanip>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/range/algorithm/transform.hpp>
-#include <boost/range/algorithm/sort.hpp>
-#include <boost/range/irange.hpp>
+#include <sstream>
+#include <string>
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/exceptions.h>
@@ -46,6 +43,24 @@
 #include "table_read.h"
 
 using namespace opencog;
+
+// -------------------------------------------------------
+
+/**
+ * Trim whitespace from left and right.
+ */
+static inline void trim(std::string& str)
+{
+	size_t start = str.find_first_not_of(" \t\r\n");
+	if (start == std::string::npos) {
+		str.clear();
+		return;
+	}
+
+	// Trim from right
+	size_t end = str.find_last_not_of(" \t\r\n");
+	str = str.substr(start, end - start + 1);
+}
 
 // -------------------------------------------------------
 
@@ -111,42 +126,55 @@ std::istream& get_data_line(std::istream& is, std::string& line)
 
 // -------------------------------------------------------
 
-typedef boost::tokenizer<boost::escaped_list_separator<char>> table_tokenizer;
-
 /**
- * Take a row, return a tokenizer.  Tokenization uses the
- * separator characters comma, blank, tab (',', ' ' or '\t').
+ * CSV tokenizer that handles escaped strings with quotes.
+ * Supports separators: comma, tab, and space (',', '\t', ' ')
+ * Supports quoted fields with embedded separators
+ * Supports escape character '\' for quotes within quoted fields
  */
-static table_tokenizer get_row_tokenizer(const std::string& line)
+static std::vector<std::string> tokenizeRow(const std::string& line)
 {
-	typedef boost::escaped_list_separator<char> separator;
-	typedef boost::tokenizer<separator> tokenizer;
+	std::vector<std::string> result;
+	std::string current_token;
+	bool in_quotes = false;
+	bool escape_next = false;
 
-	// Tokenize line; currently, we allow tabs, commas, blanks.
-	static const separator sep("\\", ",\t ", "\"");
-	return tokenizer(line, sep);
-}
+	for (size_t i = 0; i < line.length(); ++i) {
+		char c = line[i];
 
-/**
- * Take a line and return a vector containing the elements parsed.
- */
-static std::vector<std::string> tokenizeRow (const std::string& line)
-{
-	table_tokenizer tok = get_row_tokenizer(line);
-	std::vector<std::string> res;
-	for (const std::string& t : tok)
-	{
-		// Trim away whitespace padding; failing to do this
-		// confuses stuff downstream.
-		std::string clean(t);
-		boost::trim(clean);
-
-		// Sometimes the tokenizer returns pure whitespace :-(
-		if (0 == clean.size()) continue;
-
-		res.push_back(clean);
+		if (escape_next) {
+			// If we're escaping, add the character as-is
+			current_token += c;
+			escape_next = false;
+		}
+		else if (c == '\\') {
+			// Escape character
+			escape_next = true;
+		}
+		else if (c == '"') {
+			// Toggle quote mode
+			in_quotes = !in_quotes;
+		}
+		else if (!in_quotes && (c == ',' || c == '\t' || c == ' ')) {
+			// We found a separator outside of quotes
+			// Trim and add the token if it's not empty
+			trim(current_token);
+			if (!current_token.empty())
+				result.push_back(current_token);
+			current_token.clear();
+		}
+		else {
+			// Regular character, add to current token
+			current_token += c;
+		}
 	}
-	return res;
+
+	// Don't forget the last token
+	trim(current_token);
+	if (!current_token.empty())
+		result.push_back(current_token);
+
+	return result;
 }
 
 // -------------------------------------------------------
@@ -175,7 +203,7 @@ static Type infer_type_from_token(const std::string& token)
     // Hope that we can cast this to a float point number.
     else {
         try {
-            boost::lexical_cast<double>(token);
+            std::stod(token);
             return FLOAT_VALUE;
         }
         catch(...) {
@@ -283,8 +311,11 @@ std::istream& istreamRawITable(std::istream& in, ITable& tab,
 	// Vector of indices [0, lines.size())
 	size_t ls = lines.size();
 	tab.resize(ls);
-	auto ir = boost::irange((size_t)0, ls);
-	std::vector<size_t> indices(ir.begin(), ir.end());
+	std::vector<size_t> indices;
+	indices.reserve(ls);
+	for (size_t i = 0; i < ls; ++i) {
+		indices.push_back(i);
+	}
 	OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
 
 	if (-1 != arity_fail_row) {
@@ -417,8 +448,8 @@ inferTableAttributes(std::istream& in,
 		}
 
 		// Infer type
-		boost::transform(types, tokens, types.begin(),
-		                 infer_type_from_token2);
+		std::transform(types.begin(), types.end(), tokens.begin(),
+		               types.begin(), infer_type_from_token2);
 	}
 
 	// Determine has_header
@@ -428,7 +459,7 @@ inferTableAttributes(std::istream& in,
 	if (has_header)
 	{
 		ignore_idxs = get_indices(ignore_features, maybe_header);
-		boost::sort(ignore_idxs);
+		std::sort(ignore_idxs.begin(), ignore_idxs.end());
 	}
 
 	in.seekg(beg);
@@ -454,8 +485,8 @@ static bool token_to_bool(const std::string& token)
 static double token_to_contin(const std::string& token)
 {
 	try {
-		return boost::lexical_cast<double>(token);
-	} catch (boost::bad_lexical_cast&) {
+		return std::stod(token);
+	} catch (std::invalid_argument&) {
 		throw SyntaxException(TRACE_INFO,
 			"Could not cast %s to floating point", token.c_str());
 	}
