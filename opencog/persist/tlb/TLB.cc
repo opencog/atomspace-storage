@@ -24,6 +24,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include "TLB.h"
 
+#include <algorithm>
+
 using namespace opencog;
 
 TLB::TLB(uuid_pool* allocator)

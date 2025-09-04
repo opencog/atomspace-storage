@@ -20,12 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <time.h>
-
-#include <functional>
-#include <iomanip>
-#include <string>
-
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
@@ -36,6 +30,13 @@
 
 #include "JSCommands.h"
 #include "Json.h"
+
+#include <time.h>
+
+#include <algorithm>
+#include <functional>
+#include <iomanip>
+#include <string>
 
 using namespace opencog;
 
