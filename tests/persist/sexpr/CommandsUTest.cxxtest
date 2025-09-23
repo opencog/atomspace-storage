@@ -179,7 +179,7 @@ void CommandsUTest::test_set_tv()
 	in = R"((cog-set-tv! (Concept "b") (stv 1 0)))";
 	out = com.interpret_command(in);
 
-	TruthValuePtr tv = h->getTruthValue();
+	TruthValuePtr tv = TruthValueCast(h->getValue(truth_key()));
 	printf("new TV is %s\n", tv->to_string().c_str());
 	TS_ASSERT(*tv == *TruthValue::DEFAULT_TV());
 
@@ -381,7 +381,7 @@ void CommandsUTest::test_set_values()
 	Handle h = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr != h);
 
-	TruthValuePtr tvp = h->getTruthValue();
+	TruthValuePtr tvp = TruthValueCast(h->getValue(truth_key()));
 	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, tvp->get_type());
 	double mean = tvp->get_mean();
 	double conf = tvp->get_confidence();

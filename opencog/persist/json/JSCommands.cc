@@ -594,7 +594,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_ATOM("[]");
 
 		std::string alist = "[{ \"value\": \n";
-		alist += Json::encode_value(ValueCast(h->getTruthValue()));
+		alist += Json::encode_value(h->getValue(truth_key()));
 		alist += "}]";
 		RETURNSTR(alist);
 	}

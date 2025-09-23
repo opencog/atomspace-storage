@@ -449,7 +449,7 @@ void JSCommandsUTest::test_getTVsetTV()
 	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": true}\n");
 
 	// Verify TV was set
-	TruthValuePtr tv = h->getTruthValue();
+	TruthValuePtr tv = TruthValueCast(h->getValue(truth_key()));
 	TS_ASSERT_DELTA(tv->get_mean(), 0.8, 0.001);
 	TS_ASSERT_DELTA(tv->get_confidence(), 0.9, 0.001);
 

@@ -321,7 +321,7 @@ void FastLoadUTest::test_stv_in_middle()
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
 
     // Verify the right TV was extracted.
-    TruthValuePtr stv = h->getTruthValue();
+    TruthValuePtr stv = TruthValueCast(h->getValue(truth_key()));
     TruthValuePtr estv = createSimpleTruthValue(0.9, 1);
     TS_ASSERT (*stv == *estv);
 
@@ -330,10 +330,10 @@ void FastLoadUTest::test_stv_in_middle()
     TS_ASSERT_EQUALS(oset[1]->get_type(), CONCEPT_NODE);
 
     estv = createSimpleTruthValue(0.4, 1);
-    TS_ASSERT (*estv == *oset[0]->getTruthValue());
+    TS_ASSERT (*estv == *oset[0]->getValue(truth_key()));
 
     estv = createSimpleTruthValue(0.3, 1);
-    TS_ASSERT (*estv == *oset[1]->getTruthValue());
+    TS_ASSERT (*estv == *oset[1]->getValue(truth_key()));
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
