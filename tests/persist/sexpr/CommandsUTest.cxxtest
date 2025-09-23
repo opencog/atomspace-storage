@@ -173,7 +173,7 @@ void CommandsUTest::test_set_tv()
 
 	// ------------
 	h = as->add_node(CONCEPT_NODE, "b");
-	as->set_truthvalue(h, createSimpleTruthValue(0.5, 0.5));
+	as->set_value(h, truth_key(), createSimpleTruthValue(0.5, 0.5));
 
 	// Clobber the TV on B back to Default
 	in = R"((cog-set-tv! (Concept "b") (stv 1 0)))";
@@ -420,7 +420,7 @@ void CommandsUTest::test_get_values()
 	h->setValue(key, createFloatValue(std::vector<double>{4, 5, 6}));
 	h->setValue(fiz, createStringValue(std::vector<std::string>{"a", "b"}));
 	h->setValue(buz, ValueCast(createCountTruthValue(0.3, 0.4, 42)));
-	h->setTruthValue(createSimpleTruthValue(0.1, 0.9));
+	h->setValue(truth_key(), createSimpleTruthValue(0.1, 0.9));
 
 	std::string in = "(cog-keys->alist (Concept \"a\"))";
 

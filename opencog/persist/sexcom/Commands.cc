@@ -494,7 +494,7 @@ std::string Commands::cog_set_tv(const std::string& cmd)
 	if (nullptr == ha) return "()"; // read-only atomspace.
 
 	TruthValuePtr tvp(TruthValueCast(vp));
-	ha = as->set_truthvalue(ha, tvp);
+	ha = as->set_value(ha, _truth_key, tvp);
 
 	// Make sure we can store truth values!
 	if (nullptr == _truth_key)

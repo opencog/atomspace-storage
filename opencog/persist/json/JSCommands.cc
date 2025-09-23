@@ -607,7 +607,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		ADD_ATOM;
 		GET_VALUE;
 
-		as->set_truthvalue(h, TruthValueCast(v));
+		as->set_value(h, truth_key(), TruthValueCast(v));
 		RETURN("true");
 	}
 
