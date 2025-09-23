@@ -174,15 +174,7 @@ static TruthValuePtr get_stv(const std::string& s,
 		return createSimpleTruthValue(
 					NumberNode::to_vector(s.substr(l+4, r-l-4)));
 
-	if (0 == s.compare(l, 18, "(SimpleTruthValue "))
-		return createSimpleTruthValue(
-					NumberNode::to_vector(s.substr(l+4, r-l-4)));
-
 	if (0 == s.compare(l, 5, "(ctv "))
-		return createCountTruthValue(
-					NumberNode::to_vector(s.substr(l+4, r-l-4)));
-
-	if (0 == s.compare(l, 17, "(CountTruthValue "))
 		return createCountTruthValue(
 					NumberNode::to_vector(s.substr(l+4, r-l-4)));
 
@@ -226,23 +218,18 @@ Handle Sexpr::decode_atom(const std::string& s,
 			if (islower(s[l1+1]))
 			{
 				// 0 == s.compare(l1, 5, "(stv ") or "(ctv"
-				if ('s' == s[l1+1] or 'c' == s[l1+1] or
-				    0 == s.compare(l1, 18, "(SimpleTruthValue ") or
-				    0 == s.compare(l1, 17, "(CountTruthValue "))
+				if ('s' == s[l1+1] or 'c' == s[l1+1])
 					stv = get_stv(s, l1, r1, line_cnt);
 				else
 					break;
 			}
-			else
+			else if (0 == s.compare(l1, 11, "(AtomSpace "))
 			{
-				if (0 == s.compare(l1, 11, "(AtomSpace "))
-				{
-					Handle hasp(decode_frame(Handle::UNDEFINED, s, l1, ascache));
-					as = (AtomSpace*) hasp.get();
-				}
-				else
-					outgoing.push_back(decode_atom(s, l1, r1, line_cnt, ascache));
+				Handle hasp(decode_frame(Handle::UNDEFINED, s, l1, ascache));
+				as = (AtomSpace*) hasp.get();
 			}
+			else
+				outgoing.push_back(decode_atom(s, l1, r1, line_cnt, ascache));
 
 			l = r1 + 1;
 		} while (l < r);
