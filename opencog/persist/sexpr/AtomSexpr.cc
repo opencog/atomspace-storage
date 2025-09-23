@@ -166,6 +166,7 @@ std::string Sexpr::get_node_name(const std::string& s,
 }
 
 /// Extract SimpleTruthValue and return that, else throw an error.
+/// This is a legacy function, it should eventually be purged.
 static TruthValuePtr get_stv(const std::string& s,
                              size_t l, size_t r, size_t line_cnt)
 {
@@ -173,7 +174,15 @@ static TruthValuePtr get_stv(const std::string& s,
 		return createSimpleTruthValue(
 					NumberNode::to_vector(s.substr(l+4, r-l-4)));
 
+	if (0 == s.compare(l, 18, "(SimpleTruthValue "))
+		return createSimpleTruthValue(
+					NumberNode::to_vector(s.substr(l+4, r-l-4)));
+
 	if (0 == s.compare(l, 5, "(ctv "))
+		return createCountTruthValue(
+					NumberNode::to_vector(s.substr(l+4, r-l-4)));
+
+	if (0 == s.compare(l, 17, "(CountTruthValue "))
 		return createCountTruthValue(
 					NumberNode::to_vector(s.substr(l+4, r-l-4)));
 
