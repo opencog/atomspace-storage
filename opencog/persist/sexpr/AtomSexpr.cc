@@ -226,7 +226,9 @@ Handle Sexpr::decode_atom(const std::string& s,
 			if (islower(s[l1+1]))
 			{
 				// 0 == s.compare(l1, 5, "(stv ") or "(ctv"
-				if ('s' == s[l1+1] or 'c' == s[l1+1])
+				if ('s' == s[l1+1] or 'c' == s[l1+1] or
+				    0 == s.compare(l1, 18, "(SimpleTruthValue ") or
+				    0 == s.compare(l1, 17, "(CountTruthValue "))
 					stv = get_stv(s, l1, r1, line_cnt);
 				else
 					break;
