@@ -32,7 +32,6 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/truthvalue/CountTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -174,10 +173,6 @@ static TruthValuePtr get_stv(const std::string& s,
 		return createSimpleTruthValue(
 					NumberNode::to_vector(s.substr(l+4, r-l-4)));
 
-	if (0 == s.compare(l, 5, "(ctv "))
-		return createCountTruthValue(
-					NumberNode::to_vector(s.substr(l+4, r-l-4)));
-
 	throw SyntaxException(TRACE_INFO,
 		"Syntax error at line %zu Unexpected markup: >>%s<< in expr %s",
 		line_cnt, s.substr(l, r-l+1).c_str(), s.c_str());
@@ -214,11 +209,10 @@ Handle Sexpr::decode_atom(const std::string& s,
 			// Atom names never start with lower-case.
 			// We allow (stv nn nn) to occur in the middle of a long
 			// sexpr, because apparently some users (agi-bio) do that.
-			// Also, (ctv nn nn nn) is sent by the cogserver.
 			if (islower(s[l1+1]))
 			{
-				// 0 == s.compare(l1, 5, "(stv ") or "(ctv"
-				if ('s' == s[l1+1] or 'c' == s[l1+1])
+				// 0 == s.compare(l1, 5, "(stv ")
+				if ('s' == s[l1+1])
 					stv = get_stv(s, l1, r1, line_cnt);
 				else
 					break;
