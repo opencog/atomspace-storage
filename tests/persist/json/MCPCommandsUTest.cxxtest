@@ -538,7 +538,7 @@ void MCPCommandsUTest::test_getTVsetTV()
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	TS_ASSERT(result.find("\"content\"") != std::string::npos);
 
-	// Get default TV
+	// There is no default TV
 	cmd = R"({ "tool": "getTV", "params": {"type": "ConceptNode", "name": "tvtest"}})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
@@ -546,7 +546,7 @@ void MCPCommandsUTest::test_getTVsetTV()
 	// Should return success with TV
 	TS_ASSERT(result.find("\"content\"") != std::string::npos);
 	TS_ASSERT(result.find("\"type\":\"text\"") != std::string::npos);
-	TS_ASSERT(result.find("SimpleTruthValue") != std::string::npos);
+	TS_ASSERT(result.find("null") != std::string::npos);
 
 	// Set a new TV
 	cmd = R"({ "tool": "setTV", "params": {"type": "ConceptNode", "name": "tvtest", "value": {"type": "SimpleTruthValue", "value": [0.8, 0.9]}}})";

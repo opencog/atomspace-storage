@@ -434,13 +434,13 @@ void JSCommandsUTest::test_getTVsetTV()
 	// Create a node
 	Handle h = as->add_node(CONCEPT_NODE, "tvtest");
 
-	// Get default TV
+	// By default, there is no TV
 	std::string cmd = "AtomSpace.getTV({\"type\": \"ConceptNode\", \"name\": \"tvtest\"})";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 
-	// Should return TV with default values
-	TS_ASSERT(result.find("SimpleTruthValue") != std::string::npos);
+	// There should be nothing.
+	TS_ASSERT(result.find("null") != std::string::npos);
 
 	// Set a new TV
 	cmd = "AtomSpace.setTV({\"type\": \"ConceptNode\", \"name\": \"tvtest\", \"value\": {\"type\": \"SimpleTruthValue\", \"value\": [0.8, 0.9]}})";

@@ -593,8 +593,11 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		GET_ATOM("[]");
 
+		ValuePtr v = h->getValue(truth_key());
+		if (nullptr == v) RETURN("null");
+
 		std::string alist = "[{ \"value\": \n";
-		alist += Json::encode_value(h->getValue(truth_key()));
+		alist += Json::encode_value(v);
 		alist += "}]";
 		RETURNSTR(alist);
 	}
