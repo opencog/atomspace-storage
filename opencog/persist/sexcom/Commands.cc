@@ -497,8 +497,7 @@ std::string Commands::cog_set_tv(const std::string& cmd)
 	if (nullptr == _truth_key)
 		_truth_key = as->add_atom(truth_key());
 
-	TruthValuePtr tvp(TruthValueCast(vp));
-	ha = as->set_value(ha, _truth_key, tvp);
+	ha = as->set_value(ha, _truth_key, vp);
 
 	if (_proxy and _proxy->have_storeValue)
 		_proxy->store_value(ha, _truth_key);
