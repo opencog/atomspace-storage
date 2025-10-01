@@ -1,4 +1,7 @@
 
+# The storage_types.h file is written to the build directory
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
+
 # -------------------------------
 # File-specific code.
 
