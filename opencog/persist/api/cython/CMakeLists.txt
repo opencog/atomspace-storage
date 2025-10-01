@@ -1,4 +1,6 @@
-#
+# The storage_types.h file is written to the build directory
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
+
 # Need to use -fno-strict-aliasing when compiling cython code, in order
 # to avoid nasty compiler warnings about aliasing.  Cython explicitly
 # performs aliasing, in order to emulate python object inheritance.
