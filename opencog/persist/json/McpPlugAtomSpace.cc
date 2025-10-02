@@ -121,23 +121,6 @@ std::string McpPlugAtomSpace::get_tool_descriptions() const
 		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}}, "
 		"\"required\": [\"type\"]}");
 
-	// getTV
-	add_tool(json, "getTV", "Get the truth value of an atom",
-		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type\"}, "
-		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
-		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}}, "
-		"\"required\": [\"type\"]}");
-
-	// setTV
-	add_tool(json, "setTV", "Set the truth value of an atom",
-		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type\"}, "
-		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
-		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}, "
-		"\"value\": {\"type\": \"object\", \"description\": \"The truth value to set\"}}, "
-		"\"required\": [\"type\", \"value\"]}");
-
 	// getKeys
 	add_tool(json, "getKey", "Get all keys attached to an atom",
 		"{\"type\": \"object\", \"properties\": {"

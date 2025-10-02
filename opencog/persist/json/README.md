@@ -160,15 +160,6 @@ AtomSpace.loadAtoms([
 ])
 ```
 
-* Get the TruthValue on Atom. Returns the value.
-```
-AtomSpace.getTV({"type": "Concept", "name": "foo"})
-```
-* Set the TruthValue on Atom. Returns true if successful, else false.
-```
-AtomSpace.setTV({ "type": "ConceptNode", "name": "foo", "value": { "type": "SimpleTruthValue", "value": [0.3, 0.4] } } )
-```
-
 * Set arbitrary Value on Atom. Returns true if successful, else false.
 ```
 AtomSpace.setValue({ "type": "ConceptNode", "name": "foo", "key": { "type": "PredicateNode", "name": "keewee" }, "value": { "type": "FloatValue", "value": [1, 2, 3] } } )
