@@ -30,6 +30,7 @@
 
 #include "JSCommands.h"
 #include "Json.h"
+#include <opencog/persist/sexpr/Sexpr.h>
 
 #include <time.h>
 
@@ -335,16 +336,28 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_TYPE;
 		GET_BOOL;
 
-		std::string rv = "[\n";
 		HandleSeq hset;
 		as->get_handles_by_type(hset, t, recursive);
-		bool first = true;
-		for (const Handle& h: hset)
+		std::string rv;
+		if (js_mode)
 		{
-			if (not first) { rv += ",\n"; } else { first = false; }
-			rv += Json::encode_atom(h, "  ");
+			// JSON format: array of atoms
+			rv = "[\n";
+			bool first = true;
+			for (const Handle& h: hset)
+			{
+				if (not first) { rv += ",\n"; } else { first = false; }
+				rv += Json::encode_atom(h, "  ");
+			}
+			rv += "]";
 		}
-		rv += "]";
+		else
+		{
+			rv = "(alist ";
+			for (const Handle& h: hset)
+				rv += Sexpr::encode_atom(h);
+			rv += ")";
+		}
 		RETURNSTR(rv);
 	}
 
@@ -511,14 +524,25 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		else
 			is = h->getIncomingSet();
 
-		bool first = true;
-		std::string alist = "[";
-		for (const Handle& hi : is)
+		std::string alist;
+		if (js_mode)
 		{
-			if (not first) { alist += ",\n"; } else { first = false; }
-			alist += Json::encode_atom(hi, "");
+			bool first = true;
+			alist = "[";
+			for (const Handle& hi : is)
+			{
+				if (not first) { alist += ",\n"; } else { first = false; }
+				alist += Json::encode_atom(hi, "");
+			}
+			alist += "]";
 		}
-		alist += "]";
+		else
+		{
+			alist = "(alist ";
+			for (const Handle& hi : is)
+				alist += Sexpr::encode_atom(hi);
+			alist += ")";
+		}
 		RETURNSTR(alist);
 	}
 
@@ -529,14 +553,25 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_ATOM("[]");
 		HandleSet keys = h->getKeys();
 
-		bool first = true;
-		std::string klist = "[";
-		for (const Handle& key : keys)
+		std::string klist;
+		if (js_mode)
 		{
-			if (not first) { klist += ",\n"; } else { first = false; }
-			klist += Json::encode_atom(key, "");
+			bool first = true;
+			klist = "[";
+			for (const Handle& key : keys)
+			{
+				if (not first) { klist += ",\n"; } else { first = false; }
+				klist += Json::encode_atom(key, "");
+			}
+			klist += "]";
 		}
-		klist += "]";
+		else
+		{
+			klist = "(alist ";
+			for (const Handle& key : keys)
+				klist += Sexpr::encode_atom(key);
+			klist += ")";
+		}
 		RETURNSTR(klist);
 	}
 
@@ -545,7 +580,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gtval == act)
 	{
 		GET_ATOM("[]");
-		RETURNSTR(Json::encode_atom_values(h));
+		std::string result = js_mode ? Json::encode_atom_values(h) : Sexpr::encode_atom_values(h);
+		RETURNSTR(result);
 	}
 
 	// -----------------------------------------------
@@ -563,7 +599,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		ValuePtr v = h->getValue(k);
 		if (nullptr == v) RETURN("null");
 
-		RETURNSTR(Json::encode_value(v));
+		std::string result = js_mode ? Json::encode_value(v) : Sexpr::encode_value(v);
+		RETURNSTR(result);
 	}
 
 	// -----------------------------------------------
@@ -594,7 +631,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		ADD_ATOM;
 
 		ValuePtr vp = h->execute();
-		RETURNSTR(Json::encode_value(vp));
+		std::string result = js_mode ? Json::encode_value(vp) : Sexpr::encode_value(vp);
+		RETURNSTR(result);
 	}
 
 	// -----------------------------------------------
