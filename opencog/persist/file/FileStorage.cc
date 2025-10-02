@@ -115,7 +115,7 @@ bool FileStorageNode::connected(void)
 	return nullptr != _fh;
 }
 
-void FileStorageNode::barrier(void)
+void FileStorageNode::barrier(AtomSpace*)
 {
 	if (_fh) fflush(_fh);
 }

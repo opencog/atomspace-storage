@@ -63,7 +63,7 @@ class FileStorageNode : public StorageNode
 		void storeValue(const Handle&, const Handle&);
 		void loadValue(const Handle&, const Handle&);
 		void loadType(AtomSpace*, Type);
-		void barrier();
+		void barrier(AtomSpace* = nullptr);
 
 		// Large-scale loads and saves
 		void loadAtomSpace(AtomSpace*); // Load entire contents of DB
