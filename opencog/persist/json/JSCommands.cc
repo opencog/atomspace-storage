@@ -303,8 +303,10 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		if (std::string::npos == epos) return reterr(cmd);
 	}
 
-	// Detect encoding preference (sexpr by default, json if requested)
-	bool use_sexpr = use_sexpr_encoding(cmd, epos);
+	// Detect encoding preference
+	// For JS mode: default to JSON for backward compatibility
+	// For MCP mode: default to sexpr, unless "encoding": "json" is specified
+	bool use_sexpr = js_mode ? false : use_sexpr_encoding(cmd, epos);
 
 	// -----------------------------------------------
 	// Get version
