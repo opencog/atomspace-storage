@@ -573,14 +573,25 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		else
 			is = h->getIncomingSet();
 
-		bool first = true;
-		std::string alist = "[";
-		for (const Handle& hi : is)
+		std::string alist;
+		if (use_sexpr)
 		{
-			if (not first) { alist += ",\n"; } else { first = false; }
-			alist += Json::encode_atom(hi, "");
+			alist = "(alist ";
+			for (const Handle& hi : is)
+				alist += Sexpr::encode_atom(hi);
+			alist += ")";
 		}
-		alist += "]";
+		else
+		{
+			bool first = true;
+			alist = "[";
+			for (const Handle& hi : is)
+			{
+				if (not first) { alist += ",\n"; } else { first = false; }
+				alist += Json::encode_atom(hi, "");
+			}
+			alist += "]";
+		}
 		RETURNSTR(alist);
 	}
 
@@ -591,14 +602,25 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_ATOM("[]");
 		HandleSet keys = h->getKeys();
 
-		bool first = true;
-		std::string klist = "[";
-		for (const Handle& key : keys)
+		std::string klist;
+		if (use_sexpr)
 		{
-			if (not first) { klist += ",\n"; } else { first = false; }
-			klist += Json::encode_atom(key, "");
+			klist = "(alist ";
+			for (const Handle& key : keys)
+				klist += Sexpr::encode_atom(key);
+			klist += ")";
 		}
-		klist += "]";
+		else
+		{
+			bool first = true;
+			klist = "[";
+			for (const Handle& key : keys)
+			{
+				if (not first) { klist += ",\n"; } else { first = false; }
+				klist += Json::encode_atom(key, "");
+			}
+			klist += "]";
+		}
 		RETURNSTR(klist);
 	}
 
