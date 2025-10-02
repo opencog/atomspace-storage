@@ -65,28 +65,6 @@ static bool use_sexpr_encoding(const std::string& cmd, size_t epos)
 	return true; // Default to sexpr for any other value
 }
 
-// Helper functions to encode atoms and values based on format preference
-static std::string encode_atom_with_format(const Handle& h, bool use_sexpr, const std::string& indent = "")
-{
-	if (use_sexpr)
-		return Sexpr::encode_atom(h);
-	return Json::encode_atom(h, indent);
-}
-
-static std::string encode_value_with_format(const ValuePtr& v, bool use_sexpr)
-{
-	if (use_sexpr)
-		return Sexpr::encode_value(v);
-	return Json::encode_value(v);
-}
-
-static std::string encode_atom_values_with_format(const Handle& h, bool use_sexpr)
-{
-	if (use_sexpr)
-		return Sexpr::encode_atom_values(h);
-	return Json::encode_atom_values(h);
-}
-
 // Helper function to parse boolean parameters from commands
 static bool parse_bool_param(const std::string& cmd, size_t& pos, size_t epos, bool js_mode)
 {
