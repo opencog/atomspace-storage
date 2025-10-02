@@ -325,6 +325,9 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		if (std::string::npos == epos) return reterr(cmd);
 	}
 
+	// Detect encoding preference (sexpr by default, json if requested)
+	bool use_sexpr = use_sexpr_encoding(cmd, epos);
+
 	// -----------------------------------------------
 	// Get version
 	// AtomSpace.version()
@@ -382,16 +385,28 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_TYPE;
 		GET_BOOL;
 
-		std::string rv = "[\n";
 		HandleSeq hset;
 		as->get_handles_by_type(hset, t, recursive);
-		bool first = true;
-		for (const Handle& h: hset)
+		std::string rv;
+		if (use_sexpr)
 		{
-			if (not first) { rv += ",\n"; } else { first = false; }
-			rv += Json::encode_atom(h, "  ");
+			rv = "(alist ";
+			for (const Handle& h: hset)
+				rv += Sexpr::encode_atom(h);
+			rv += ")";
 		}
-		rv += "]";
+		else
+		{
+			// JSON format: array of atoms
+			rv = "[\n";
+			bool first = true;
+			for (const Handle& h: hset)
+			{
+				if (not first) { rv += ",\n"; } else { first = false; }
+				rv += Json::encode_atom(h, "  ");
+			}
+			rv += "]";
+		}
 		RETURNSTR(rv);
 	}
 
