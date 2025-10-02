@@ -75,102 +75,84 @@ std::string McpPlugAtomSpace::get_tool_descriptions() const
 		"\"required\": [\"type\"]}");
 
 	// haveNode
-	add_tool(json, "haveNode", "Check if a node with the given type and name exists",
+	add_tool(json, "haveNode", "Check if a node exists in the AtomSpace",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The node type\"}, "
-		"\"name\": {\"type\": \"string\", \"description\": \"The name of the node\"}}, "
-		"\"required\": [\"type\", \"name\"]}");
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the node, e.g. (Concept \\\"cat\\\")\"}}, "
+		"\"required\": [\"atomese\"]}");
 
 	// haveLink
-	add_tool(json, "haveLink", "Check if a link with the given type and outgoing set exists",
+	add_tool(json, "haveLink", "Check if a link exists in the AtomSpace",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The link type\"}, "
-		"\"outgoing\": {\"type\": \"array\", \"description\": \"Array of atom specifications\"}}, "
-		"\"required\": [\"type\", \"outgoing\"]}");
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the link, e.g. (List (Concept \\\"a\\\") (Concept \\\"b\\\"))\"}}, "
+		"\"required\": [\"atomese\"]}");
 
 	// haveAtom
 	add_tool(json, "haveAtom", "Check if an atom exists in the AtomSpace",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type\"}, "
-		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
-		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}}, "
-		"\"required\": [\"type\"]}");
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom\"}}, "
+		"\"required\": [\"atomese\"]}");
 
 	// makeAtom
 	add_tool(json, "makeAtom", "Create an atom in the AtomSpace",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type to create\"}, "
-		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
-		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}}, "
-		"\"required\": [\"type\"]}");
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom to create\"}}, "
+		"\"required\": [\"atomese\"]}");
 
 	// loadAtoms
 	add_tool(json, "loadAtoms", "Create multiple atoms in the AtomSpace",
 		"{\"type\": \"object\", \"properties\": {"
 		"\"atoms\": {\"type\": \"array\", \"description\": \"Array of atom specifications to create\", "
 		"\"items\": {\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\"}, \"name\": {\"type\": \"string\"}, "
-		"\"outgoing\": {\"type\": \"array\"}}, \"required\": [\"type\"]}}}, "
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom\"}}, \"required\": [\"atomese\"]}}}, "
 		"\"required\": [\"atoms\"]}");
 
 	// getIncoming
 	add_tool(json, "getIncoming", "Get all links that contain a given atom in their outgoing set",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type\"}, "
-		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
-		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}}, "
-		"\"required\": [\"type\"]}");
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom\"}}, "
+		"\"required\": [\"atomese\"]}");
 
 	// getKeys
 	add_tool(json, "getKeys", "Get all keys attached to an atom",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type\"}, "
-		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
-		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}}, "
-		"\"required\": [\"type\"]}");
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom\"}}, "
+		"\"required\": [\"atomese\"]}");
 
 	// getValueAtKey
 	add_tool(json, "getValueAtKey", "Get the value on an atom located at a given key",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type\"}, "
-		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
-		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}, "
-		"\"key\": {\"type\": \"object\", \"description\": \"The key atom\"}}, "
-		"\"required\": [\"type\", \"key\", \"value\"]}");
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom\"}, "
+		"\"key\": {\"type\": \"object\", \"properties\": {"
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the key atom\"}}, \"required\": [\"atomese\"]}}, "
+		"\"required\": [\"atomese\", \"key\"]}");
 
 	// getValues
 	add_tool(json, "getValues", "Get all values attached to an atom",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type\"}, "
-		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
-		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}}, "
-		"\"required\": [\"type\"]}");
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom\"}}, "
+		"\"required\": [\"atomese\"]}");
 
 	// setValue
 	add_tool(json, "setValue", "Set a value on an atom with a given key",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type\"}, "
-		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
-		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}, "
-		"\"key\": {\"type\": \"object\", \"description\": \"The key atom\"}, "
-		"\"value\": {\"type\": \"object\", \"description\": \"The value to set\"}}, "
-		"\"required\": [\"type\", \"key\", \"value\"]}");
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom\"}, "
+		"\"key\": {\"type\": \"object\", \"properties\": {"
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the key atom\"}}, \"required\": [\"atomese\"]}, "
+		"\"value\": {\"type\": \"object\", \"description\": \"The value to set (FloatValue, StringValue, etc.)\"}}, "
+		"\"required\": [\"atomese\", \"key\", \"value\"]}");
 
 	// execute
 	add_tool(json, "execute", "Execute an executable atom and get the result",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The executable atom type\"}, "
-		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set\"}}, "
-		"\"required\": [\"type\"]}");
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the executable atom\"}}, "
+		"\"required\": [\"atomese\"]}");
 
 	// extract
 	add_tool(json, "extract", "Remove an atom from the AtomSpace",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type\"}, "
-		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
-		"\"outgoing\": {\"type\": \"array\", \"description\": \"The outgoing set (for links)\"}, "
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom to remove\"}, "
 		"\"recursive\": {\"type\": \"boolean\", \"description\": \"Whether to recursively remove\"}}, "
-		"\"required\": [\"type\"]}", true);  // last = true
+		"\"required\": [\"atomese\"]}", true);  // last = true
 
 	json += "]";
 	return json;
