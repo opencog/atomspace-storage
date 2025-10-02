@@ -171,7 +171,7 @@ void MCPCommandsUTest::test_getAtoms()
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for getAtoms Node (no subclass): %s", result.c_str());
 	TS_ASSERT(result.find("\"content\"") != std::string::npos);
-	TS_ASSERT(extractMCPContent(result).find("[") == 0);
+	TS_ASSERT(extractMCPContent(result).find("(alist") == 0);
 	// Should be empty - no direct Node instances
 	TS_ASSERT(result.find("\"test1\"") == std::string::npos);
 
@@ -329,7 +329,7 @@ void MCPCommandsUTest::test_makeAtom()
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for getAtoms: %s", result.c_str());
 	TS_ASSERT(result.find("\"content\"") != std::string::npos);
-	TS_ASSERT(extractMCPContent(result).find("\"name\": \"foo\"") != std::string::npos);
+	TS_ASSERT(extractMCPContent(result).find("(ConceptNode \"foo\")") != std::string::npos);
 
 	// Also verify with haveNode
 	cmd = R"({ "tool": "haveNode", "params": {"type": "Concept", "name": "foo"}})";
@@ -363,7 +363,7 @@ void MCPCommandsUTest::test_makeAtom()
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for getAtoms PredicateNode: %s", result.c_str());
 	TS_ASSERT(result.find("\"content\"") != std::string::npos);
-	TS_ASSERT(extractMCPContent(result).find("\"name\": \"test_predicate\"") != std::string::npos);
+	TS_ASSERT(extractMCPContent(result).find("(PredicateNode \"test_predicate\")") != std::string::npos);
 
 	// Test parameter order independence for nodes (name before type)
 	logger().info("Testing parameter order independence...");
