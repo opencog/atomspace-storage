@@ -122,7 +122,7 @@ std::string McpPlugAtomSpace::get_tool_descriptions() const
 		"\"required\": [\"type\"]}");
 
 	// getKeys
-	add_tool(json, "getKey", "Get all keys attached to an atom",
+	add_tool(json, "getKeys", "Get all keys attached to an atom",
 		"{\"type\": \"object\", \"properties\": {"
 		"\"type\": {\"type\": \"string\", \"description\": \"The atom type\"}, "
 		"\"name\": {\"type\": \"string\", \"description\": \"The name (for nodes)\"}, "
