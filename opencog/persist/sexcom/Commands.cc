@@ -479,33 +479,6 @@ std::string Commands::cog_set_values(const std::string& cmd)
 }
 
 // -----------------------------------------------
-// (cog-set-tv! (Concept "foo") (stv 1 0))
-// (cog-set-tv! (Concept "foo") (stv 1 0) (AtomSpace "foo"))
-std::string Commands::cog_set_tv(const std::string& cmd)
-{
-	size_t pos = 0;
-	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
-	ValuePtr vp = Sexpr::decode_value(cmd, ++pos);
-
-	// Search for optional AtomSpace argument
-	AtomSpace* as = get_opt_as(cmd, pos);
-
-	Handle ha = as->add_atom(h);
-	if (nullptr == ha) return "()"; // read-only atomspace.
-
-	// Make sure we can store truth values!
-	if (nullptr == _truth_key)
-		_truth_key = as->add_atom(truth_key());
-
-	ha = as->set_value(ha, _truth_key, vp);
-
-	if (_proxy and _proxy->have_storeValue)
-		_proxy->store_value(ha, _truth_key);
-
-	return "()";
-}
-
-// -----------------------------------------------
 // (cog-update-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
 std::string Commands::cog_update_value(const std::string& cmd)
 {

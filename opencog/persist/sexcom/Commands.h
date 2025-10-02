@@ -89,7 +89,6 @@ public:
 	std::string cog_extract_recursive(const std::string&);
 	std::string cog_set_value(const std::string&);
 	std::string cog_set_values(const std::string&);
-	std::string cog_set_tv(const std::string&);
 	std::string cog_update_value(const std::string&);
 
 	// Misc stuff.
