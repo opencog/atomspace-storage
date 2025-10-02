@@ -629,7 +629,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gtval == act)
 	{
 		GET_ATOM("[]");
-		RETURNSTR(Json::encode_atom_values(h));
+		std::string result = use_sexpr ? Sexpr::encode_atom_values(h) : Json::encode_atom_values(h);
+		RETURNSTR(result);
 	}
 
 	// -----------------------------------------------
@@ -647,7 +648,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		ValuePtr v = h->getValue(k);
 		if (nullptr == v) RETURN("null");
 
-		RETURNSTR(Json::encode_value(v));
+		std::string result = use_sexpr ? Sexpr::encode_value(v) : Json::encode_value(v);
+		RETURNSTR(result);
 	}
 
 	// -----------------------------------------------
@@ -678,7 +680,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		ADD_ATOM;
 
 		ValuePtr vp = h->execute();
-		RETURNSTR(Json::encode_value(vp));
+		std::string result = use_sexpr ? Sexpr::encode_value(vp) : Json::encode_value(vp);
+		RETURNSTR(result);
 	}
 
 	// -----------------------------------------------
