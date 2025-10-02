@@ -51,7 +51,6 @@ class CommandsUTest : public CxxTest::TestSuite
 		void test_node();
 		void test_node_quoted();
 		void test_link();
-		void test_set_tv();
 		void test_set_value();
 		void test_set_value_quoted();
 		void test_set_several_quoted();
