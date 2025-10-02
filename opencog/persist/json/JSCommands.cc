@@ -41,30 +41,6 @@
 
 using namespace opencog;
 
-// Helper function to detect encoding preference
-// Returns true if sexpr encoding requested, false if json encoding requested
-// Default is sexpr (returns true)
-static bool use_sexpr_encoding(const std::string& cmd, size_t epos)
-{
-	// Look for "encoding": "json" or "encoding": "sexpr" in the command
-	size_t enc_pos = cmd.find("\"encoding\"", 0);
-	if (std::string::npos == enc_pos or enc_pos > epos)
-		return true; // Default to sexpr
-
-	enc_pos = cmd.find(':', enc_pos);
-	if (std::string::npos == enc_pos or enc_pos > epos)
-		return true;
-
-	enc_pos = cmd.find_first_not_of(": \n\t\"", enc_pos);
-	if (std::string::npos == enc_pos or enc_pos > epos)
-		return true;
-
-	if (0 == cmd.compare(enc_pos, 4, "json"))
-		return false;
-
-	return true; // Default to sexpr for any other value
-}
-
 // Helper function to parse boolean parameters from commands
 static bool parse_bool_param(const std::string& cmd, size_t& pos, size_t epos, bool js_mode)
 {
@@ -303,11 +279,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		if (std::string::npos == epos) return reterr(cmd);
 	}
 
-	// Detect encoding preference
-	// For JS mode: default to JSON for backward compatibility
-	// For MCP mode: default to sexpr, unless "encoding": "json" is specified
-	bool use_sexpr = js_mode ? false : use_sexpr_encoding(cmd, epos);
-
 	// -----------------------------------------------
 	// Get version
 	// AtomSpace.version()
@@ -368,14 +339,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		HandleSeq hset;
 		as->get_handles_by_type(hset, t, recursive);
 		std::string rv;
-		if (use_sexpr)
-		{
-			rv = "(alist ";
-			for (const Handle& h: hset)
-				rv += Sexpr::encode_atom(h);
-			rv += ")";
-		}
-		else
+		if (js_mode)
 		{
 			// JSON format: array of atoms
 			rv = "[\n";
@@ -386,6 +350,13 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 				rv += Json::encode_atom(h, "  ");
 			}
 			rv += "]";
+		}
+		else
+		{
+			rv = "(alist ";
+			for (const Handle& h: hset)
+				rv += Sexpr::encode_atom(h);
+			rv += ")";
 		}
 		RETURNSTR(rv);
 	}
@@ -554,14 +525,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			is = h->getIncomingSet();
 
 		std::string alist;
-		if (use_sexpr)
-		{
-			alist = "(alist ";
-			for (const Handle& hi : is)
-				alist += Sexpr::encode_atom(hi);
-			alist += ")";
-		}
-		else
+		if (js_mode)
 		{
 			bool first = true;
 			alist = "[";
@@ -571,6 +535,13 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 				alist += Json::encode_atom(hi, "");
 			}
 			alist += "]";
+		}
+		else
+		{
+			alist = "(alist ";
+			for (const Handle& hi : is)
+				alist += Sexpr::encode_atom(hi);
+			alist += ")";
 		}
 		RETURNSTR(alist);
 	}
@@ -583,14 +554,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		HandleSet keys = h->getKeys();
 
 		std::string klist;
-		if (use_sexpr)
-		{
-			klist = "(alist ";
-			for (const Handle& key : keys)
-				klist += Sexpr::encode_atom(key);
-			klist += ")";
-		}
-		else
+		if (js_mode)
 		{
 			bool first = true;
 			klist = "[";
@@ -601,6 +565,13 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			}
 			klist += "]";
 		}
+		else
+		{
+			klist = "(alist ";
+			for (const Handle& key : keys)
+				klist += Sexpr::encode_atom(key);
+			klist += ")";
+		}
 		RETURNSTR(klist);
 	}
 
@@ -609,7 +580,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gtval == act)
 	{
 		GET_ATOM("[]");
-		std::string result = use_sexpr ? Sexpr::encode_atom_values(h) : Json::encode_atom_values(h);
+		std::string result = js_mode ? Json::encode_atom_values(h) : Sexpr::encode_atom_values(h);
 		RETURNSTR(result);
 	}
 
@@ -628,7 +599,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		ValuePtr v = h->getValue(k);
 		if (nullptr == v) RETURN("null");
 
-		std::string result = use_sexpr ? Sexpr::encode_value(v) : Json::encode_value(v);
+		std::string result = js_mode ? Json::encode_value(v) : Sexpr::encode_value(v);
 		RETURNSTR(result);
 	}
 
@@ -660,7 +631,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		ADD_ATOM;
 
 		ValuePtr vp = h->execute();
-		std::string result = use_sexpr ? Sexpr::encode_value(vp) : Json::encode_value(vp);
+		std::string result = js_mode ? Json::encode_value(vp) : Sexpr::encode_value(vp);
 		RETURNSTR(result);
 	}
 
