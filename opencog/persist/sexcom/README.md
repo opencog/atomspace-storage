@@ -73,7 +73,6 @@ cog_extract -> remove_atom =>> removeAtom
 cog_extract_recursive -> remove_atom
 cog_set_value -> store_value =>> storeValue
 cog_set_values -> store_atom =>> storeAtom
-cog_set_tv -> store_value =>> storeValue
 cog_update_value -> update_value =>> updateValue
 
 Misc:

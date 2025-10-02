@@ -74,7 +74,6 @@ Dispatcher::Dispatcher(void)
 	MASH(recur, "cog-extract-recursive!", cog_extract_recursive);
 	MASH(stval, "cog-set-value!",         cog_set_value);
 	MASH(svals, "cog-set-values!",        cog_set_values);
-	MASH(settv, "cog-set-tv!",            cog_set_tv);
 
 	MASH(dfine, "define",                 cog_define);
 	MASH(ping,  "ping)",                  cog_ping);

@@ -151,42 +151,6 @@ void CommandsUTest::test_link()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-// Test cog-set-tv!
-void CommandsUTest::test_set_tv()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	std::string in = R"((cog-set-tv! (Concept "a") (stv 1 0)))";
-
-	Dispatcher com;
-	com.set_base_space(as);
-	std::string out = com.interpret_command(in);
-	printf("Got %s\n", out.c_str());
-
-	// Two, because its the Concept, and the Predicate "TruthValueKey"
-	printf("AtomSpace is %s\n", as->to_string().c_str());
-	TS_ASSERT_EQUALS(2, as->get_size());
-	TS_ASSERT(0 == out.compare("()"));
-
-	Handle h = as->get_node(CONCEPT_NODE, "a");
-	TS_ASSERT(nullptr != h);
-
-	// ------------
-	h = as->add_node(CONCEPT_NODE, "b");
-	as->set_value(h, truth_key(), createSimpleTruthValue(0.5, 0.5));
-
-	// Clobber the TV on B
-	in = R"((cog-set-tv! (Concept "b") (stv 1 0)))";
-	out = com.interpret_command(in);
-
-	TruthValuePtr tv = TruthValueCast(h->getValue(truth_key()));
-	printf("new TV is %s\n", tv->to_string().c_str());
-	TS_ASSERT(tv->get_mean() == 1.0);
-	TS_ASSERT(tv->get_confidence() == 0.0);
-
-	logger().info("END TEST: %s", __FUNCTION__);
-}
-
 // Test cog-set-value!
 void CommandsUTest::test_set_value()
 {

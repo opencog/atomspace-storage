@@ -87,7 +87,6 @@ public:
 	///    cog-extract-recursive!
 	///    cog-set-value!
 	///    cog-set-values!
-	///    cog-set-tv!
 	///    cog-update-value!
 	///
 	///    ping

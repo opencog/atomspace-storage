@@ -12,7 +12,7 @@ install(EXPORT AtomSpaceStorageTargets
 	DESTINATION ${ConfigPackageLocation}
 )
 
-SET(SEMANTIC_VERSION 4.1.0)
+SET(SEMANTIC_VERSION 4.2.0)
 
 configure_package_config_file(AtomSpaceStorageConfig.cmake.in
 	${CMAKE_CURRENT_BINARY_DIR}/AtomSpaceStorageConfig.cmake

@@ -188,8 +188,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t makea = std::hash<std::string>{}("makeAtom");
 	static const size_t loada = std::hash<std::string>{}("loadAtoms");
 	static const size_t gtinc = std::hash<std::string>{}("getIncoming");
-	static const size_t gettv = std::hash<std::string>{}("getTV");
-	static const size_t settv = std::hash<std::string>{}("setTV");
 	static const size_t gtkey = std::hash<std::string>{}("getKeys");
 	static const size_t gtval = std::hash<std::string>{}("getValues");
 	static const size_t gtvak = std::hash<std::string>{}("getValueAtKey");
@@ -584,33 +582,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_VALUE;
 
 		as->set_value(h, k, v);
-		RETURN("true");
-	}
-
-	// -----------------------------------------------
-	// AtomSpace.getTV({ "type": "ConceptNode", "name": "foo"})
-	if (gettv == act)
-	{
-		GET_ATOM("[]");
-
-		ValuePtr v = h->getValue(truth_key());
-		if (nullptr == v) RETURN("null");
-
-		std::string alist = "[{ \"value\": \n";
-		alist += Json::encode_value(v);
-		alist += "}]";
-		RETURNSTR(alist);
-	}
-
-	// -----------------------------------------------
-	// AtomSpace.setTV({ "type": "ConceptNode", "name": "foo",
-	//     "value": { "type": "SimpleTruthValue", "value": [0.2, 0.3] } } )
-	if (settv == act)
-	{
-		ADD_ATOM;
-		GET_VALUE;
-
-		as->set_value(h, truth_key(), v);
 		RETURN("true");
 	}
 
