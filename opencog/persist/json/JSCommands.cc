@@ -30,6 +30,7 @@
 
 #include "JSCommands.h"
 #include "Json.h"
+#include <opencog/persist/sexpr/Sexpr.h>
 
 #include <time.h>
 
@@ -39,6 +40,52 @@
 #include <string>
 
 using namespace opencog;
+
+// Helper function to detect encoding preference
+// Returns true if sexpr encoding requested, false if json encoding requested
+// Default is sexpr (returns true)
+static bool use_sexpr_encoding(const std::string& cmd, size_t epos)
+{
+	// Look for "encoding": "json" or "encoding": "sexpr" in the command
+	size_t enc_pos = cmd.find("\"encoding\"", 0);
+	if (std::string::npos == enc_pos or enc_pos > epos)
+		return true; // Default to sexpr
+
+	enc_pos = cmd.find(':', enc_pos);
+	if (std::string::npos == enc_pos or enc_pos > epos)
+		return true;
+
+	enc_pos = cmd.find_first_not_of(": \n\t\"", enc_pos);
+	if (std::string::npos == enc_pos or enc_pos > epos)
+		return true;
+
+	if (0 == cmd.compare(enc_pos, 4, "json"))
+		return false;
+
+	return true; // Default to sexpr for any other value
+}
+
+// Helper functions to encode atoms and values based on format preference
+static std::string encode_atom_with_format(const Handle& h, bool use_sexpr, const std::string& indent = "")
+{
+	if (use_sexpr)
+		return Sexpr::encode_atom(h);
+	return Json::encode_atom(h, indent);
+}
+
+static std::string encode_value_with_format(const ValuePtr& v, bool use_sexpr)
+{
+	if (use_sexpr)
+		return Sexpr::encode_value(v);
+	return Json::encode_value(v);
+}
+
+static std::string encode_atom_values_with_format(const Handle& h, bool use_sexpr)
+{
+	if (use_sexpr)
+		return Sexpr::encode_atom_values(h);
+	return Json::encode_atom_values(h);
+}
 
 // Helper function to parse boolean parameters from commands
 static bool parse_bool_param(const std::string& cmd, size_t& pos, size_t epos, bool js_mode)
