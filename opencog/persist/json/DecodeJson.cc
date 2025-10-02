@@ -488,6 +488,33 @@ ValuePtr Json::decode_value(const std::string& s,
 	l = s.find("{", l);
 	if (std::string::npos == l) return nullptr;
 
+	// Find the end of this JSON object
+	size_t obj_start = l;
+	size_t obj_end = find_json_end(s, obj_start);
+	if (std::string::npos == obj_end) return nullptr;
+
+	// Check for "atomese" field - if present, decode as s-expression
+	size_t apos = find_top_level_field(s, "atomese", obj_start, obj_end);
+	if (std::string::npos != apos) {
+		// Find the start of the string value
+		apos = s.find_first_not_of(" \n\t", apos);
+		if (std::string::npos != apos && '"' == s[apos]) {
+			// Extract the quoted string and unescape it
+			std::stringstream ss;
+			ss << s.substr(apos);
+			std::string sexpr_str;
+			ss >> std::quoted(sexpr_str);
+
+			// Decode using s-expression decoder
+			size_t sexpr_pos = 0;
+			ValuePtr v = Sexpr::decode_value(sexpr_str, sexpr_pos);
+
+			// Update ro to point after the closing brace of the JSON object
+			ro = obj_end;
+			return v;
+		}
+	}
+
 	size_t tpos = s.find("\"type\":", l);
 	if (std::string::npos == tpos) return nullptr;
 	tpos += 7;  // skip past "type":
