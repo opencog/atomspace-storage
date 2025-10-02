@@ -9,6 +9,7 @@ ADD_LIBRARY (json SHARED
 )
 
 TARGET_LINK_LIBRARIES(json
+	sexpr
 	atomspace
 	execution
 	atombase

@@ -1,0 +1,187 @@
+/*
+ * SexTunnelUTest.cxxtest
+ * Test s-expression tunneling through JSON
+ *
+ * Copyright (c) 2025 Linas Vepstas
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/StringValue.h>
+
+#include "opencog/persist/json/Json.h"
+
+using namespace opencog;
+
+class SexTunnelUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpacePtr as;
+
+public:
+	SexTunnelUTest()
+	{
+		logger().set_print_to_stdout_flag(true);
+		as = createAtomSpace();
+	}
+
+	void setUp() { as->clear(); }
+	void tearDown() {}
+
+	void test_simple_node();
+	void test_simple_link();
+	void test_escaped_quotes();
+	void test_nested_expression();
+	void test_regular_json_still_works();
+	void test_value_float();
+	void test_value_string();
+};
+
+// Test simple node in s-expression format
+void SexTunnelUTest::test_simple_node()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string json = R"jsn({"atomese": "(Concept \"test\")"})jsn";
+	Handle h = Json::decode_atom(json);
+
+	TS_ASSERT(h != nullptr);
+	TS_ASSERT_EQUALS(h->get_type(), CONCEPT_NODE);
+	TS_ASSERT_EQUALS(h->get_name(), "test");
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test simple link in s-expression format
+void SexTunnelUTest::test_simple_link()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string json = R"jsn({"atomese": "(List (Concept \"a\") (Concept \"b\"))"})jsn";
+	Handle h = Json::decode_atom(json);
+
+	TS_ASSERT(h != nullptr);
+	TS_ASSERT_EQUALS(h->get_type(), LIST_LINK);
+	TS_ASSERT_EQUALS(h->get_arity(), 2);
+
+	HandleSeq oset = h->getOutgoingSet();
+	TS_ASSERT_EQUALS(oset[0]->get_name(), "a");
+	TS_ASSERT_EQUALS(oset[1]->get_name(), "b");
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test s-expression with escaped quotes
+void SexTunnelUTest::test_escaped_quotes()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string json = R"jsn({"atomese": "(Evaluation (Predicate \"foo\") (List (Concept \"bar\")))"})jsn";
+	Handle h = Json::decode_atom(json);
+
+	TS_ASSERT(h != nullptr);
+	TS_ASSERT_EQUALS(h->get_type(), EVALUATION_LINK);
+	TS_ASSERT_EQUALS(h->get_arity(), 2);
+
+	HandleSeq oset = h->getOutgoingSet();
+	TS_ASSERT_EQUALS(oset[0]->get_type(), PREDICATE_NODE);
+	TS_ASSERT_EQUALS(oset[0]->get_name(), "foo");
+	TS_ASSERT_EQUALS(oset[1]->get_type(), LIST_LINK);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test nested expression
+void SexTunnelUTest::test_nested_expression()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string json = R"jsn({"atomese": "(Inheritance (Concept \"cat\") (Concept \"mammal\"))"})jsn";
+	Handle h = Json::decode_atom(json);
+
+	TS_ASSERT(h != nullptr);
+	TS_ASSERT_EQUALS(h->get_type(), INHERITANCE_LINK);
+
+	HandleSeq oset = h->getOutgoingSet();
+	TS_ASSERT_EQUALS(oset[0]->get_name(), "cat");
+	TS_ASSERT_EQUALS(oset[1]->get_name(), "mammal");
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test that regular JSON format still works
+void SexTunnelUTest::test_regular_json_still_works()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string json = R"({"type": "ConceptNode", "name": "regular"})";
+	Handle h = Json::decode_atom(json);
+
+	TS_ASSERT(h != nullptr);
+	TS_ASSERT_EQUALS(h->get_type(), CONCEPT_NODE);
+	TS_ASSERT_EQUALS(h->get_name(), "regular");
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test FloatValue in s-expression format
+void SexTunnelUTest::test_value_float()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string json = R"jsn({"atomese": "(FloatValue 1.5 2.5 3.5)"})jsn";
+	size_t lo = 0, ro = json.size();
+	ValuePtr v = Json::decode_value(json, lo, ro);
+
+	TS_ASSERT(v != nullptr);
+	TS_ASSERT_EQUALS(v->get_type(), FLOAT_VALUE);
+
+	FloatValuePtr fv = FloatValueCast(v);
+	TS_ASSERT(fv != nullptr);
+	TS_ASSERT_EQUALS(fv->value().size(), 3);
+	TS_ASSERT_DELTA(fv->value()[0], 1.5, 0.001);
+	TS_ASSERT_DELTA(fv->value()[1], 2.5, 0.001);
+	TS_ASSERT_DELTA(fv->value()[2], 3.5, 0.001);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test StringValue in s-expression format
+void SexTunnelUTest::test_value_string()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string json = R"jsn({"atomese": "(StringValue \"hello\" \"world\")"})jsn";
+	size_t lo = 0, ro = json.size();
+	ValuePtr v = Json::decode_value(json, lo, ro);
+
+	TS_ASSERT(v != nullptr);
+	TS_ASSERT_EQUALS(v->get_type(), STRING_VALUE);
+
+	StringValuePtr sv = StringValueCast(v);
+	TS_ASSERT(sv != nullptr);
+	TS_ASSERT_EQUALS(sv->value().size(), 2);
+	TS_ASSERT_EQUALS(sv->value()[0], "hello");
+	TS_ASSERT_EQUALS(sv->value()[1], "world");
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
