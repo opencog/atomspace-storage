@@ -426,36 +426,6 @@ void JSCommandsUTest::test_getIncoming()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-// Test getTV and setTV
-void JSCommandsUTest::test_getTVsetTV()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	// Create a node
-	Handle h = as->add_node(CONCEPT_NODE, "tvtest");
-
-	// By default, there is no TV
-	std::string cmd = "AtomSpace.getTV({\"type\": \"ConceptNode\", \"name\": \"tvtest\"})";
-	std::string result = JSCommands::interpret_command(as.get(), cmd);
-	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-
-	// There should be nothing.
-	TS_ASSERT(result.find("null") != std::string::npos);
-
-	// Set a new TV
-	cmd = "AtomSpace.setTV({\"type\": \"ConceptNode\", \"name\": \"tvtest\", \"value\": {\"type\": \"SimpleTruthValue\", \"value\": [0.8, 0.9]}})";
-	result = JSCommands::interpret_command(as.get(), cmd);
-	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": true}\n");
-
-	// Verify TV was set
-	TruthValuePtr tv = TruthValueCast(h->getValue(truth_key()));
-	TS_ASSERT_DELTA(tv->get_mean(), 0.8, 0.001);
-	TS_ASSERT_DELTA(tv->get_confidence(), 0.9, 0.001);
-
-	logger().info("END TEST: %s", __FUNCTION__);
-}
-
 // Test getValues and setValue
 void JSCommandsUTest::test_getValuesSetValue()
 {

@@ -528,43 +528,6 @@ void MCPCommandsUTest::test_getIncoming()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-// Test getTV and setTV in MCP format
-void MCPCommandsUTest::test_getTVsetTV()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	// Create a node using makeAtom
-	std::string cmd = R"({ "tool": "makeAtom", "params": {"type": "ConceptNode", "name": "tvtest"}})";
-	std::string result = JSCommands::interpret_command(as.get(), cmd);
-	TS_ASSERT(result.find("\"content\"") != std::string::npos);
-
-	// There is no default TV
-	cmd = R"({ "tool": "getTV", "params": {"type": "ConceptNode", "name": "tvtest"}})";
-	result = JSCommands::interpret_command(as.get(), cmd);
-	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-
-	// Should return success with TV
-	TS_ASSERT(result.find("\"content\"") != std::string::npos);
-	TS_ASSERT(result.find("\"type\":\"text\"") != std::string::npos);
-	TS_ASSERT(result.find("null") != std::string::npos);
-
-	// Set a new TV
-	cmd = R"({ "tool": "setTV", "params": {"type": "ConceptNode", "name": "tvtest", "value": {"type": "SimpleTruthValue", "value": [0.8, 0.9]}}})";
-	result = JSCommands::interpret_command(as.get(), cmd);
-	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT(result.find("\"content\"") != std::string::npos);
-	TS_ASSERT(extractMCPContent(result) == "true");
-
-	// Verify TV was set by getting it again
-	cmd = R"({ "tool": "getTV", "params": {"type": "ConceptNode", "name": "tvtest"}})";
-	result = JSCommands::interpret_command(as.get(), cmd);
-	logger().info("Result for getTV after setTV: %s", result.c_str());
-	TS_ASSERT(result.find("0.8") != std::string::npos);
-	TS_ASSERT(result.find("0.9") != std::string::npos);
-
-	logger().info("END TEST: %s", __FUNCTION__);
-}
-
 // Test getValues and setValue in MCP format
 void MCPCommandsUTest::test_getValuesSetValue()
 {
