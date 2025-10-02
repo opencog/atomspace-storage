@@ -97,7 +97,6 @@ public:
 
 	// Test atom property functions
 	void test_getIncoming();
-	void test_getTVsetTV();
 	void test_getValuesSetValue();
 
 	// Test other functions
