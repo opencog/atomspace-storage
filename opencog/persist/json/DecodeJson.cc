@@ -32,6 +32,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "Json.h"
+#include "../sexpr/Sexpr.h"
 
 using namespace opencog;
 
@@ -363,6 +364,28 @@ Handle Json::decode_atom(const std::string& s,
 	size_t obj_start = l;
 	size_t obj_end = find_json_end(s, obj_start);
 	if (std::string::npos == obj_end) return Handle::UNDEFINED;
+
+	// Check for "atomese" field - if present, decode as s-expression
+	size_t apos = find_top_level_field(s, "atomese", obj_start, obj_end);
+	if (std::string::npos != apos) {
+		// Find the start of the string value
+		apos = s.find_first_not_of(" \n\t", apos);
+		if (std::string::npos != apos && '"' == s[apos]) {
+			// Extract the quoted string and unescape it
+			std::stringstream ss;
+			ss << s.substr(apos);
+			std::string sexpr_str;
+			ss >> std::quoted(sexpr_str);
+
+			// Decode using s-expression decoder
+			size_t sexpr_pos = 0;
+			Handle h = Sexpr::decode_atom(sexpr_str, sexpr_pos);
+
+			// Update r to point after the closing brace of the JSON object
+			r = obj_end;
+			return h;
+		}
+	}
 
 	// Find the "type" field at the top level
 	size_t tpos = find_top_level_field(s, "type", obj_start, obj_end);
