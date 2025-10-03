@@ -353,7 +353,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		}
 		else
 		{
-			rv = "(alist ";
+			rv = "(list ";
 			for (const Handle& h: hset)
 				rv += Sexpr::encode_atom(h);
 			rv += ")";
@@ -524,26 +524,26 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		else
 			is = h->getIncomingSet();
 
-		std::string alist;
+		std::string atmlist;
 		if (js_mode)
 		{
 			bool first = true;
-			alist = "[";
+			atmlist = "[";
 			for (const Handle& hi : is)
 			{
-				if (not first) { alist += ",\n"; } else { first = false; }
-				alist += Json::encode_atom(hi, "");
+				if (not first) { atmlist += ",\n"; } else { first = false; }
+				atmlist += Json::encode_atom(hi, "");
 			}
-			alist += "]";
+			atmlist += "]";
 		}
 		else
 		{
-			alist = "(alist ";
+			atmlist = "(list ";
 			for (const Handle& hi : is)
-				alist += Sexpr::encode_atom(hi);
-			alist += ")";
+				atmlist += Sexpr::encode_atom(hi);
+			atmlist += ")";
 		}
-		RETURNSTR(alist);
+		RETURNSTR(atmlist);
 	}
 
 	// -----------------------------------------------
@@ -567,7 +567,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		}
 		else
 		{
-			klist = "(alist ";
+			klist = "(list ";
 			for (const Handle& key : keys)
 				klist += Sexpr::encode_atom(key);
 			klist += ")";

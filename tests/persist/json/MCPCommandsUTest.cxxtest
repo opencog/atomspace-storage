@@ -171,7 +171,7 @@ void MCPCommandsUTest::test_getAtoms()
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for getAtoms Node (no subclass): %s", result.c_str());
 	TS_ASSERT(result.find("\"content\"") != std::string::npos);
-	TS_ASSERT(extractMCPContent(result).find("(alist") == 0);
+	TS_ASSERT(extractMCPContent(result).find("(list") == 0);
 	// Should be empty - no direct Node instances
 	TS_ASSERT(result.find("\"test1\"") == std::string::npos);
 
