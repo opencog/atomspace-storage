@@ -187,7 +187,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t havel = std::hash<std::string>{}("haveLink");
 	static const size_t havea = std::hash<std::string>{}("haveAtom");
 	static const size_t makea = std::hash<std::string>{}("makeAtom");
-	static const size_t loada = std::hash<std::string>{}("loadAtoms");
 	static const size_t gtinc = std::hash<std::string>{}("getIncoming");
 	static const size_t gtkey = std::hash<std::string>{}("getKeys");
 	static const size_t gtval = std::hash<std::string>{}("getValues");
@@ -452,49 +451,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (makea == act)
 	{
 		ADD_ATOM;
-		RETURN("true");
-	}
-
-	// -----------------------------------------------
-	// A list version of above.
-	// AtomSpace.loadAtoms([{ "type": "ConceptNode", "name": "foo"},
-	//                      { "type": "ConceptNode", "name": "oofdah"}])
-	// AtomSpace.loadAtoms({"atoms":
-	//                         [{ "type": "ConceptNode", "name": "foo"},
-	//                         { "type": "ConceptNode", "name": "oofdah"}]})
-	if (loada == act)
-	{
-		CHK_FOR_JSON_ARG;
-		if (is_json_object)
-		{
-			pos = cmd.find("\"atoms\":", pos);
-			if (std::string::npos == pos) RETURN("false");
-			pos += 8; // 8 == strlen("\"atoms\":");
-		}
-
-		pos = cmd.find_first_not_of(" \n\t", pos);
-		if ('[' != cmd[pos]) RETURN("false");
-		pos++;
-		while (epos != cmd.npos)
-		{
-			ADD_ATOM;
-			pos = epos;
-
-			// We expect a comma or a close-bracket.
-			if  (cmd.npos == pos) RETURN("false");
-
-			// Skip whitespace
-			pos = cmd.find_first_not_of(" \n\t", pos);
-			if  (cmd.npos == pos) RETURN("false");
-
-			// If end of list, we are done.
-			if (']' == cmd[pos]) break;
-
-			// If not end of list, we expect a comma.
-			if (',' != cmd[pos]) RETURN("false");
-			pos++;
-			epos = cmd.size();
-		}
 		RETURN("true");
 	}
 
