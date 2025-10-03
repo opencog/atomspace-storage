@@ -147,19 +147,6 @@ AtomSpace.version()
 AtomSpace.makeAtom({"type": "Concept", "name": "foo"})
 ```
 
-* Load a list of Atoms. Returns `true` if successful, else `false`.
-  If using the telnet interface, the newlines must be removed from
-  the example below, else errors will be reported!
-```
-AtomSpace.loadAtoms([
-	{ "type": "ConceptNode", "name": "foo"},
-	{ "type": "ConceptNode", "name": "oofdah"},
-	{"type": "List", "outgoing":
-		[{"type": "Concept", "name": "one"},
-		 {"type": "Concept", "name": "two"}]}
-])
-```
-
 * Set arbitrary Value on Atom. Returns true if successful, else false.
 ```
 AtomSpace.setValue({ "type": "ConceptNode", "name": "foo", "key": { "type": "PredicateNode", "name": "keewee" }, "value": { "type": "FloatValue", "value": [1, 2, 3] } } )

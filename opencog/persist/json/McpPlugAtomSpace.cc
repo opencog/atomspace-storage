@@ -98,14 +98,6 @@ std::string McpPlugAtomSpace::get_tool_descriptions() const
 		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom to create\"}}, "
 		"\"required\": [\"atomese\"]}");
 
-	// loadAtoms
-	add_tool(json, "loadAtoms", "Create multiple atoms in the AtomSpace",
-		"{\"type\": \"object\", \"properties\": {"
-		"\"atoms\": {\"type\": \"array\", \"description\": \"Array of atom specifications to create\", "
-		"\"items\": {\"type\": \"object\", \"properties\": {"
-		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom\"}}, \"required\": [\"atomese\"]}}}, "
-		"\"required\": [\"atoms\"]}");
-
 	// getIncoming
 	add_tool(json, "getIncoming", "Get all links that contain a given atom in their outgoing set",
 		"{\"type\": \"object\", \"properties\": {"
