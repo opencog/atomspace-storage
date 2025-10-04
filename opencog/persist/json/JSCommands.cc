@@ -76,14 +76,14 @@ static bool parse_bool_param(const std::string& cmd, size_t& pos, size_t epos, b
 
 static std::string reterr(const std::string& cmd)
 {
-	return "{\"success\": false, \"error\": { \"code\": -32600, "
+	return "{\"error\": { \"code\": -32600, "
 		"\"message\": \"Invalid Request\", \"data\": { "
 		"\"details\": \"" + cmd + "\"}}}\n";
 }
 
 static std::string retmsgerr(const std::string& errmsg)
 {
-	return "{\"success\": false, \"error\": { \"code\": -32602, "
+	return "{\"error\": { \"code\": -32602, "
 		"\"message\": \"Invalid params\", \"data\": { "
 		"\"details\": \"" + errmsg + "\"}}}\n";
 }
