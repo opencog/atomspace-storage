@@ -76,37 +76,23 @@ static bool parse_bool_param(const std::string& cmd, size_t& pos, size_t epos, b
 
 static std::string reterr(const std::string& cmd)
 {
-	return "{\"error\": { \"code\": -32600, "
-		"\"message\": \"Invalid Request\", \"data\": { "
-		"\"details\": \"" + cmd + "\"}}}\n";
+	return "{\"content\": [{\"type\":\"text\", \"text\": \"Error: Invalid Request - " + cmd + "\"}], \"isError\": true}\n";
 }
 
 static std::string retmsgerr(const std::string& errmsg)
 {
-	return "{\"error\": { \"code\": -32602, "
-		"\"message\": \"Invalid params\", \"data\": { "
-		"\"details\": \"" + errmsg + "\"}}}\n";
+	return "{\"content\": [{\"type\":\"text\", \"text\": \"Error: Invalid params - " + errmsg + "\"}], \"isError\": true}\n";
 }
 
-// Because MCP is not really JSON, (see below) we cannot return booleans
-// as booleans; they must be strings. So add some extra quotes to them.
+// MCP tool responses use the "content" format.
+// All responses (success or error) return text content.
+// Simple values can be returned as quoted strings.
 #define RETURN(RV) { \
-	if (js_mode) \
-		return "{ \"success\": true, \"result\": " RV "}\n"; \
 	return "{\"content\": [{\"type\":\"text\", \"text\": \"" RV "\"}]}\n"; }
 
-// Sigh. So MCP is not really JSON, it's pseudo-json. It does use
-// "valid" JSON to create, send and receive messages, but all tool-use
-// messages must always be text strings (and not JSON). But our core
-// API returns ... actual JSON. So .. fake it. Escape all quotes in
-// in the JSON, surround the whole thing with quotes, and bingo: its
-// now a text string. Hurrah. Well, for now, it seems that at least
-// Claude Code seems to grok this at some level, so we're good for now.
-// I personally think it's ugly and annoying but whatever.
+// For complex results (JSON structures), we need to escape quotes
+// and wrap the JSON as a text string within the content array.
 #define RETURNSTR(RV) { \
-	if (js_mode) \
-		return std::string("{ \"success\": true, \"result\": ") + RV + "}\n"; \
-	/* return "{\"content\": [{\"type\":\"text\", \"text\": " + RV + "}]}\n"; } */ \
 	std::string srv(RV); \
 	std::replace(srv.begin(), srv.end(), '\n', ' '); \
 	std::stringstream ss; \
@@ -135,26 +121,26 @@ static std::string retmsgerr(const std::string& errmsg)
 
 #define GET_ATOM(rv) \
 	Handle h = Json::decode_atom(cmd, pos, epos); \
-	if (nullptr == h) reterr(cmd); \
+	if (nullptr == h) return reterr(cmd); \
 	h = as->get_atom(h); \
 	if (nullptr == h) RETURN(rv);
 
 #define ADD_ATOM \
 	Handle h = Json::decode_atom(cmd, pos, epos); \
-	if (nullptr == h) reterr(cmd); \
+	if (nullptr == h) return reterr(cmd); \
 	h = as->add_atom(h); \
-	if (nullptr == h) retmsgerr("No such Atom");
+	if (nullptr == h) return retmsgerr("No such Atom");
 
 #define GET_KEY \
 	pos = cmd.find("\"key\":", epos); \
-	if (std::string::npos == pos) reterr(cmd); \
+	if (std::string::npos == pos) return reterr(cmd); \
 	pos += 6; \
 	epos = cmd.size(); \
 	Handle k = Json::decode_atom(cmd, pos, epos); \
-	if (nullptr == k) reterr(cmd); \
+	if (nullptr == k) return reterr(cmd); \
 	k = as->add_atom(k); \
 	pos = cmd.find(',', epos); \
-	if (std::string::npos == pos) retmsgerr("No such Key");
+	if (std::string::npos == pos) return retmsgerr("No such Key");
 
 #define GET_VALUE \
 	pos = cmd.find("\"value\":", pos); \
@@ -162,12 +148,12 @@ static std::string retmsgerr(const std::string& errmsg)
 		pos += 8; \
 	else { \
 		pos = cmd.find("\"values\":", pos); \
-		if (std::string::npos == pos) reterr(cmd); \
+		if (std::string::npos == pos) return reterr(cmd); \
 		pos += 9; \
 	} \
 	epos = cmd.size(); \
 	ValuePtr v = Json::decode_value(cmd, pos, epos); \
-	if (nullptr == v) reterr(cmd);
+	if (nullptr == v) return reterr(cmd);
 
 /// The cogserver provides a network API to send/receive Atoms, encoded
 /// as JSON, over the internet. This is NOT as efficient as the
