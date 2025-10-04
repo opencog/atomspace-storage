@@ -49,6 +49,48 @@ public:
 	void setUp() { as->clear(); }
 	void tearDown() {}
 
+	// Helper to extract and unescape text from MCP content format
+	std::string extractText(const std::string& mcpResponse) {
+		// Extract text from {"content": [{"type":"text", "text": "..."}]}
+		size_t textPos = mcpResponse.find("\"text\": \"");
+		if (textPos == std::string::npos) return "";
+		textPos += 9; // strlen("\"text\": \"")
+
+		// Find closing quote+brace (may have trailing space)
+		size_t endPos = mcpResponse.find("\"}", textPos);
+		if (endPos == std::string::npos) {
+			// Try with space before closing brace
+			endPos = mcpResponse.find(" \"}", textPos);
+		}
+		if (endPos == std::string::npos) return "";
+
+		std::string escaped = mcpResponse.substr(textPos, endPos - textPos);
+
+		// Unescape JSON string: \" -> ", \\ -> \, etc.
+		std::string unescaped;
+		for (size_t i = 0; i < escaped.length(); i++) {
+			if (escaped[i] == '\\' && i + 1 < escaped.length()) {
+				char next = escaped[i + 1];
+				if (next == '"' || next == '\\' || next == '/') {
+					unescaped += next;
+					i++; // Skip the next char
+				} else if (next == 'n') {
+					unescaped += '\n';
+					i++;
+				} else if (next == 't') {
+					unescaped += '\t';
+					i++;
+				} else {
+					unescaped += escaped[i];
+				}
+			} else {
+				unescaped += escaped[i];
+			}
+		}
+
+		return unescaped;
+	}
+
 	// Test type query functions
 	void test_getSubTypes();
 	void test_getSuperTypes();
@@ -83,8 +125,9 @@ void JSCommandsUTest::test_getSubTypes()
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 
 	// Should return array of Link subtypes
-	TS_ASSERT(result.find("[") != std::string::npos);
-	TS_ASSERT(result.find("\"OrderedLink\"") != std::string::npos);
+	std::string text = extractText(result);
+	TS_ASSERT(text.find("[") != std::string::npos);
+	TS_ASSERT(text.find("\"OrderedLink\"") != std::string::npos);
 
 	// Test JSON object format
 	cmd = "AtomSpace.getSubTypes({\"type\": \"Link\"})";
@@ -127,9 +170,10 @@ void JSCommandsUTest::test_getSuperTypes()
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 
 	// Should return array containing parent types
-	TS_ASSERT(result.find("[") != std::string::npos);
+	std::string text = extractText(result);
+	TS_ASSERT(text.find("[") != std::string::npos);
 	// ListLink's direct parent is OrderedLink, not UnorderedLink
-	TS_ASSERT(result.find("\"OrderedLink\"") != std::string::npos);
+	TS_ASSERT(text.find("\"OrderedLink\"") != std::string::npos);
 
 	// Test JSON object format
 	cmd = "AtomSpace.getSuperTypes({\"type\": \"ListLink\"})";
@@ -177,10 +221,11 @@ void JSCommandsUTest::test_getAtoms()
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 
 	// Should return array with 2 concept nodes
-	TS_ASSERT(result.find("[") != std::string::npos);
-	TS_ASSERT(result.find("\"test1\"") != std::string::npos);
-	TS_ASSERT(result.find("\"test2\"") != std::string::npos);
-	TS_ASSERT(result.find("\"pred1\"") == std::string::npos);
+	std::string text = extractText(result);
+	TS_ASSERT(text.find("[") != std::string::npos);
+	TS_ASSERT(text.find("\"test1\"") != std::string::npos);
+	TS_ASSERT(text.find("\"test2\"") != std::string::npos);
+	TS_ASSERT(text.find("\"pred1\"") == std::string::npos);
 
 	// Test JSON object format
 	cmd = "AtomSpace.getAtoms({\"type\": \"ConceptNode\"})";
@@ -196,9 +241,10 @@ void JSCommandsUTest::test_getAtoms()
 	logger().info("Result for '%s': %s", cmd.c_str(), result3.c_str());
 
 	// Should include all nodes
-	TS_ASSERT(result3.find("\"test1\"") != std::string::npos);
-	TS_ASSERT(result3.find("\"test2\"") != std::string::npos);
-	TS_ASSERT(result3.find("\"pred1\"") != std::string::npos);
+	std::string text3 = extractText(result3);
+	TS_ASSERT(text3.find("\"test1\"") != std::string::npos);
+	TS_ASSERT(text3.find("\"test2\"") != std::string::npos);
+	TS_ASSERT(text3.find("\"pred1\"") != std::string::npos);
 
 	// Test JSON object format with subclass
 	// NOTE: The "subclass" field in JSON object format is not yet implemented
@@ -223,13 +269,13 @@ void JSCommandsUTest::test_haveNode()
 	std::string cmd = "AtomSpace.haveNode(\"ConceptNode\", \"foo\")";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": false}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"false\"}]}\n");
 
 	// Test when node doesn't exist - JSON object format
 	cmd = "AtomSpace.haveNode({\"type\": \"ConceptNode\", \"name\": \"foo\"})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": false}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"false\"}]}\n");
 
 	// Add the node
 	as->add_node(CONCEPT_NODE, "foo");
@@ -238,13 +284,13 @@ void JSCommandsUTest::test_haveNode()
 	cmd = "AtomSpace.haveNode(\"ConceptNode\", \"foo\")";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": true}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"true\"}]}\n");
 
 	// Test when node exists - JSON object format
 	cmd = "AtomSpace.haveNode({\"type\": \"ConceptNode\", \"name\": \"foo\"})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": true}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"true\"}]}\n");
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -262,13 +308,13 @@ void JSCommandsUTest::test_haveLink()
 	std::string cmd = "AtomSpace.haveLink(\"ListLink\", [{\"type\": \"ConceptNode\", \"name\": \"foo\"}, {\"type\": \"ConceptNode\", \"name\": \"bar\"}])";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": false}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"false\"}]}\n");
 
 	// Test when link doesn't exist - JSON object format
 	cmd = "AtomSpace.haveLink({\"type\": \"ListLink\", \"outgoing\": [{\"type\": \"ConceptNode\", \"name\": \"foo\"}, {\"type\": \"ConceptNode\", \"name\": \"bar\"}]})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": false}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"false\"}]}\n");
 
 	// Add the link
 	as->add_link(LIST_LINK, h1, h2);
@@ -277,13 +323,13 @@ void JSCommandsUTest::test_haveLink()
 	cmd = "AtomSpace.haveLink(\"ListLink\", [{\"type\": \"ConceptNode\", \"name\": \"foo\"}, {\"type\": \"ConceptNode\", \"name\": \"bar\"}])";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": true}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"true\"}]}\n");
 
 	// Test when link exists - JSON object format
 	cmd = "AtomSpace.haveLink({\"type\": \"ListLink\", \"outgoing\": [{\"type\": \"ConceptNode\", \"name\": \"foo\"}, {\"type\": \"ConceptNode\", \"name\": \"bar\"}]})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": true}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"true\"}]}\n");
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -297,7 +343,7 @@ void JSCommandsUTest::test_haveAtom()
 	std::string cmd = "AtomSpace.haveAtom({\"type\": \"ConceptNode\", \"name\": \"test\"})";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": false}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"false\"}]}\n");
 
 	// Add the atom
 	as->add_node(CONCEPT_NODE, "test");
@@ -305,7 +351,7 @@ void JSCommandsUTest::test_haveAtom()
 	// Test when atom exists
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": true}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"true\"}]}\n");
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -319,7 +365,7 @@ void JSCommandsUTest::test_makeAtom()
 	std::string cmd = "AtomSpace.makeAtom({\"type\": \"ConceptNode\", \"name\": \"created\"})";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": true}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"true\"}]}\n");
 
 	// Verify node was created
 	Handle h = as->get_node(CONCEPT_NODE, "created");
@@ -329,7 +375,7 @@ void JSCommandsUTest::test_makeAtom()
 	cmd = "AtomSpace.makeAtom({\"type\": \"ListLink\", \"outgoing\": [{\"type\": \"ConceptNode\", \"name\": \"created\"}, {\"type\": \"ConceptNode\", \"name\": \"another\"}]})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": true}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"true\"}]}\n");
 
 	// Verify link was created
 	HandleSeq outgoing;
@@ -388,7 +434,7 @@ void JSCommandsUTest::test_getValuesSetValue()
 	std::string cmd = "AtomSpace.setValue({\"type\": \"ConceptNode\", \"name\": \"valuetest\", \"key\": {\"type\": \"PredicateNode\", \"name\": \"mykey\"}, \"value\": {\"type\": \"FloatValue\", \"value\": [1.1, 2.2, 3.3]}})";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": true}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"true\"}]}\n");
 
 	// Get values
 	cmd = "AtomSpace.getValues({\"type\": \"ConceptNode\", \"name\": \"valuetest\"})";
@@ -409,7 +455,7 @@ void JSCommandsUTest::test_getValuesSetValue()
 	cmd = "AtomSpace.setValue({\"key\":{\"type\":\"Predicate\",\"name\":\"sovs\"},\"name\":\"fimble\",\"type\":\"Concept\",\"value\":{\"type\":\"StringValue\",\"value\":[\"a\", \"b\", \"c\", \"wait there's more\", \"e\", \"oofdah\"]}})";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for setValue with mixed fields: %s", result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": true}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"true\"}]}\n");
 
 	// Verify the atom was created with the correct name
 	Handle fimble = as->get_node(CONCEPT_NODE, "fimble");
@@ -442,15 +488,15 @@ void JSCommandsUTest::test_getValuesSetValue()
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for getValues on fimble: %s", result.c_str());
 
-	// Should contain the key and string values
+	// Should contain the key and string values (now escaped in JSON string)
 	TS_ASSERT(result.find("sovs") != std::string::npos);
 	TS_ASSERT(result.find("StringValue") != std::string::npos);
-	TS_ASSERT(result.find("\"a\"") != std::string::npos);
-	TS_ASSERT(result.find("\"b\"") != std::string::npos);
-	TS_ASSERT(result.find("\"c\"") != std::string::npos);
-	TS_ASSERT(result.find("\"wait there's more\"") != std::string::npos);
-	TS_ASSERT(result.find("\"e\"") != std::string::npos);
-	TS_ASSERT(result.find("\"oofdah\"") != std::string::npos);
+	TS_ASSERT(result.find("\\\"a\\\"") != std::string::npos);
+	TS_ASSERT(result.find("\\\"b\\\"") != std::string::npos);
+	TS_ASSERT(result.find("\\\"c\\\"") != std::string::npos);
+	TS_ASSERT(result.find("\\\"wait there's more\\\"") != std::string::npos);
+	TS_ASSERT(result.find("\\\"e\\\"") != std::string::npos);
+	TS_ASSERT(result.find("\\\"oofdah\\\"") != std::string::npos);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -470,9 +516,9 @@ void JSCommandsUTest::test_execute()
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
 
-	// Should return result of execution
+	// Should return result of execution (now escaped in JSON string)
 	TS_ASSERT(result.find("NumberNode") != std::string::npos);
-	TS_ASSERT(result.find("\"5\"") != std::string::npos);
+	TS_ASSERT(result.find("\\\"5\\\"") != std::string::npos);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -493,14 +539,14 @@ void JSCommandsUTest::test_extract()
 	std::string cmd = "AtomSpace.extract({\"type\": \"ConceptNode\", \"name\": \"extract1\"}, false)";
 	std::string result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": false}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"false\"}]}\n");
 	TS_ASSERT_EQUALS(as->get_size(), initial_size);
 
 	// Extract recursively
 	cmd = "AtomSpace.extract({\"type\": \"ConceptNode\", \"name\": \"extract1\"}, true)";
 	result = JSCommands::interpret_command(as.get(), cmd);
 	logger().info("Result for '%s': %s", cmd.c_str(), result.c_str());
-	TS_ASSERT_EQUALS(result, "{ \"success\": true, \"result\": true}\n");
+	TS_ASSERT_EQUALS(result, "{\"content\": [{\"type\":\"text\", \"text\": \"true\"}]}\n");
 
 	// Verify extraction
 	TS_ASSERT(as->get_node(CONCEPT_NODE, "extract1") == nullptr);
