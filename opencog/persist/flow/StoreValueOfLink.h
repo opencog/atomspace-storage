@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_STORE_VALUE_OF_LINK_H
 #define _OPENCOG_STORE_VALUE_OF_LINK_H
 
+#include <opencog/persist/storage/storage_types.h>
 #include <opencog/atoms/flow/ValueOfLink.h>
 
 namespace opencog
