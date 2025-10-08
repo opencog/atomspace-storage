@@ -5,14 +5,12 @@ IF (HAVE_CYTHON)
 ENDIF (HAVE_CYTHON)
 
 ADD_LIBRARY (persist SHARED
-	BackingQuery.cc
-	BackingStore.cc
 	PersistSCM.cc
-	StorageNode.cc
 )
 
 TARGET_LINK_LIBRARIES(persist
 	storage-types
+	backing
 	atomspace
 	smob
 )
@@ -30,10 +28,4 @@ ADD_GUILE_MODULE (FILES
 
 INSTALL (TARGETS persist EXPORT AtomSpaceStorageTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
-
-INSTALL (FILES
-	BackingStore.h
-	StorageNode.h
-   DESTINATION "include/opencog/persist/api"
 )
