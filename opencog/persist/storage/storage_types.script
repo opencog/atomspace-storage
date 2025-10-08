@@ -3,11 +3,6 @@
 // a collection of types suitable for defining distributed storage
 // interconnects.
 //
-// The ObjectNode is the base class for StorageNode, because all
-// StorageNodes are stateful objects, existing in the real physical
-// world, and accept the messages that define the storage API.
-STORAGE_NODE <- OBJECT_NODE
-//
 // Specific storage nodes. FileStoreageNode is implemented here, because
 // it is so simple. The others are implemented in other git repos,
 // according to the type.
