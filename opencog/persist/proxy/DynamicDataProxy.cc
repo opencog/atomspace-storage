@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/persist/proxy/DynamicDataProxy.h>
+#include <opencog/persist/storage/storage_types.h>
 
 using namespace opencog;
 

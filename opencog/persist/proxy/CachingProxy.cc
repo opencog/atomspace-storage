@@ -21,6 +21,7 @@
  */
 
 #include <opencog/persist/proxy/CachingProxy.h>
+#include <opencog/persist/storage/storage_types.h>
 
 using namespace opencog;
 

@@ -35,6 +35,7 @@
 #include <opencog/atomspace/version.h>
 #include <opencog/persist/sexpr/Sexpr.h>
 #include <opencog/persist/proxy/ProxyNode.h>
+#include <opencog/persist/storage/storage_types.h>
 
 #include "Commands.h"
 

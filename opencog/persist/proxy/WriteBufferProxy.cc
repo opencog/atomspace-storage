@@ -26,6 +26,7 @@
 
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/persist/proxy/WriteBufferProxy.h>
+#include <opencog/persist/storage/storage_types.h>
 
 using namespace opencog;
 
