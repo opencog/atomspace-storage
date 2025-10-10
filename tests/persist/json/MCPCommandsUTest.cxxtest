@@ -25,8 +25,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/StringValue.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-#include <opencog/atoms/truthvalue/CountTruthValue.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/base/Link.h>
 
