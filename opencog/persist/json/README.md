@@ -11,7 +11,7 @@ just enough to interact with the AtomSpace, and nothing more.
 
 Status
 ------
-**Version 1.0.0.** There is enough here to be usable for basic things.
+**Version 1.0.1.** There is enough here to be usable for basic things.
 Support for multiple AtomSpaces is missing.  A convenience call for
 setting multiple values at the same time is missing.
 
@@ -79,8 +79,6 @@ $ guile
 (start-cogserver)
 (List (Concept "foo") (Concept "bar"))
 (cog-set-value! (ConceptNode "foo") (Predicate "key") (FloatValue 1 2 3))
-(cog-set-tv! (ConceptNode "foo") (SimpleTruthValue 0.3 0.8))
-(cog-set-tv! (ConceptNode "bar") (stv 0.4 0.5))
 ```
 
 Now create a network connection to talk to the CogServer, and send it
@@ -156,8 +154,7 @@ AtomSpace.setValue({ "type": "ConceptNode", "name": "foo", "key": { "type": "Pre
 AtomSpace.setValue({ "type": "ConceptNode", "name": "foo", "key": { "type":
 "PredicateNode", "name": "linky" }, "value": { "type": "LinkValue", "value": [
 { "type": "FloatValue", "value": [4, 5, 6] },
-{ "type": "StringValue", "value": ["g", "h", "i, \"j\", k"] },
-{ "type": "CountTruthValue", "value": [7, 8, 9] } } } )
+{ "type": "StringValue", "value": ["g", "h", "i, \"j\", k"] } } } )
 ```
 
 * Get base and derived types.  The optional bool flag indicates whether
