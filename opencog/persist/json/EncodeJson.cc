@@ -100,9 +100,8 @@ std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 	Type typ = v->get_type();
 	if (nameserver().isA(typ, FLOAT_VALUE))
 	{
-		// The FloatValue to_string() method prints out a high-precision
-		// form of the value, as compared to SimpleTruthValue, which
-		// only prints 6 digits and breaks the unit tests.
+		// The FloatValue to_string() method prints out
+		// plenty of digits, enough for high-precision.
 		FloatValuePtr fv(FloatValueCast(v));
 		const std::vector<double>& fl = fv->value();
 		bool first = true;
