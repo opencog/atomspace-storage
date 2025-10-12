@@ -177,7 +177,7 @@ std::string Commands::cog_execute_cache(const std::string& cmd)
 	if (query->is_executable())
 		rslt = query->execute(_base_space.get());
 	else if (query->is_evaluatable())
-		rslt = ValueCast(query->evaluate(_base_space.get()));
+		rslt = query->evaluate(_base_space.get());
 	else
 		return "#f";
 
