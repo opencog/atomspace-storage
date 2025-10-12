@@ -380,16 +380,6 @@ std::string Sexpr::encode_value(const ValuePtr& v)
 	// Empty values are used to erase keys from atoms.
 	if (nullptr == v) return " #f";
 
-	// The FloatValue to_string() method prints out a high-precision
-	// form of the value, as compared to SimpleTruthValue, which
-	// only prints 6 digits and breaks the unit tests.
-	// Only TruthValues have this issue.
-	if (v->is_type(TRUTH_VALUE))
-	{
-		FloatValuePtr fv(FloatValueCast(v));
-		return fv->FloatValue::to_string();
-	}
-
 	if (not v->is_atom())
 		return v->to_short_string();
 	return prt_atom(HandleCast(v), false);
