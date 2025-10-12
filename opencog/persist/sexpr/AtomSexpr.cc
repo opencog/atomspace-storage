@@ -32,7 +32,6 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "Sexpr.h"
@@ -164,20 +163,6 @@ std::string Sexpr::get_node_name(const std::string& s,
 	return name;
 }
 
-/// Extract SimpleTruthValue and return that, else throw an error.
-/// This is a legacy function, it should eventually be purged.
-static TruthValuePtr get_stv(const std::string& s,
-                             size_t l, size_t r, size_t line_cnt)
-{
-	if (0 == s.compare(l, 5, "(stv "))
-		return createSimpleTruthValue(
-					NumberNode::to_vector(s.substr(l+4, r-l-4)));
-
-	throw SyntaxException(TRACE_INFO,
-		"Syntax error at line %zu Unexpected markup: >>%s<< in expr %s",
-		line_cnt, s.substr(l, r-l+1).c_str(), s.c_str());
-}
-
 /// Convert an Atomese S-expression into a C++ Atom.
 /// For example: `(Concept "foobar")`  or
 /// `(Evaluation (Predicate "blort") (List (Concept "foo") (Concept "bar")))`
@@ -191,7 +176,6 @@ Handle Sexpr::decode_atom(const std::string& s,
                           size_t l, size_t r, size_t line_cnt,
                           std::unordered_map<std::string, Handle>& ascache)
 {
-	TruthValuePtr stv;
 	size_t l1 = l, r1 = r;
 	Type atype = get_typename(s, l1, r1, line_cnt);
 
@@ -207,17 +191,9 @@ Handle Sexpr::decode_atom(const std::string& s,
 			if (l1 == r1) break;
 
 			// Atom names never start with lower-case.
-			// We allow (stv nn nn) to occur in the middle of a long
-			// sexpr, because apparently some users (agi-bio) do that.
 			if (islower(s[l1+1]))
-			{
-				// 0 == s.compare(l1, 5, "(stv ")
-				if ('s' == s[l1+1])
-					stv = get_stv(s, l1, r1, line_cnt);
-				else
 					break;
-			}
-			else if (0 == s.compare(l1, 11, "(AtomSpace "))
+			if (0 == s.compare(l1, 11, "(AtomSpace "))
 			{
 				Handle hasp(decode_frame(Handle::UNDEFINED, s, l1, ascache));
 				as = (AtomSpace*) hasp.get();
@@ -230,14 +206,6 @@ Handle Sexpr::decode_atom(const std::string& s,
 
 		Handle h(createLink(std::move(outgoing), atype));
 		if (as) h = as->add_atom(h);
-
-		if (stv)
-		{
-			if (as)
-				as->set_value(h, truth_key(), stv);
-			else
-				h->setValue(truth_key(), stv);
-		}
 
 		// alist's occur at the end of the sexpr.
 		if (l1 != r1 and l < r)
@@ -254,7 +222,6 @@ Handle Sexpr::decode_atom(const std::string& s,
 
 		Handle h(createNode(atype, std::move(name)));
 
-		// There might be an stv in the content. Handle it.
 		size_t l2 = r1;
 		size_t r2 = r;
 		get_next_expr(s, l2, r2, line_cnt);
@@ -271,10 +238,6 @@ Handle Sexpr::decode_atom(const std::string& s,
 			{
 				if (0 == s.compare(l2, 7, "(alist "))
 					decode_slist(h, s, l2);
-				else if (as)
-					as->set_value(h, truth_key(), get_stv(s, l2, r2, line_cnt));
-				else
-					h->setValue(truth_key(), get_stv(s, l2, r2, line_cnt));
 			}
 		}
 
