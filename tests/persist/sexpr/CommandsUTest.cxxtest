@@ -327,8 +327,6 @@ void CommandsUTest::test_set_values()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	std::string in = "(cog-set-values! (Concept \"a\") (alist "
-		"(cons (Predicate \"*-TruthValueKey-*\") (stv 0.3 0.5))"
-		"(cons (Predicate \"key\") (stv 0.6 0.8))"
 		"(cons (Predicate \"fiz\") (FloatValue 1 2 3))"
 		"(cons (Predicate \"buz\") (StringValue \"gee\" \"golly\"))))";
 
@@ -338,26 +336,13 @@ void CommandsUTest::test_set_values()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT(0 == out.compare("()"));
-	TS_ASSERT_EQUALS(5, as->get_size());
+	TS_ASSERT_EQUALS(3, as->get_size());
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr != h);
 
-	TruthValuePtr tvp = TruthValueCast(h->getValue(truth_key()));
-	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, tvp->get_type());
-	double mean = tvp->get_mean();
-	double conf = tvp->get_confidence();
-	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, tvp->get_type());
-	TS_ASSERT(0.2999 < mean and mean < 0.3001);
-	TS_ASSERT(0.4999 < conf and conf < 0.5001);
-
-	Handle key = as->add_node(PREDICATE_NODE, "key");
+	Handle key = as->add_node(PREDICATE_NODE, "fiz");
 	ValuePtr vp = h->getValue(key);
-	TS_ASSERT(nullptr != vp);
-	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, vp->get_type());
-
-	key = as->add_node(PREDICATE_NODE, "fiz");
-	vp = h->getValue(key);
 	TS_ASSERT(nullptr != vp);
 	TS_ASSERT_EQUALS(FLOAT_VALUE, vp->get_type());
 
