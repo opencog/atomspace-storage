@@ -30,7 +30,6 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/value/FloatValue.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/version.h>
 #include <opencog/persist/sexpr/Sexpr.h>
