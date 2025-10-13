@@ -21,10 +21,18 @@
 (cog-set-value! wsto (Predicate "*-proxy-parts-*") sto)
 
 (cog-open wsto)
-(store-atom (Concept "b1" (stv 0.1 0.1)))
-(store-atom (Concept "b2" (stv 0.2 0.2)))
-(store-atom (Concept "b3" (stv 0.3 0.3)))
-(store-atom (Concept "b4" (stv 0.4 0.4)))
+(define b1 (Concept "b1"))
+(cog-set-value! b1 (Predicate "*-TruthValueKey-*") (FloatValue 0.1 0.1))
+(store-atom b1)
+(define b2 (Concept "b2"))
+(cog-set-value! b2 (Predicate "*-TruthValueKey-*") (FloatValue 0.2 0.2))
+(store-atom b2)
+(define b3 (Concept "b3"))
+(cog-set-value! b3 (Predicate "*-TruthValueKey-*") (FloatValue 0.3 0.3))
+(store-atom b3)
+(define b4 (Concept "b4"))
+(cog-set-value! b4 (Predicate "*-TruthValueKey-*") (FloatValue 0.4 0.4))
+(store-atom b4)
 (cog-close wsto)
 
 ; ----------------------------
