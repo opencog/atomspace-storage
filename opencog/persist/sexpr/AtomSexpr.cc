@@ -95,9 +95,9 @@ static Type get_typename(const std::string& s, size_t& l, size_t& r,
 			"Error at line %lu unexpected content: >>%s<< in %s",
 			line_cnt, s.substr(l, r-l+1).c_str(), s.c_str());
 
-	// Advance until whitespace.
+	// Advance until whitespace or closing paren.
 	l++;
-	r = s.find_first_of("( \t\n", l);
+	r = s.find_first_of("() \t\n", l);
 
 	const std::string stype = s.substr(l, r-l);
 	Type atype = namer.getType(stype);

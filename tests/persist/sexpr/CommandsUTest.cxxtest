@@ -49,6 +49,7 @@ class CommandsUTest : public CxxTest::TestSuite
 		void test_node();
 		void test_node_quoted();
 		void test_link();
+		void test_empty_link();
 		void test_set_value();
 		void test_set_value_quoted();
 		void test_set_several_quoted();
@@ -144,6 +145,32 @@ void CommandsUTest::test_link()
 	TS_ASSERT_EQUALS(3, as->get_size());
 	TS_ASSERT(0 == out.compare(
 		"(ListLink (ConceptNode \"a\")(ConceptNode \"b\"))"));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test empty ListLink parsing (bug fix for whitespace handling)
+void CommandsUTest::test_empty_link()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test that empty ListLink without whitespace parses correctly
+	std::string in = R"((cog-execute! (ListLink)))";
+
+	Dispatcher com;
+	com.set_base_space(as);
+	std::string out = com.interpret_command(in);
+	printf("Got %s\n", out.c_str());
+
+	// Should successfully create empty ListLink
+	TS_ASSERT(0 != as->get_size());
+
+	// Test with explicit whitespace (should also work)
+	as->clear();
+	in = R"((cog-execute! (ListLink )))";
+	out = com.interpret_command(in);
+	printf("Got %s\n", out.c_str());
+	TS_ASSERT(0 != as->get_size());
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
