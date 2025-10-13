@@ -452,7 +452,7 @@ std::string Commands::cog_set_value(const std::string& cmd)
 
 // -----------------------------------------------
 // (cog-set-values! (Concept "foo") (AtomSpace "foo")
-//     (alist (cons (Predicate "bar") (stv 0.9 0.8)) ...))
+//     (alist (cons (Predicate "bar") (FloatValue 0.9 0.8)) ...))
 std::string Commands::cog_set_values(const std::string& cmd)
 {
 	size_t pos = 0;
