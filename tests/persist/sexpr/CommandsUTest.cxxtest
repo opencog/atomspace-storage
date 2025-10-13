@@ -154,7 +154,7 @@ void CommandsUTest::test_set_value()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	std::string in =
-		R"((cog-set-value! (Concept "a") (Predicate "key") (stv 0.6 0.8)))";
+		R"((cog-set-value! (Concept "a") (Predicate "key") (FloatValue 0.6 0.8)))";
 
 	Dispatcher com;
 	com.set_base_space(as);
@@ -170,7 +170,7 @@ void CommandsUTest::test_set_value()
 	Handle key = as->add_node(PREDICATE_NODE, "key");
 	ValuePtr vp = h->getValue(key);
 	TS_ASSERT(nullptr != vp);
-	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, vp->get_type());
+	TS_ASSERT_EQUALS(FLOAT_VALUE, vp->get_type());
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
