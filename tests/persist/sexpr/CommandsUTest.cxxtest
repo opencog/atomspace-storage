@@ -155,22 +155,25 @@ void CommandsUTest::test_empty_link()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	// Test that empty ListLink without whitespace parses correctly
-	std::string in = R"((cog-execute! (ListLink)))";
+	std::string in = R"((cog-execute-cache! (ListLink) (Predicate "test-key")))";
 
 	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
 
-	// Should successfully create empty ListLink
-	TS_ASSERT(0 != as->get_size());
+	// ListLink is not executable, so returns #f, but parsing should succeed
+	TS_ASSERT(0 == out.compare("#f"));
+	// Verify atoms were created (ListLink + Predicate)
+	TS_ASSERT(2 == as->get_size());
 
 	// Test with explicit whitespace (should also work)
 	as->clear();
-	in = R"((cog-execute! (ListLink )))";
+	in = R"((cog-execute-cache! (ListLink ) (Predicate "test-key2")))";
 	out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
-	TS_ASSERT(0 != as->get_size());
+	TS_ASSERT(0 == out.compare("#f"));
+	TS_ASSERT(2 == as->get_size());
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
