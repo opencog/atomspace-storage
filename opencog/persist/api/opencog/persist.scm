@@ -470,10 +470,9 @@
     performs an atomic read-modify-write of the Value located at KEY.
 
     At this time, the only implemented updates are atomic increments
-    of floating-point values stored in a FloatValue or in a TruthValue.
-    The intended use is to allow lots of clients to simultaneously
-    update counts on ATOM, without having them clobber each-other with
-    a non-atomic update.
+    of floating-point values stored in a FloatValue.  The intended use
+    is to allow lots of clients to simultaneously update counts on ATOM,
+    without having them clobber each-other with a non-atomic update.
 
     Usage:
        (cog-set-value! (StorageNode ...) (*-update-value-*)
