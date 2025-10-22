@@ -131,22 +131,39 @@ std::string Sexpr::get_node_name(const std::string& s,
 	// Advance past whitespace.
 	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
 
+	// Check if we have content
+	if (l >= r)
+		throw SyntaxException(TRACE_INFO,
+			"Error at line %zu: empty node name",
+			line_cnt);
+
 	bool typeNode = namer.isA(atype, TYPE_NODE);
+	bool numberNode = namer.isA(atype, NUMBER_NODE);
+
+	// Detect if this is a quoted value or not
+	bool quoted_value = (s[l] == '"');
+	bool scm_symbol = false;
 
 	// Scheme strings start and end with double-quote.
 	// Scheme symbols start with single-quote.
-	bool scm_symbol = false;
+	// NumberNode allows unquoted numeric values.
 	if (typeNode and s[l] == '\'')
 		scm_symbol = true;
-	else if (not typeNode and s[l] != '"')
+	else if (not typeNode and not numberNode and not quoted_value)
 		throw SyntaxException(TRACE_INFO,
 			"Syntax error at line %zu Unexpected content: >>%s<< in %s",
 			line_cnt, s.substr(l, r-l+1).c_str(), s.c_str());
 
-	l++;
+	// Skip opening quote or symbol marker
+	if (quoted_value or scm_symbol)
+		l++;
+
 	size_t p = l;
 	if (scm_symbol)
 		for (; p < r and (s[p] != '(' or s[p] != ' ' or s[p] != '\t' or s[p] != '\n'); p++);
+	else if (numberNode and not quoted_value)
+		// For unquoted NumberNode: extract until whitespace or closing paren
+		for (; p < r and s[p] != ')' and s[p] != ' ' and s[p] != '\t' and s[p] != '\n'; p++);
 	else
 		for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
 	r = p;
@@ -154,12 +171,28 @@ std::string Sexpr::get_node_name(const std::string& s,
 	// We use std::quoted() to unescape embedded quotes.
 	// Unescaping works ONLY if the leading character is a quote!
 	// So readjust left and right to pick those up.
-	if ('"' == s[l-1]) l--; // grab leading quote, for std::quoted().
-	if ('"' == s[r]) r++;   // step past trailing quote.
+	if (quoted_value) l--; // grab leading quote, for std::quoted().
+	if (quoted_value and '"' == s[r]) r++;   // step past trailing quote.
+
+	// Validate extraction bounds
+	if (r < l)
+		throw SyntaxException(TRACE_INFO,
+			"Error at line %zu: invalid node name bounds",
+			line_cnt);
+
 	std::stringstream ss;
 	std::string name;
-	ss << s.substr(l, r-l);
-	ss >> std::quoted(name);
+	if (numberNode and not quoted_value)
+	{
+		// For unquoted NumberNode, directly extract the numeric string
+		name = s.substr(l, r-l);
+	}
+	else
+	{
+		// For quoted strings, use std::quoted to unescape
+		ss << s.substr(l, r-l);
+		ss >> std::quoted(name);
+	}
 	return name;
 }
 
