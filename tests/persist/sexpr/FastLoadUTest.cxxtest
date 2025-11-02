@@ -96,13 +96,13 @@ void FastLoadUTest::test_pattern_parse()
 {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-    std::string input_sym = "(Get\n"
+    std::string input_sym = "(Meet\n"
                      "           (VariableList\n"
                      "              (TypedVariable (Variable \"$a\") (Type 'Concept)))\n"
                      "           (Evaluation (Predicate \"test\")\n"
                      "              (List (Variable \"$a\") (Concept \"A\"))))";
 
-    std::string input_not_sym = "(Get\n"
+    std::string input_not_sym = "(Meet\n"
                                 "           (VariableList\n"
                                 "              (TypedVariable (Variable \"$a\") (Type \"Concept\")))\n"
                                 "           (Evaluation (Predicate \"test\")\n"
