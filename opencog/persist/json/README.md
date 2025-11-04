@@ -249,9 +249,9 @@ examples that actually work:
   the key (Predicate "fovs") and it should be a FloatValue holding the
   vector 1 2 3 0.4 0.5 -0.6 0.777 88 999
 
-Additional info can be found in the cogserver examples directory. This
-includes a CLAUDE.md file explaining Atomese.
-See https://github.com/opencog/cogserver/tree/master/examples/mcp for
-details.
+Additional info can be found in the cogserver git repo. This
+includes extensive tool documentation developed for Claude Code.
+See https://github.com/opencog/cogserver/tree/master/opencog/cogserver
+for details.
 
 
