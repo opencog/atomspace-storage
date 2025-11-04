@@ -50,17 +50,17 @@ std::string McpPlugAtomSpace::get_tool_descriptions() const
 		"{\"type\": \"object\", \"properties\": {}, \"required\": []}");
 
 	// getSubTypes
-	add_tool(json, "getSubTypes", "Get all subtypes of a given atom type",
+	add_tool(json, "getSubTypes", "Get all subtypes of a given atom type. Useful for exploring the type hierarchy.",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type to get subtypes of\"}, "
-		"\"recursive\": {\"type\": \"boolean\", \"description\": \"Whether to get all subtypes recursively\"}}, "
+		"\"type\": {\"type\": \"string\", \"description\": \"The atom type to get subtypes of. Examples: 'Node', 'Link', 'Value'. Returns all types that inherit from this type.\"}, "
+		"\"recursive\": {\"type\": \"boolean\", \"description\": \"If true, gets all descendants recursively. If false (default), gets only immediate children.\"}}, "
 		"\"required\": [\"type\"]}");
 
 	// getSuperTypes
-	add_tool(json, "getSuperTypes", "Get all supertypes of a given atom type",
+	add_tool(json, "getSuperTypes", "Get all supertypes of a given atom type. Useful for exploring the type hierarchy.",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type to get supertypes of\"}, "
-		"\"recursive\": {\"type\": \"boolean\", \"description\": \"Whether to get all supertypes recursively\"}}, "
+		"\"type\": {\"type\": \"string\", \"description\": \"The atom type to get supertypes of. Examples: 'Concept', 'Edge', 'FloatValue'. Returns all types this type inherits from.\"}, "
+		"\"recursive\": {\"type\": \"boolean\", \"description\": \"If true, gets all ancestors recursively up to TopType. If false (default), gets only immediate parents.\"}}, "
 		"\"required\": [\"type\"]}");
 
 	// reportCounts
@@ -68,10 +68,10 @@ std::string McpPlugAtomSpace::get_tool_descriptions() const
 		"{\"type\": \"object\", \"properties\": {}, \"required\": []}");
 
 	// getAtoms
-	add_tool(json, "getAtoms", "Get all atoms of a specific type from the AtomSpace",
+	add_tool(json, "getAtoms", "Get all atoms of a specific type from the AtomSpace. WARNING: May return large results - check count with reportCounts first.",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"type\": {\"type\": \"string\", \"description\": \"The atom type to retrieve\"}, "
-		"\"subclass\": {\"type\": \"boolean\", \"description\": \"Whether to include atoms of subtypes\"}}, "
+		"\"type\": {\"type\": \"string\", \"description\": \"The atom type to retrieve. Examples: 'Concept', 'Predicate', 'Edge', 'List'. Use getSubTypes/getSuperTypes to explore type hierarchy.\"}, "
+		"\"subclass\": {\"type\": \"boolean\", \"description\": \"Whether to include atoms of subtypes. If true, retrieves all subtypes of the given type.\"}}, "
 		"\"required\": [\"type\"]}");
 
 	// haveNode
@@ -95,7 +95,7 @@ std::string McpPlugAtomSpace::get_tool_descriptions() const
 	// makeAtom
 	add_tool(json, "makeAtom", "Create an atom in the AtomSpace",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom to create\"}}, "
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom to create. Examples: (Concept \\\"cat\\\"), (List (Concept \\\"a\\\") (Concept \\\"b\\\")), (Edge (Predicate \\\"likes\\\") (List (Concept \\\"Alice\\\") (Concept \\\"Bob\\\"))). Nodes and Links can be arbitrarily nested.\"}}, "
 		"\"required\": [\"atomese\"]}");
 
 	// getIncoming
@@ -111,39 +111,39 @@ std::string McpPlugAtomSpace::get_tool_descriptions() const
 		"\"required\": [\"atomese\"]}");
 
 	// getValueAtKey
-	add_tool(json, "getValueAtKey", "Get the value on an atom located at a given key",
+	add_tool(json, "getValueAtKey", "Get the value on an atom located at a given key. Returns a Value (FloatValue, StringValue, LinkValue, or Atom) in s-expression format.",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom\"}, "
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom. Example: (Anchor \\\"my-data\\\")\"}, "
 		"\"key\": {\"type\": \"object\", \"properties\": {"
-		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the key atom\"}}, \"required\": [\"atomese\"]}}, "
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the key atom. Example: (Predicate \\\"my-key\\\")\"}}, \"required\": [\"atomese\"]}}, "
 		"\"required\": [\"atomese\", \"key\"]}");
 
 	// getValues
-	add_tool(json, "getValues", "Get all values attached to an atom",
+	add_tool(json, "getValues", "Get all values attached to an atom. Returns an association list (alist) of (key . value) pairs in s-expression format.",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom\"}}, "
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom. Example: (Anchor \\\"my-data\\\")\"}}, "
 		"\"required\": [\"atomese\"]}");
 
 	// setValue
 	add_tool(json, "setValue", "Set a value on an atom with a given key",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom\"}, "
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom. Example: (Anchor \\\"my-data\\\")\"}, "
 		"\"key\": {\"type\": \"object\", \"properties\": {"
-		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the key atom\"}}, \"required\": [\"atomese\"]}, "
-		"\"value\": {\"type\": \"object\", \"description\": \"The value to set (FloatValue, StringValue, etc.)\"}}, "
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the key atom. Example: (Predicate \\\"my-key\\\")\"}}, \"required\": [\"atomese\"]}, "
+		"\"value\": {\"type\": \"object\", \"description\": \"The value to set. PREFERRED: Use 'atomese' property with s-expression. Examples: {\\\"atomese\\\": \\\"(FloatValue 1.5 2.7 3.14)\\\"}, {\\\"atomese\\\": \\\"(StringValue \\\\\\\"hello\\\\\\\" \\\\\\\"world\\\\\\\")\\\"}, {\\\"atomese\\\": \\\"(LinkValue (Concept \\\\\\\"A\\\\\\\") (Concept \\\\\\\"B\\\\\\\"))\\\"}. Alternative: verbose JSON format {\\\"type\\\": \\\"FloatValue\\\", \\\"value\\\": [1.5, 2.7, 3.14]}.\", \"properties\": {\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the value (PREFERRED). Examples: (FloatValue 1.0 2.0), (StringValue \\\\\\\"text\\\\\\\"), (LinkValue (Concept \\\\\\\"X\\\\\\\") (Concept \\\\\\\"Y\\\\\\\"))\"}, \"type\": {\"type\": \"string\", \"description\": \"Type name for verbose JSON (not recommended)\"}, \"value\": {\"description\": \"Value data for verbose JSON (not recommended)\"}}}}, "
 		"\"required\": [\"atomese\", \"key\", \"value\"]}");
 
 	// execute
-	add_tool(json, "execute", "Execute an executable atom and get the result",
+	add_tool(json, "execute", "Execute an executable atom and get the result. WARNING: Execution has side effects and may modify AtomSpace contents or external systems. Returns a Value.",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the executable atom\"}}, "
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the executable atom. Examples: (PlusLink (Number 1) (Number 2)), (ValueOf (Concept \\\"foo\\\") (Predicate \\\"key\\\")), (Query ...). Many Link types are executable - see wiki for details.\"}}, "
 		"\"required\": [\"atomese\"]}");
 
 	// extract
-	add_tool(json, "extract", "Remove an atom from the AtomSpace",
+	add_tool(json, "extract", "Remove an atom from the AtomSpace. WARNING: Irreversible operation.",
 		"{\"type\": \"object\", \"properties\": {"
-		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom to remove\"}, "
-		"\"recursive\": {\"type\": \"boolean\", \"description\": \"Whether to recursively remove\"}}, "
+		"\"atomese\": {\"type\": \"string\", \"description\": \"S-expression for the atom to remove. Example: (Concept \\\"obsolete\\\")\"}, "
+		"\"recursive\": {\"type\": \"boolean\", \"description\": \"If true, recursively removes all Links containing this atom. If false (default), only removes the atom if nothing references it.\"}}, "
 		"\"required\": [\"atomese\"]}", true);  // last = true
 
 	json += "]";
