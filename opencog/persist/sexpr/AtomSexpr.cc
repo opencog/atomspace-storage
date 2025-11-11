@@ -102,9 +102,15 @@ static Type get_typename(const std::string& s, size_t& l, size_t& r,
 	const std::string stype = s.substr(l, r-l);
 	Type atype = namer.getType(stype);
 	if (atype == opencog::NOTYPE)
+	{
+		if (0 < line_cnt)
+			throw SyntaxException(TRACE_INFO,
+				"Error at line %lu unknown Atom type: %s",
+				line_cnt, stype.c_str());
 		throw SyntaxException(TRACE_INFO,
-			"Error at line %lu unknown Atom type: %s",
-			line_cnt, stype.c_str());
+			"Unknown Atom type: %s in expression %s",
+			stype.c_str(), s.c_str());
+	}
 
 	return atype;
 }
