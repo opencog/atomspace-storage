@@ -7,7 +7,6 @@ from unittest import TestCase
 
 from opencog.type_constructors import *
 from opencog.atomspace import AtomSpace
-from opencog.utilities import initialize_opencog, finalize_opencog
 
 # Argh. The build dir isn't set up right
 # from opencog.storage import load_file
@@ -29,11 +28,7 @@ class UtilitiesTest(TestCase):
         self.atomspace = AtomSpace()
  
     def tearDown(self):
-        del self.atomspace
-
-    def test_initialize_finalize(self):
-        initialize_opencog(self.atomspace)
-        finalize_opencog()
+        pass
 
     def test_fast_load(self):
         gen_atoms(self.atomspace)

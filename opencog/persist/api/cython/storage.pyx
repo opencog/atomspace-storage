@@ -11,7 +11,10 @@ from cython.operator cimport dereference as deref
 
 from opencog.atomspace import types
 from opencog.atomspace import regenerate_types
-from opencog.utilities import add_node, add_link
+
+# These are imported so that they become available to the
+# autogened type constructors.
+from opencog.type_ctors import add_node, add_link
 
 # The list of Atom Types that python knows about has to be rebuilt,
 # before much else can be done.
