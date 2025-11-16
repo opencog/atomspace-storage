@@ -112,6 +112,10 @@ std::string Dispatcher::interpret_command(const std::string& cmd)
 		throw SyntaxException(TRACE_INFO, "Not a command: %s",
 			cmd.c_str());
 
+	// Argh. The sexpr websockets sends `(cog-version)` with no
+	// newline. Deal with it. Arghhh.
+	if (cmd[epos] == ')') epos++;
+
 	// Look up the method to call, based on the hash of the command string.
 	size_t action = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
 	const auto& disp = _dispatch_map.find(action);
