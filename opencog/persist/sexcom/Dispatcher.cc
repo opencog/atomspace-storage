@@ -107,7 +107,7 @@ std::string Dispatcher::interpret_command(const std::string& cmd)
 
 	pos ++; // Skip over the open-paren
 
-	size_t epos = cmd.find_first_of(" \n\t", pos);
+	size_t epos = cmd.find_first_of(" \n\t)", pos);
 	if (std::string::npos == epos)
 		throw SyntaxException(TRACE_INFO, "Not a command: %s",
 			cmd.c_str());
