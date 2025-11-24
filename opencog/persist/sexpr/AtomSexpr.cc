@@ -230,15 +230,9 @@ Handle Sexpr::decode_atom(const std::string& s,
 			if (l1 == r1) break;
 
 			// Atom names never start with lower-case.
-			if (islower(s[l1+1]))
-					break;
-			if (0 == s.compare(l1, 11, "(AtomSpace "))
-			{
-				Handle hasp(decode_frame(Handle::UNDEFINED, s, l1, ascache));
-				as = (AtomSpace*) hasp.get();
-			}
-			else
-				outgoing.push_back(decode_atom(s, l1, r1, line_cnt, ascache));
+			if (islower(s[l1+1])) break;
+
+			outgoing.push_back(decode_atom(s, l1, r1, line_cnt, ascache));
 
 			l = r1 + 1;
 		} while (l < r);
