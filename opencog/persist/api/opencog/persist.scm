@@ -686,7 +686,7 @@
        (cog-set-value! (StorageNode ...) (*-fetch-query-*)
                        (LinkValue ATOMSPACE QUERY KEY METADATA FRESH))
 
-    Where FRESH is either (TrueLink) for true or (FalseLink) for false.
+    Where FRESH is either (BoolValue #t) or (BoolValue #f).
 
     See also:
     *-fetch-incoming-set-* -- to fetch the incoming set of an Atom.
@@ -738,6 +738,9 @@
 		; Simple case: just QUERY and KEY
 		(begin
 			(if (not STORAGE) (set! STORAGE (cog-storage-node)))
+			(if (not (cog-atom? STORAGE))
+				(throw 'C++-EXCEPTION fetch-query
+					"StorageNode is not open for reading!"))
 			(direct-setvalue! STORAGE (*-fetch-query-*)
 				(LinkValue (cog-atomspace) QUERY KEY)))
 		; METADATA provided
@@ -748,9 +751,12 @@
 			; METADATA is a real metadata handle
 			(begin
 				(if (not STORAGE) (set! STORAGE (cog-storage-node)))
+				(if (not (cog-atom? STORAGE))
+					(throw 'C++-EXCEPTION fetch-query
+						"StorageNode is not open for reading!"))
 				(direct-setvalue! STORAGE (*-fetch-query-*)
 					(LinkValue (cog-atomspace) QUERY KEY METADATA
-						(if FRESH (TrueLink) (FalseLink)))))))
+						(if FRESH (BoolValue #t) (BoolValue #f)))))))
 	QUERY
 )
 
