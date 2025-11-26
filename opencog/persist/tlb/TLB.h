@@ -35,6 +35,9 @@
 namespace opencog
 {
 
+//! UUID == Universally Unique Identifier
+typedef size_t UUID;
+
 class uuid_pool
 {
 public:
