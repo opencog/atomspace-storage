@@ -12,7 +12,6 @@ TARGET_LINK_LIBRARIES(sexcom
 	sexpr
 	storage-types
 	persist-proxy
-	persist
 	atomspace
 	execution
 	atombase

@@ -37,7 +37,6 @@ ADD_LIBRARY (persist-file SHARED
 ADD_DEPENDENCIES(persist-file storage_types)
 
 TARGET_LINK_LIBRARIES(persist-file
-	persist
 	storage-types
 	fast_load_scm
 	sexcom

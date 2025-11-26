@@ -2,7 +2,6 @@
 
 LINK_LIBRARIES(
 	json
-	persist
 	atomspace
 	execution
 )

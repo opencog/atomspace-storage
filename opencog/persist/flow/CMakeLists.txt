@@ -11,7 +11,7 @@ ADD_LIBRARY (persist-flow SHARED
 ADD_DEPENDENCIES(persist-flow storage_types)
 
 TARGET_LINK_LIBRARIES(persist-flow
-	persist
+	storage-types
 	${ATOMSPACE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 )

@@ -23,6 +23,7 @@ ADD_LIBRARY(storage-types SHARED
 ADD_DEPENDENCIES(storage-types storage_types)
 
 TARGET_LINK_LIBRARIES(storage-types
+	${ATOMSPACE_LIBRARY}
 	${ATOMSPACE_atomtypes_LIBRARY}
 )
 
