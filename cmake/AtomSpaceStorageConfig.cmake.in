@@ -13,7 +13,6 @@ set(ATOMSPACE_STORAGE_LIBRARIES
 	fast_load_scm
 	sexpr
 	sexcom
-	persist
 	csv-table
 	csv
 	json
