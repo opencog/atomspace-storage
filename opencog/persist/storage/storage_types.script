@@ -75,9 +75,5 @@ DYNAMIC_DATA_PROXY_NODE <- PROXY_NODE
 // Fetch and store Values from Storage.
 // Marked "NUMERIC" only because having a FetchFloatValueOfLink seems
 // like overkill.
-//
-// These are here, instead of in the "main" atom_types.script because
-// the implementation for them is here, because otherwise crazy library
-// dependency issues arise.
-FETCH_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
-STORE_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
+FETCH_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_SIG
+STORE_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_SIG
