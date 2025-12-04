@@ -21,7 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <unistd.h> /* for usleep() */
+#include <chrono>
+#include <thread>
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -81,20 +82,42 @@ std::string SexprEval::poll_result()
 	return ret;
 }
 
-
 void SexprEval::begin_eval()
 {
-	std::lock_guard<std::mutex> lock(_mtx);
-	size_t cnt = 0;
-	while (0 < _answer.size())
-	{
-		logger().warn("SexprEval::begin_eval: This shouldn't happen!  Buffer not empty, size=%lu", _answer.size());
+	std::unique_lock<std::mutex> lock(_mtx);
+	if (_answer.empty()) return;
 
-		usleep(100);
-		cnt++;
-		if (10000 * 60 < cnt) break;
+	// Unusual race condition: some other thread is using this evaluator,
+	// and evaluation there has not completed. This seems to be rare,
+	// and I think we can just ignore this, at least for a little while.
+	auto start = std::chrono::steady_clock::now();
+	bool warned = false;
+	while (not _answer.empty())
+	{
+		// Release lock and yield so poll_result() can clear _answer
+		lock.unlock();
+		std::this_thread::yield();
+		lock.lock();
+
+		auto elapsed = std::chrono::steady_clock::now() - start;
+		auto secs = std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
+
+		// Only warn if we've been waiting a long time (> 1 second)
+		if (not warned and secs >= 1)
+		{
+			logger().warn("SexprEval::begin_eval: Buffer not empty after 1 sec, size=%lu",
+				_answer.size());
+			warned = true;
+		}
+
+		// Give up after 60 seconds - don't clear, something is very wrong
+		if (secs >= 60)
+		{
+			logger().error("SexprEval::begin_eval: Giving up after 60 sec, size=%lu",
+				_answer.size());
+			return;
+		}
 	}
-	_answer.clear();
 }
 
 /* ============================================================== */
