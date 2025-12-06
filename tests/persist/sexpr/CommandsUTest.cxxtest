@@ -75,7 +75,7 @@ void CommandsUTest::test_node()
 
 	printf("AtomSpace is %s\n", as->to_string().c_str());
 	TS_ASSERT_EQUALS(0, as->get_size());
-	TS_ASSERT(0 == out.compare("()"));
+	TS_ASSERT(0 == out.compare("#f\n"));
 
 	as->add_node(CONCEPT_NODE, "foo");
 	out = com.interpret_command(in);
@@ -102,7 +102,7 @@ void CommandsUTest::test_node_quoted()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT_EQUALS(0, as->get_size());
-	TS_ASSERT(0 == out.compare("()"));
+	TS_ASSERT(0 == out.compare("#f\n"));
 
 	Handle h = as->add_node(CONCEPT_NODE, R"("f""o"""o"!!!"")");
 	printf("Added atom %s\n", h->to_short_string().c_str());
@@ -136,7 +136,7 @@ void CommandsUTest::test_link()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT_EQUALS(2, as->get_size());
-	TS_ASSERT(0 == out.compare("()"));
+	TS_ASSERT(0 == out.compare("#f\n"));
 
 	as->add_link(LIST_LINK, ca, cb);
 

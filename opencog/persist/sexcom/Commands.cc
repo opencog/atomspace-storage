@@ -328,7 +328,7 @@ std::string Commands::cog_node(const std::string& cmd)
 	AtomSpace* as = get_opt_as(cmd, r);
 	h = as->get_node(t, std::move(name));
 
-	if (nullptr == h) return "()";
+	if (nullptr == h) return "#f\n";
 	return Sexpr::encode_atom(h, _multi_space);
 }
 
@@ -366,7 +366,7 @@ std::string Commands::cog_link(const std::string& cmd)
 	AtomSpace* as = get_opt_as(cmd, pos);
 	h = as->get_link(t, std::move(outgoing));
 
-	if (nullptr == h) return "()";
+	if (nullptr == h) return "#f\n";
 	return Sexpr::encode_atom(h, _multi_space);
 }
 
