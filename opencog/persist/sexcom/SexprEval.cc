@@ -59,8 +59,10 @@ void SexprEval::eval_expr(const std::string &expr)
 
 		// CogStorageNode expects all responses to be terminated
 		// by exactly one newline char. It is the end-of-message
-		// marker.
-		_answer += "\n";
+		// marker. Empty responses have no newline - the client
+		// should not call recv() for commands that return nothing.
+		if (not _answer.empty())
+			_answer += "\n";
 	}
 	catch (const StandardException& ex)
 	{

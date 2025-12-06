@@ -447,7 +447,7 @@ std::string Commands::cog_set_value(const std::string& cmd)
 	if (_proxy and _proxy->have_storeValue)
 		_proxy->store_value(atom, key);
 
-	return "()";
+	return "";
 }
 
 // -----------------------------------------------
@@ -475,7 +475,7 @@ std::string Commands::cog_set_values(const std::string& cmd)
 	if (_proxy and _proxy->have_storeAtom)
 		_proxy->store_atom(h);
 
-	return "()";
+	return "";
 }
 
 // -----------------------------------------------
@@ -492,7 +492,7 @@ std::string Commands::cog_update_value(const std::string& cmd)
 	key = as->add_atom(key);
 
 	if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
-		return "()";
+		return "";
 
 	FloatValuePtr fvp = FloatValueCast(vp);
 	as->increment_count(atom, key, fvp->value());
@@ -503,7 +503,7 @@ std::string Commands::cog_update_value(const std::string& cmd)
 	// Return the new value. XXX Why? This just wastes CPU?
 	// ValuePtr vp = atom->getValue(key);
 	// return Sexpr::encode_value(vp);
-	return "()";
+	return "";
 }
 
 // -----------------------------------------------
@@ -529,7 +529,7 @@ std::string Commands::cog_define(const std::string& cmd)
 	// Hacky...
 	// _space_map.insert({sym, top_space});
 
-	return "()";
+	return "";
 }
 
 // -----------------------------------------------
