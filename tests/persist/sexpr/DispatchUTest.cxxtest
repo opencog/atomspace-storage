@@ -80,10 +80,10 @@ void DispatchUTest::test_overload()
 	MyDispatch com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
-	printf("Got %s\n", out.c_str());
+	printf("Got >>%s<<\n", out.c_str());
 
 	TS_ASSERT_EQUALS(0, as->get_size());
-	TS_ASSERT(0 == out.compare("foobar()"));
+	TS_ASSERT(0 == out.compare("foobar#f\n"));
 
 	as->add_node(CONCEPT_NODE, "foo");
 	out = com.interpret_command(in);
