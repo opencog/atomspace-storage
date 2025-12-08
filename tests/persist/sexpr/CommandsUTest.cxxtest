@@ -191,7 +191,7 @@ void CommandsUTest::test_set_value()
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
 
-	TS_ASSERT_EQUALS(2, as->get_size());
+	TS_ASSERT_EQUALS(3, as->get_size());
 	TS_ASSERT(0 == out.compare(""));
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
@@ -223,7 +223,7 @@ void CommandsUTest::test_set_value_quoted()
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
 
-	TS_ASSERT_EQUALS(2, as->get_size());
+	TS_ASSERT_EQUALS(3, as->get_size());
 	TS_ASSERT(0 == out.compare(""));
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
@@ -264,7 +264,7 @@ void CommandsUTest::test_set_several_quoted()
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
 	printf("AtomSpace contents: %s\n", as->to_string().c_str());
-	TS_ASSERT_EQUALS(5, as->get_size());
+	TS_ASSERT_EQUALS(6, as->get_size());
 	TS_ASSERT(0 == out.compare(""));
 
 	Handle hx = as->get_node(CONCEPT_NODE, "x \"float\" node");
@@ -366,7 +366,7 @@ void CommandsUTest::test_set_values()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT(0 == out.compare(""));
-	TS_ASSERT_EQUALS(3, as->get_size());
+	TS_ASSERT_EQUALS(4, as->get_size());
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr != h);
