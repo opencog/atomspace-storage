@@ -111,14 +111,14 @@ void FastLoadUTest::test_pattern_parse()
     _asp->clear();
     Handle h = parseExpression(input_sym, _asp);
 
-    // This test adds 9 atoms.
-    TS_ASSERT_EQUALS(9, _asp->get_size());
+    // This test adds 9 atoms. Pluse one: (Predicate "*-IsKeyFlag-*")
+    TS_ASSERT_EQUALS(10, _asp->get_size());
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
 
     _asp->clear();
 
     h = parseExpression(input_not_sym, _asp);
-    TS_ASSERT_EQUALS(9, _asp->get_size());
+    TS_ASSERT_EQUALS(10, _asp->get_size());
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
 
     logger().info("END TEST: %s", __FUNCTION__);
