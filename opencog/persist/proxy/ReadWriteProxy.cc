@@ -143,18 +143,11 @@ void ReadWriteProxy::storeAtom(const Handle& h, bool synchronous)
 	_writer->barrier();
 }
 
-void ReadWriteProxy::preRemoveAtom(AtomSpace* as, const Handle& h,
+void ReadWriteProxy::removeAtom(AtomSpace* as, const Handle& h,
                                    bool recursive)
 {
 	CHECK_OPEN
-	_writer->preRemoveAtom(as, h, recursive);
-}
-
-void ReadWriteProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
-                                    bool recursive, bool extract_ok)
-{
-	CHECK_OPEN
-	_writer->postRemoveAtom(as, h, recursive, extract_ok);
+	_writer->removeAtom(as, h, recursive);
 }
 
 void ReadWriteProxy::storeValue(const Handle& atom, const Handle& key)

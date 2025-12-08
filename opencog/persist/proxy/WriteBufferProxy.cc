@@ -139,13 +139,6 @@ void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 	}
 }
 
-// Two-step remove. Just pass the two steps down to the children.
-void WriteBufferProxy::preRemoveAtom(AtomSpace* as, const Handle& h,
-                                     bool recursive)
-{
-	WriteThruProxy::preRemoveAtom(as, h, recursive);
-}
-
 void WriteBufferProxy::erase_recursive(const Handle& h)
 {
 	_atom_queue.erase(h);
@@ -154,8 +147,8 @@ void WriteBufferProxy::erase_recursive(const Handle& h)
 		erase_recursive(hi);
 }
 
-void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
-                                      bool recursive, bool extracted_ok)
+void WriteBufferProxy::removeAtom(AtomSpace* as, const Handle& h,
+                                     bool recursive)
 {
 	if (recursive)
 		erase_recursive(h);
@@ -179,8 +172,7 @@ void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
 
 		WriteThruProxy::barrier();
 	}
-
-	WriteThruProxy::postRemoveAtom(as, h, recursive, extracted_ok);
+	WriteThruProxy::removeAtom(as, h, recursive);
 }
 
 void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)

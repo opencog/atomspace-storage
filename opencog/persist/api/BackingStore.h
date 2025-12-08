@@ -130,37 +130,6 @@ class BackingStore
 		}
 
 		/**
-		 * Same as above, except providing a two-step removal API.
-		 *
-		 * When the user asks to remove an Atom, the preRemoveAtom()
-		 * method is called first. When it is called, the Atom is still in
-		 * the AtomSpace. Next, the Atom is removed from the AtomSpace,
-		 * and finally, the postRemoveAtom() method is called. This
-		 * two-step process gives the backend the freedom to implement
-		 * algorithms that would be difficult with a one-step process.
-		 *
-		 * A default implementation is provided for backwards compat.
-		 */
-		virtual void preRemoveAtom(AtomSpace* as, const Handle& h,
-		                           bool recursive)
-		{
-			removeAtom(as, h, recursive);
-		}
-
-		/**
-		 * The postRemoveAtom() method is called after the Atom has been
-		 * extracted from the AtomSpace. That extraction might fail, for
-		 * a large number of reasons, having to do with read-only, framing
-		 * and shadowing. Thus, the result of the extraction is passed in
-		 * as an argument: if `extracted` is false, then the Atom was never
-		 * removed from the AtomSpace (and shouldn't be removed from the
-		 * backend, either.)
-		 */
-		virtual void postRemoveAtom(AtomSpace* as, const Handle& h,
-		                            bool recursive, bool extracted)
-		{}
-
-		/**
 		 * Store the value located at `key` on `atom` to the remote
 		 * server. If the `atom` does not yet exist on the remote
 		 * server, it is created there.  This method is more granular

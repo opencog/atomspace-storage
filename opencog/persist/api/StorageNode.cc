@@ -459,39 +459,9 @@ void StorageNode::update_value(const Handle& h, const Handle& key,
 	updateValue(h, key, delta);
 }
 
-bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
+void StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 {
-	// Removal is done with a two-step process. First, we tell storage
-	// about the Atom that is going away. It's still in the AtomSpace at
-	// this point, so storage can grab whatever data it needs from the
-	// AtomSpace (e.g. grab the IncomingSet). Next, we extract from the
-	// AtomSpace, and then finally, we tell storage that we're done.
-	//
-	// The postRemove call gets the return code from the AtomSpace
-	// extract. This is because the AtomSpace extract logic is complex,
-	// with success & failure depending on subtle interactions between
-	// read-only, framing, hiding and other concerns. It is too hard to
-	// ask each kind of storage to try to replicate this logic. The
-	// solution used here is minimalist: if the AtomSpace extract worked,
-	// let storage know. If the AtomSpace extract worked, storage should
-	// finish the remove. Otherwise, it should keep the atom.
-
-	if (not recursive and not h->isIncomingSetEmpty()) return false;
-
-	// Removal of atoms from read-only storage is not allowed. However,
-	// it is OK to remove atoms from a read-only AtomSpace, because
-	// it is acting as a cache for the database, and removal is used
-	// used to free up RAM storage.
-	if (_atom_space->get_read_only())
-		return as->extract_atom(h, recursive);
-
-	// Warn storage about upcoming extraction; do the extraction, then
-	// tell storage how it all worked out.
-	preRemoveAtom(as, h, recursive);
-	bool exok = as->extract_atom(h, recursive);
-	postRemoveAtom(as, h, recursive, exok);
-
-	return exok;
+	removeAtom(as, h, recursive);
 }
 
 Handle StorageNode::fetch_atom(const Handle& h, AtomSpace* as)

@@ -402,8 +402,8 @@ std::string Commands::cog_extract(const std::string& cmd)
 
 	if (_proxy and _proxy->have_removeAtom)
 	{
-		if (_proxy->remove_atom(_base_space, h, false)) return "#t";
-		return "#f";
+		_proxy->remove_atom(_base_space, h, false);
+		return "#t";
 	}
 
 	if (_base_space->extract_atom(h, false)) return "#t";
@@ -420,8 +420,8 @@ std::string Commands::cog_extract_recursive(const std::string& cmd)
 
 	if (_proxy and _proxy->have_removeAtom)
 	{
-		if (_proxy->remove_atom(_base_space, h, true)) return "#t";
-		return "#f";
+		_proxy->remove_atom(_base_space, h, true);
+		return "#t";
 	}
 
 	if (_base_space->extract_atom(h, true)) return "#t";

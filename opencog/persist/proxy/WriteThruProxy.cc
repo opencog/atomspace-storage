@@ -79,19 +79,11 @@ void WriteThruProxy::storeAtom(const Handle& h, bool synchronous)
 		stnp->barrier();
 }
 
-// Two-step remove. Just pass the two steps down to the children.
-void WriteThruProxy::preRemoveAtom(AtomSpace* as, const Handle& h,
+void WriteThruProxy::removeAtom(AtomSpace* as, const Handle& h,
                                    bool recursive)
 {
 	for (const StorageNodePtr& stnp : _targets)
-		stnp->preRemoveAtom(as, h, recursive);
-}
-
-void WriteThruProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
-                                    bool recursive, bool extracted_ok)
-{
-	for (const StorageNodePtr& stnp : _targets)
-		stnp->postRemoveAtom(as, h, recursive, extracted_ok);
+		stnp->removeAtom(as, h, recursive);
 }
 
 void WriteThruProxy::storeValue(const Handle& atom, const Handle& key)

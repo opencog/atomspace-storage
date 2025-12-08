@@ -310,24 +310,20 @@ public:
 	                  const ValuePtr& delta);
 
 	/**
-	 * Removes an atom from the atomspace, and any attached storage.
-	 * The atom remains valid as long as there are Handles that
-	 * reference it; it is deleted only when the last reference
-	 * goes away.
+	 * Removes an atom from attached storage. It is NOT removed from
+	 * the local AtomSpace!
 	 *
 	 * @param h The Handle of the atom to be removed.
 	 * @param recursive Recursive-removal flag. If the flag is set,
 	 *       then this atom, and *everything* that points to it will
-	 *       be removed from the atomspace.  This can cause a large
-	 *       cascade of removals!  If the flag is not set, then the
-	 *       atom will be removed only if its incoming set is empty.
+	 *       also be removed. This can cause a large cascade of
+	 *       removals!  If the flag is not set, then the atom will be
+	 *       removed only if its incoming set is empty.
 	 *       By default, recursion is disabled.
-	 * @return True if the Atom for the given Handle was successfully
-	 *         removed. False, otherwise.
 	 */
-	bool remove_atom(AtomSpace*, Handle, bool recursive=false);
-	bool remove_atom(const AtomSpacePtr& as, Handle h, bool recursive=false)
-		{ return remove_atom(as.get(), h, recursive); }
+	void remove_atom(AtomSpace*, Handle, bool recursive=false);
+	void remove_atom(const AtomSpacePtr& as, Handle h, bool recursive=false)
+		{ remove_atom(as.get(), h, recursive); }
 };
 
 NODE_PTR_DECL(StorageNode)
