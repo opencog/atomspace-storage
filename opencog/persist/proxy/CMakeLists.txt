@@ -19,7 +19,7 @@ ADD_DEPENDENCIES(persist-proxy storage_types)
 
 TARGET_LINK_LIBRARIES(persist-proxy
 	storage-types
-	backing
+	persist
 	atomcore
 	atombase
 	${COGUTIL_LIBRARY}

@@ -7,7 +7,6 @@ ENDIF (HAVE_CYTHON)
 ADD_LIBRARY (persist SHARED
 	BackingQuery.cc
 	BackingStore.cc
-	PersistSCM.cc
 	StorageNode.cc
 )
 
