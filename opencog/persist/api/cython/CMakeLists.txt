@@ -31,9 +31,11 @@ ADD_LIBRARY(storage_cython SHARED
 ADD_DEPENDENCIES(storage_cython storage_types)
 
 TARGET_LINK_LIBRARIES(storage_cython
+	# utilities_cython
 	fast_load_scm
+	# ${NO_AS_NEEDED}
+	persist
 	storage-types
-	backing
 	${ATOMSPACE_LIBRARIES}
 	${Python3_LIBRARIES}
 )
