@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; file-episodic.scm -- Unit test for FileStorageNode w/AtomSpaces
 ;

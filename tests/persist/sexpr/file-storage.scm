@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; file-storage.scm -- Unit test for the FileStorageNode
 ;
