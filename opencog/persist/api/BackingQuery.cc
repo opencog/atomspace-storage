@@ -26,10 +26,10 @@
 #include <time.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Transient.h>
 
 #include <opencog/atoms/join/JoinLink.h>
 #include <opencog/atoms/pattern/QueryLink.h>
+#include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/ContainerValue.h>
 #include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/query/Implicator.h>
@@ -231,12 +231,12 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 		svp->close();
 		ContainerValuePtr cvp(svp);
 
-		AtomSpace* tas = grab_transient_atomspace(as);
-		BackingImplicator impl(this, tas, cvp);
+		AtomSpacePtr scratch = createAtomSpace(as);
+		BackingImplicator impl(this, scratch.get(), cvp);
 		impl.satisfy(qlp);
+		scratch->clear();
 
 		qv = svp;
-		release_transient_atomspace(tas);
 	}
 	else if (nameserver().isA(qt, MEET_LINK))
 	{
@@ -244,32 +244,32 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 		svp->close();
 		ContainerValuePtr cvp(svp);
 
-		AtomSpace* tas = grab_transient_atomspace(as);
-		BackingSatisfyingSet sater(this, tas, cvp);
+		AtomSpacePtr scratch = createAtomSpace(as);
+		BackingSatisfyingSet sater(this, scratch.get(), cvp);
 		sater.satisfy(PatternLinkCast(query));
+		scratch->clear();
 
 		qv = svp;
-		release_transient_atomspace(tas);
 	}
 	else if (nameserver().isA(qt, JOIN_LINK))
 	{
-		AtomSpace* tas = grab_transient_atomspace(as);
-		BackingJoinCallback rjcb(this, tas);
+		AtomSpacePtr scratch = createAtomSpace(as);
+		BackingJoinCallback rjcb(this, scratch.get());
 
-		qv = JoinLinkCast(query)->execute_cb(tas, &rjcb);
-		release_transient_atomspace(tas);
+		qv = JoinLinkCast(query)->execute_cb(scratch.get(), &rjcb);
+		scratch->clear();
 	}
 	else if (query->is_executable())
 	{
-		AtomSpace* tas = grab_transient_atomspace(as);
-		qv = query->execute(tas);
-		release_transient_atomspace(tas);
+		AtomSpacePtr scratch = createAtomSpace(as);
+		qv = query->execute(scratch.get());
+		scratch->clear();
 	}
 	else if (query->is_evaluatable())
 	{
-		AtomSpace* tas = grab_transient_atomspace(as);
-		qv = ValueCast(query->evaluate(tas));
-		release_transient_atomspace(tas);
+		AtomSpacePtr scratch = createAtomSpace(as);
+		qv = query->evaluate(scratch.get());
+		scratch->clear();
 	}
 	else
 	{

@@ -23,12 +23,12 @@
 
 #include <string>
 
-#include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/signature/TypeNode.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/persist/storage/storage_types.h>
 #include "StorageNode.h"
 #include "DispatchHash.h"
 
@@ -47,9 +47,106 @@ StorageNode::~StorageNode()
 {
 }
 
+HandleSeq StorageNode::getMessages() const
+{
+	static const HandleSeq msgs = []() {
+		HandleSeq m({
+			createNode(PREDICATE_NODE, "*-open-*"),
+			createNode(PREDICATE_NODE, "*-close-*"),
+			createNode(PREDICATE_NODE, "*-load-atomspace-*"),
+			createNode(PREDICATE_NODE, "*-store-atomspace-*"),
+			createNode(PREDICATE_NODE, "*-load-atoms-of-type-*"),
+			createNode(PREDICATE_NODE, "*-store-atom-*"),
+			createNode(PREDICATE_NODE, "*-store-value-*"),
+			createNode(PREDICATE_NODE, "*-update-value-*"),
+
+			createNode(PREDICATE_NODE, "*-fetch-atom-*"),
+			createNode(PREDICATE_NODE, "*-fetch-value-*"),
+			createNode(PREDICATE_NODE, "*-fetch-incoming-set-*"),
+			createNode(PREDICATE_NODE, "*-fetch-incoming-by-type-*"),
+			createNode(PREDICATE_NODE, "*-fetch-query-*"),
+
+			createNode(PREDICATE_NODE, "*-delete-*"),
+			createNode(PREDICATE_NODE, "*-delete-recursive-*"),
+			createNode(PREDICATE_NODE, "*-barrier-*"),
+
+			createNode(PREDICATE_NODE, "*-store-frames-*"),
+			createNode(PREDICATE_NODE, "*-delete-frame-*"),
+			createNode(PREDICATE_NODE, "*-erase-*"),
+
+			createNode(PREDICATE_NODE, "*-proxy-open-*"),
+			createNode(PREDICATE_NODE, "*-proxy-close-*"),
+			createNode(PREDICATE_NODE, "*-set-proxy-*"),
+
+			// Used only in getValue
+			createNode(PREDICATE_NODE, "*-load-frames-*"),
+			createNode(PREDICATE_NODE, "*-connected?-*"),
+			createNode(PREDICATE_NODE, "*-load-frames-*"),
+			createNode(PREDICATE_NODE, "*-monitor-*")
+		});
+		// Mark each message predicate as a message, once at load time.
+		for (const Handle& h : m)
+			h->markIsMessage();
+		return m;
+	}();
+
+	// Copy list above into the local AtomSpace. If this is not done,
+	// then (cog-execute! (IsMessage (Predicate "*-open-*"))) will fail.
+	HandleSeq lms;
+	for (const Handle& m : msgs)
+		lms.emplace_back(_atom_space->add(m));
+	return lms;
+}
+
+bool StorageNode::usesMessage(const Handle& key) const
+{
+	static const std::unordered_set<uint32_t> msgset({
+		dispatch_hash("*-open-*"),
+		dispatch_hash("*-close-*"),
+		dispatch_hash("*-load-atomspace-*"),
+		dispatch_hash("*-store-atomspace-*"),
+		dispatch_hash("*-load-atoms-of-type-*"),
+		dispatch_hash("*-store-atom-*"),
+		dispatch_hash("*-store-value-*"),
+		dispatch_hash("*-update-value-*"),
+
+		dispatch_hash("*-fetch-atom-*"),
+		dispatch_hash("*-fetch-value-*"),
+		dispatch_hash("*-fetch-incoming-set-*"),
+		dispatch_hash("*-fetch-incoming-by-type-*"),
+		dispatch_hash("*-fetch-query-*"),
+
+		dispatch_hash("*-delete-*"),
+		dispatch_hash("*-delete-recursive-*"),
+		dispatch_hash("*-barrier-*"),
+
+		dispatch_hash("*-store-frames-*"),
+		dispatch_hash("*-delete-frame-*"),
+		dispatch_hash("*-erase-*"),
+
+		dispatch_hash("*-proxy-open-*"),
+		dispatch_hash("*-proxy-close-*"),
+		dispatch_hash("*-set-proxy-*")
+	});
+
+	// Messages used in getValue only don't need to be published here,
+	// because only the setValue ones need the COW, R/O work-around.
+	// ("*-load-frames-*")
+	// ("*-connected?-*")
+	// ("*-load-frames-*")
+	// ("*-monitor-*")
+
+	if (PREDICATE_NODE != key->get_type()) return false;
+
+	const std::string& pred = key->get_name();
+	uint32_t dhsh = dispatch_hash(pred.c_str());
+	if (msgset.find(dhsh) != msgset.end()) return true;
+	return false;
+}
+
 void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 {
-	// The value must be store only if it is not one of the values
+	// The value must be stored only if it is not one of the values
 	// that causes an action to be taken. Action messages must not be
 	// recorded, as otherwise, restore from disk/net will cause the
 	// action to be triggered!
@@ -627,6 +724,7 @@ void StorageNode::fetch_query_msg(const ValuePtr& value)
 	size_t nv = vsq.size();
 	// Format:
 	// [AtomSpace, Query, Key, Metadata, Fresh] or
+	// [AtomSpace, Query, Key] or
 	// [Query, Key, Metadata, Fresh] or
 	// [Query, Key]
 	// This is a blargle-mess but I don't feel like cleaning up today.
@@ -636,13 +734,18 @@ void StorageNode::fetch_query_msg(const ValuePtr& value)
 		Handle query = HandleCast(vsq[1]);
 		Handle key = HandleCast(vsq[2]);
 		Handle metadata = HandleCast(vsq[3]);
-		bool fresh = vsq[4]->get_type() == TRUE_LINK;
+		bool fresh = vsq[4]->is_type(BOOL_VALUE) && BoolValueCast(vsq[4])->get_bit(0);
 		fetch_query(query, key, metadata, fresh, as);
+	} else if (3 == nv && vsq[0]->is_type(ATOM_SPACE)) {
+		AtomSpace* as = AtomSpaceCast(vsq[0]).get();
+		Handle query = HandleCast(vsq[1]);
+		Handle key = HandleCast(vsq[2]);
+		fetch_query(query, key, Handle::UNDEFINED, false, as);
 	} else if (4 == nv) {
 		Handle query = HandleCast(vsq[0]);
 		Handle key = HandleCast(vsq[1]);
 		Handle metadata = HandleCast(vsq[2]);
-		bool fresh = vsq[3]->get_type() == TRUE_LINK;
+		bool fresh = vsq[3]->is_type(BOOL_VALUE) && BoolValueCast(vsq[3])->get_bit(0);
 		fetch_query(query, key, metadata, fresh);
 	} else if (2 == nv) {
 		Handle query = HandleCast(vsq[0]);

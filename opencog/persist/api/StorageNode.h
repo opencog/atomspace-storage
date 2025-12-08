@@ -28,7 +28,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/api/BackingStore.h>
-#include <opencog/persist/storage/storage_types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
 {
@@ -56,8 +56,10 @@ public:
 	StorageNode(Type, std::string);
 	virtual ~StorageNode();
 
-	virtual void setValue(const Handle& key, const ValuePtr& value);
-	virtual ValuePtr getValue(const Handle& key) const;
+	virtual void setValue(const Handle&, const ValuePtr&);
+	virtual ValuePtr getValue(const Handle&) const;
+	virtual HandleSeq getMessages() const;
+	virtual bool usesMessage(const Handle&) const;
 
 	// ----------------------------------------------------------------
 	// Operations regarding the connection to the remote URI.
