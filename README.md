@@ -138,8 +138,12 @@ Local subdirectories include:
 Build and Install
 -----------------
 The module builds and installs just like all other AtomSpace modules.
-There are no prerequistes, other than the AtomSpace itself. The general
-instructions are:
+There are no prerequistes, other than the AtomSpace itself. Get the
+AtomSpace at https://github.com/opencog/atomspace
+
+The correct way to build the AtomSpace (which you must `git clone`
+first), and this project, and all other Atomese projects is as
+following:
 ```
 cd /where/ever/you/cloned/this/to
 rm -rf build
