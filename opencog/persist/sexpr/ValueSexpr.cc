@@ -184,6 +184,48 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 		return valueserver().create(vtype, fv);
 	}
 
+	// BoolValue can be either "(BoolValue 1 0 1 ...)" or "(BoolValue #x...)"
+	if (nameserver().isA(vtype, BOOL_VALUE))
+	{
+		std::vector<bool> bv;
+		vos = stv.find_first_not_of(" \n\t", vos);
+
+		// Handle hex format: (BoolValue #x...)
+		if (vos < totlen and stv[vos] == '#' and vos+1 < totlen and stv[vos+1] == 'x')
+		{
+			vos += 2; // Skip "#x"
+			// Parse hex digits until we hit ')'
+			while (vos < totlen and stv[vos] != ')')
+			{
+				char c = stv[vos];
+				if (std::isxdigit(c))
+				{
+					int nibble = (c >= '0' and c <= '9') ? c - '0' :
+					             (c >= 'a' and c <= 'f') ? c - 'a' + 10 :
+					             (c >= 'A' and c <= 'F') ? c - 'A' + 10 : 0;
+					// Each hex digit represents 4 bits
+					for (int bit = 3; bit >= 0; bit--)
+						bv.push_back((nibble >> bit) & 1);
+				}
+				vos++;
+			}
+		}
+		else
+		{
+			// Handle individual bits: (BoolValue 1 0 1 ...)
+			while (vos < totlen and stv[vos] != ')')
+			{
+				vos = stv.find_first_not_of(" \n\t", vos);
+				if (vos >= totlen or stv[vos] == ')') break;
+				if (stv[vos] == '0') bv.push_back(false);
+				else if (stv[vos] == '1') bv.push_back(true);
+				vos++;
+			}
+		}
+		pos = vos + 1;
+		return valueserver().create(vtype, bv);
+	}
+
 	// Unescape escaped quotes
 	if (nameserver().isA(vtype, STRING_VALUE))
 	{
