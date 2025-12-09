@@ -65,7 +65,8 @@
 	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem"))))
 
 ; Verify contents
-(test-assert "base-count" (equal? 11 (count-all)))
+; 11 atoms + 1 for Predicate "*-IsKeyFlag-*"
+(test-assert "base-count" (equal? 12 (count-all)))
 (test-assert "space1-count" (equal? 8
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
 (test-assert "space2-count" (equal? 6
@@ -126,10 +127,10 @@
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))
 	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem"))))
 
-; 11 loaded plus three FileStorageNodes
+; 11 loaded + 1 for *-IsKeyFlag-* + three FileStorageNodes
 ; Plus four more: (Predicate "*-store-atomspace-*")
 ; and (Predicate "*-load-atomspace-*") and *-open-* and *-close-*
-(test-assert "base-count" (equal? 18 (count-all)))
+(test-assert "base-count" (equal? 19 (count-all)))
 (test-assert "space1-count" (equal? 0
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
 (test-assert "space2-count" (equal? 0
@@ -155,7 +156,8 @@
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))
 	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem"))))
 
-(test-assert "base-count" (equal? 18 (count-all)))
+; Same count as before: 19 (with *-IsKeyFlag-* marker)
+(test-assert "base-count" (equal? 19 (count-all)))
 (test-assert "space1-count" (equal? 11
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
 (test-assert "space2-count" (equal? 9
