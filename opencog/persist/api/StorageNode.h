@@ -42,11 +42,14 @@ class StorageNode : public Node, protected BackingStore
 	friend class WriteThruProxy;
 	friend class ReadWriteProxy;
 protected:
-	Handle add_nocheck(AtomSpace* as, const Handle& h) const
+
+	// Friendship cannot be inherited in c++. So we pass through selected
+	// functions to derived classes that will need them.
+	static inline Handle add_nocheck(AtomSpace* as, const Handle& h)
 		{ return as->add(h); }
-	void get_absent_atoms(const AtomSpace* as, HandleSeq& missing) const
+	static inline void get_absent_atoms(const AtomSpace* as, HandleSeq& missing)
 		{ as->get_absent_atoms(missing); }
-	void get_atoms_in_frame(const AtomSpace* as, HandleSeq& fseq) const
+	static inline void get_atoms_in_frame(const AtomSpace* as, HandleSeq& fseq)
 		{ as->get_atoms_in_frame(fseq); }
 
 	static inline void markAtomIsKey(const Handle& h) { h->markIsKey(); }
