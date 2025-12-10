@@ -29,7 +29,6 @@
 #include <sstream>
 #include <string>
 
-#include <opencog/util/dorepeat.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_omp.h>
 
@@ -273,7 +272,7 @@ std::istream& istreamRawITable(std::istream& in, ITable& tab,
 	// Read first few by hand. The first might be labels, so we must
 	// get at least the second line. But the second line might have
 	// all default feature values (i.e. no colon), so get the third...
-	dorepeat(20)
+	for (jnt j=0; j<20; ++j)
 	{
 		if (!get_data_line(in, line))
 			break;
