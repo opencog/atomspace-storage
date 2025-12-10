@@ -19,10 +19,19 @@ An assortment of other interesting odds and ends can be found here.
 This is ***version 4.3.0***. Multiple projects depend on this;
 everything works; all unit tests pass. There is a very long and boring
 list of changes since January 2025; all of these are bug fixes or
-patches forced by updates to the core AtomSpace. Perhaps the most
-important change is that `cog-delete` only deletes Atoms in the remote
-AtomSpace.  Deleting in the local AtomSpace must now be performed as a
-distinct step.
+patches forced by updates to the core AtomSpace.
+
+The most notable changes are:
+* The `*-delete-*` message only deletes Atoms from the remote AtomSpace.
+  Deleting from the local (in-RAM) AtomSpace must now be performed as
+  a distinct step.
+* The base `StorageNode` now uses a message-passing system to perform
+  all actions. Typical messages include `*-open-*`, `*-close-*`,
+  `*-load-atom-*`, `*-store-atom-*` and so on. See the wiki page
+  for [StorageNode](https://wiki.opencog.org/w/StorageNode) to get
+  a general description, and
+  [ObjectNode](https://wiki.opencog.org/w/ObjectNode) for message
+  specifics.
 
 ### Alternatives
 The `StorageNode` API is the original, primary API for moving Atoms
