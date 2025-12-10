@@ -15,6 +15,15 @@ moves Atoms between AtomSpaces on different network nodes, and
 mirroring, routing, caching and filtering between AtomSpaces.
 An assortment of other interesting odds and ends can be found here.
 
+### Status
+This is ***version 4.3.0***. Multiple projects depend on this;
+everything works; all unit tests pass. There is a very long and boring
+list of changes since January 2025; all of these are bug fixes or
+patches forced by updates to the core AtomSpace. Perhaps the most
+important change is that `cog-delete` only deletes Atoms in the remote
+AtomSpace.  Deleting in the local AtomSpace must now be performed as a
+distinct step.
+
 ### Alternatives
 The `StorageNode` API is the original, primary API for moving Atoms
 around. It's 'mature': full-featured, fully debugged, heavily used,
