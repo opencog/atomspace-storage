@@ -24,3 +24,9 @@ set(ATOMSPACE_STORAGE_DATA_DIR "@CMAKE_INSTALL_PREFIX@/share/opencog")
 set(ATOMSPACE_STORAGE_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/")
 set(ATOMSPACE_STORAGE_VERSION "@PROJECT_VERSION@")
 set(ATOMSPACE_STORAGE_FOUND 1)
+
+MESSAGE(STATUS "AtomSpace-Storage version ${ATOMSPACE_STORAGE_VERSION} found.")
+
+# Add atomspace-storage's cmake modules to the module path.
+# This is used by Guix and NIX to find cmake modules.
+list(APPEND CMAKE_MODULE_PATH "${ATOMSPACE_STORAGE_DATA_DIR}/cmake")
