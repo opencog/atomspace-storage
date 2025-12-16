@@ -13,9 +13,8 @@ INCLUDE_DIRECTORIES(
 
 # Need to be able to find opencog/atomspace.pxd
 # and so the location of that goes in the -I flag
-# XXX Should be CMAKE_INSTALL_DIR or something...
 SET(CYTHON_FLAGS "-3" "-f" "-Wextra"
-	"-I/usr/local/include/opencog/cython/")
+	"-I${ATOMSPACE_INCLUDE_DIR}/opencog/cython/")
 
 # The python module name is taken from the pyx filename. Thus, the file
 # storage.pyx means that module name will be 'opencog.storage'. This will
