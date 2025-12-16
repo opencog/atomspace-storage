@@ -102,7 +102,7 @@ include(OpenCogFindPython)
 # incorrectly
 
 # AtomSpace
-FIND_PACKAGE(AtomSpace CONFIG REQUIRED)
+FIND_PACKAGE(AtomSpace 5.2.0 CONFIG REQUIRED)
 IF (ATOMSPACE_FOUND)
 	MESSAGE(STATUS "AtomSpace found.")
 	ADD_DEFINITIONS(-DHAVE_ATOMSPACE)
