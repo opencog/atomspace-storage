@@ -23,7 +23,7 @@ IF(CMAKE_VERSION VERSION_GREATER 3.31)
 	CMAKE_POLICY(SET CMP0177 NEW)
 ENDIF(CMAKE_VERSION VERSION_GREATER 3.31)
 
-PROJECT(atomspace-storage)
+PROJECT(atomspace-storage VERSION 4.3.0)
 
 # ----------------------------------------------------------
 # User-modifiable options. Feel free to change these!
@@ -62,7 +62,7 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
 # Cogutil
-FIND_PACKAGE(CogUtil 2.0.1 CONFIG REQUIRED)
+FIND_PACKAGE(CogUtil 2.2.1 CONFIG REQUIRED)
 IF (COGUTIL_FOUND)
 	MESSAGE(STATUS "CogUtil version ${COGUTIL_VERSION} found.")
 	ADD_DEFINITIONS(-DHAVE_COGUTIL)
@@ -180,10 +180,6 @@ STRING(TIMESTAMP UTC_DATE %Y%m%d UTC)
 # that it is owned by the builder thus avoiding 'Permission denied' error when
 # packaging.
 FILE(WRITE "${PROJECT_BINARY_DIR}/install_manifest.txt")
-## It doesn't have a header-file declaring the version similar to cogutil and
-## atomspace.
-# SEMANTIC_VERSION is set in `lib/AtomSpaceRocksConfig.cmake.in`
-# SET(SEMANTIC_VERSION 1.3.0)
 
 ## Cpack configuration
 SET(CPACK_GENERATOR "DEB")
@@ -193,7 +189,7 @@ SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_BINARY_DIR}/packages")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The AtomSpace RocksDB Storage Backend")
 SET(CPACK_PACKAGE_NAME "atomspace-storage-dev")
 SET(CPACK_PACKAGE_VENDOR "opencog.org")
-SET(CPACK_PACKAGE_VERSION "${SEMANTIC_VERSION}-${UTC_DATE}")
+SET(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}-${UTC_DATE}")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 SET(CPACK_PACKAGE_FILE_NAME
 	"${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${PACKAGE_ARCHITECTURE}")
@@ -203,8 +199,8 @@ SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 SET(DEPENDENCY_LIST
 	"guile-3.0-dev (>= 3.0.0)"
 	"libstdc++6 (>= 7.0)"
-	"libcogutil-dev (>= 2.0.2)"
-	"atomspace-dev (>= 5.0.3)"
+	"libcogutil-dev (>= 2.2.1)"
+	"atomspace-dev (>= 5.2.0)"
 )
 
 STRING(REPLACE ";" ", " MAIN_DEPENDENCIES "${DEPENDENCY_LIST}")

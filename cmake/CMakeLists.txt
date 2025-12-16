@@ -1,5 +1,5 @@
 
-# CMake boilerplate that allows users to do
+# CMake boilerplate
 #    find_package(AtomspaceStorage REQUIRED 4.3.0)
 # and have it work.
 
@@ -12,8 +12,6 @@ install(EXPORT AtomSpaceStorageTargets
 	DESTINATION ${ConfigPackageLocation}
 )
 
-SET(SEMANTIC_VERSION 4.3.0)
-
 configure_package_config_file(AtomSpaceStorageConfig.cmake.in
 	${CMAKE_CURRENT_BINARY_DIR}/AtomSpaceStorageConfig.cmake
 	INSTALL_DESTINATION ${ConfigPackageLocation}
@@ -22,7 +20,7 @@ configure_package_config_file(AtomSpaceStorageConfig.cmake.in
 
 write_basic_package_version_file(
 	"${CMAKE_CURRENT_BINARY_DIR}/AtomSpaceStorageConfigVersion.cmake"
-	VERSION ${SEMANTIC_VERSION}
+	VERSION ${PROJECT_VERSION}
 	COMPATIBILITY SameMajorVersion
 )
 
