@@ -22,11 +22,9 @@
 (format #t "The current directory is ~A\n" (getcwd))
 
 ; Fill atomspace from a file's content.
-;
-; Hack filename to go to the correct directory for the unit tests.
-; This test runs in the build dir, and the file to load is in the
-; source dir.
-(load-file "../../../../tests/persist/file/load-file-test-data.scm")
+; PROJECT_SOURCE_DIR is set by CMake to point to the source directory.
+(load-file (string-append (getenv "PROJECT_SOURCE_DIR")
+	"/tests/persist/file/load-file-test-data.scm"))
 
 (define names (map cog-name (cog-get-atoms "ConceptNode")))
 

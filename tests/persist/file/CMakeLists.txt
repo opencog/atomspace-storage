@@ -1,5 +1,7 @@
 
 ADD_GUILE_TEST(LoadFileTest load-file-test.scm)
+SET_PROPERTY(TEST LoadFileTest APPEND PROPERTY
+	ENVIRONMENT "PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}")
 
 # -----------------------
 ## Python gorp
