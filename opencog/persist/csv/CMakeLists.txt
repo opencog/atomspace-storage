@@ -12,7 +12,7 @@ TARGET_LINK_LIBRARIES(csv
 )
 
 INSTALL (TARGETS csv EXPORT AtomSpaceStorageTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 INSTALL (FILES
@@ -35,7 +35,7 @@ TARGET_LINK_LIBRARIES(csv-table
 ADD_GUILE_EXTENSION(SCM_CONFIG csv-table "opencog-ext-path-csv-table")
 
 INSTALL (TARGETS csv-table EXPORT AtomSpaceStorageTargets
-   DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+   DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 # -------------------------------

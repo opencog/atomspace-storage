@@ -10,7 +10,7 @@ TARGET_LINK_LIBRARIES(tlb
 )
 
 INSTALL (TARGETS tlb EXPORT AtomSpaceStorageTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 INSTALL (FILES
@@ -37,7 +37,7 @@ ADD_GUILE_MODULE (FILES
 
 INSTALL (TARGETS guile-uuid
    EXPORT AtomSpaceStorageTargets
-   DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+   DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 # --------------------------------

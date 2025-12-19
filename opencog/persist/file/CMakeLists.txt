@@ -18,7 +18,7 @@ TARGET_LINK_LIBRARIES(fast_load_scm
 )
 
 INSTALL (TARGETS fast_load_scm EXPORT AtomSpaceStorageTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 INSTALL (FILES
@@ -54,7 +54,7 @@ ADD_GUILE_MODULE (FILES
 )
 
 INSTALL (TARGETS persist-file EXPORT AtomSpaceStorageTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 INSTALL (FILES
