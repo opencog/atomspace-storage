@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_STORAGE_NODE_H
 #define _OPENCOG_STORAGE_NODE_H
 
-#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/ObjectNode.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/api/BackingStore.h>
 #include <opencog/atoms/atom_types/atom_types.h>
@@ -35,7 +35,7 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-class StorageNode : public Node, protected BackingStore
+class StorageNode : public ObjectCRTP<StorageNode>, protected BackingStore
 {
 	// The write-thru proxies need to call into the BackingStore
 	// directly. We declare them as friends.
@@ -65,8 +65,6 @@ public:
 
 	virtual void setValue(const Handle&, const ValuePtr&);
 	virtual ValuePtr getValue(const Handle&) const;
-	virtual HandleSeq getMessages() const;
-	virtual bool usesMessage(const Handle&) const;
 
 	// ----------------------------------------------------------------
 	// Operations regarding the connection to the remote URI.
@@ -331,6 +329,44 @@ public:
 	void remove_atom(AtomSpace*, Handle, bool recursive=false);
 	void remove_atom(const AtomSpacePtr& as, Handle h, bool recursive=false)
 		{ remove_atom(as.get(), h, recursive); }
+
+private:
+	static constexpr const char* _messages[] = {
+		"*-open-*",
+		"*-close-*",
+		"*-load-atomspace-*",
+		"*-store-atomspace-*",
+		"*-load-atoms-of-type-*",
+		"*-store-atom-*",
+		"*-store-value-*",
+		"*-update-value-*",
+
+		"*-fetch-atom-*",
+		"*-fetch-value-*",
+		"*-fetch-incoming-set-*",
+		"*-fetch-incoming-by-type-*",
+		"*-fetch-query-*",
+
+		"*-delete-*",
+		"*-delete-recursive-*",
+		"*-barrier-*",
+
+		"*-store-frames-*",
+		"*-delete-frame-*",
+		"*-erase-*",
+
+		"*-proxy-open-*",
+		"*-proxy-close-*",
+		"*-set-proxy-*",
+
+		// Messages used in getValue only don't need to be published here,
+		// because only the setValue ones need the COW, R/O work-around.
+		// ???
+		"*-load-frames-*",
+		"*-connected?-*",
+		"*-load-frames-*",
+		"*-monitor-*"
+	};
 };
 
 NODE_PTR_DECL(StorageNode)

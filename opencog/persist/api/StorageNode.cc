@@ -37,7 +37,7 @@ using namespace opencog;
 // ====================================================================
 
 StorageNode::StorageNode(Type t, std::string uri) :
-	Node(t, uri)
+	ObjectCRTP<StorageNode>(t, std::move(uri))
 {
 	if (not nameserver().isA(t, STORAGE_NODE))
 		throw RuntimeException(TRACE_INFO, "Bad inheritance!");
@@ -45,103 +45,6 @@ StorageNode::StorageNode(Type t, std::string uri) :
 
 StorageNode::~StorageNode()
 {
-}
-
-HandleSeq StorageNode::getMessages() const
-{
-	static const HandleSeq msgs = []() {
-		HandleSeq m({
-			createNode(PREDICATE_NODE, "*-open-*"),
-			createNode(PREDICATE_NODE, "*-close-*"),
-			createNode(PREDICATE_NODE, "*-load-atomspace-*"),
-			createNode(PREDICATE_NODE, "*-store-atomspace-*"),
-			createNode(PREDICATE_NODE, "*-load-atoms-of-type-*"),
-			createNode(PREDICATE_NODE, "*-store-atom-*"),
-			createNode(PREDICATE_NODE, "*-store-value-*"),
-			createNode(PREDICATE_NODE, "*-update-value-*"),
-
-			createNode(PREDICATE_NODE, "*-fetch-atom-*"),
-			createNode(PREDICATE_NODE, "*-fetch-value-*"),
-			createNode(PREDICATE_NODE, "*-fetch-incoming-set-*"),
-			createNode(PREDICATE_NODE, "*-fetch-incoming-by-type-*"),
-			createNode(PREDICATE_NODE, "*-fetch-query-*"),
-
-			createNode(PREDICATE_NODE, "*-delete-*"),
-			createNode(PREDICATE_NODE, "*-delete-recursive-*"),
-			createNode(PREDICATE_NODE, "*-barrier-*"),
-
-			createNode(PREDICATE_NODE, "*-store-frames-*"),
-			createNode(PREDICATE_NODE, "*-delete-frame-*"),
-			createNode(PREDICATE_NODE, "*-erase-*"),
-
-			createNode(PREDICATE_NODE, "*-proxy-open-*"),
-			createNode(PREDICATE_NODE, "*-proxy-close-*"),
-			createNode(PREDICATE_NODE, "*-set-proxy-*"),
-
-			// Used only in getValue
-			createNode(PREDICATE_NODE, "*-load-frames-*"),
-			createNode(PREDICATE_NODE, "*-connected?-*"),
-			createNode(PREDICATE_NODE, "*-load-frames-*"),
-			createNode(PREDICATE_NODE, "*-monitor-*")
-		});
-		// Mark each message predicate as a message, once at load time.
-		for (const Handle& h : m)
-			h->markIsMessage();
-		return m;
-	}();
-
-	// Copy list above into the local AtomSpace. If this is not done,
-	// then (cog-execute! (IsMessage (Predicate "*-open-*"))) will fail.
-	HandleSeq lms;
-	for (const Handle& m : msgs)
-		lms.emplace_back(_atom_space->add(m));
-	return lms;
-}
-
-bool StorageNode::usesMessage(const Handle& key) const
-{
-	static const std::unordered_set<uint32_t> msgset({
-		dispatch_hash("*-open-*"),
-		dispatch_hash("*-close-*"),
-		dispatch_hash("*-load-atomspace-*"),
-		dispatch_hash("*-store-atomspace-*"),
-		dispatch_hash("*-load-atoms-of-type-*"),
-		dispatch_hash("*-store-atom-*"),
-		dispatch_hash("*-store-value-*"),
-		dispatch_hash("*-update-value-*"),
-
-		dispatch_hash("*-fetch-atom-*"),
-		dispatch_hash("*-fetch-value-*"),
-		dispatch_hash("*-fetch-incoming-set-*"),
-		dispatch_hash("*-fetch-incoming-by-type-*"),
-		dispatch_hash("*-fetch-query-*"),
-
-		dispatch_hash("*-delete-*"),
-		dispatch_hash("*-delete-recursive-*"),
-		dispatch_hash("*-barrier-*"),
-
-		dispatch_hash("*-store-frames-*"),
-		dispatch_hash("*-delete-frame-*"),
-		dispatch_hash("*-erase-*"),
-
-		dispatch_hash("*-proxy-open-*"),
-		dispatch_hash("*-proxy-close-*"),
-		dispatch_hash("*-set-proxy-*")
-	});
-
-	// Messages used in getValue only don't need to be published here,
-	// because only the setValue ones need the COW, R/O work-around.
-	// ("*-load-frames-*")
-	// ("*-connected?-*")
-	// ("*-load-frames-*")
-	// ("*-monitor-*")
-
-	if (PREDICATE_NODE != key->get_type()) return false;
-
-	const std::string& pred = key->get_name();
-	uint32_t dhsh = dispatch_hash(pred.c_str());
-	if (msgset.find(dhsh) != msgset.end()) return true;
-	return false;
 }
 
 void StorageNode::setValue(const Handle& key, const ValuePtr& value)
