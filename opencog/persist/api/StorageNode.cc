@@ -50,13 +50,19 @@ StorageNode::~StorageNode()
 {
 }
 
+/// Evaluate the ValuePtr, trying to get an AtomSpace out of it,
+/// either directly, or by execution. If the result is null, then
+/// use the StorageNode atomspace as the default.
 AtomSpace* StorageNode::get_target_as(const ValuePtr& value) const
 {
-	if (nullptr == value or 0 == value->size())
+	if (nullptr == value)
 		return _target_as.get();
 
 	if (value->is_type(ATOM_SPACE))
 		return AtomSpaceCast(value).get();
+
+	if (0 == value->size())
+		return _target_as.get();
 
 	ValuePtr vp(value);
 	if (vp->is_type(ATOM))
@@ -66,11 +72,14 @@ AtomSpace* StorageNode::get_target_as(const ValuePtr& value) const
 			vp = h->execute();
 	}
 
-	if (nullptr == vp or 0 == vp->size())
+	if (nullptr == vp)
 		return _target_as.get();
 
 	if (vp->is_type(ATOM_SPACE))
 		return AtomSpaceCast(vp).get();
+
+	if (0 == vp->size())
+		return _target_as.get();
 
 	throw RuntimeException(TRACE_INFO,
 		"Expected AtomSpace; got %s", value->to_string().c_str());
