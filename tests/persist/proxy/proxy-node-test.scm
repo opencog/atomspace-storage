@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; proxy-node-test.scm -- Unit test for basic ProxyNode syntax.
 ;
@@ -36,6 +39,12 @@
 (test-assert "Failed to catch exception" caught)
 
 ; ----------------------------
+; XXX FIXME ... Right now, all that we hope for is that nothing crashes
+; or hangs in the below, so that's OK. In the past, these also checked
+; for exceptions to be thrown, but the new design does not have any
+; code paths that throw, so the below is pretty boring. Maybe it should
+; be fixed to do some kind of more exciting testing!?
+; ----------------------------
 ; Assorted permutations -- just one target
 
 (define wnull (WriteThruProxy "wnull"))
@@ -44,14 +53,6 @@
 (cog-set-value! wnull (*-open-*))
 (cog-set-value! wnull (*-store-atom-*) (Concept "boffo"))
 (cog-set-value! wnull (*-close-*))
-
-(set! caught #f)
-(catch 'C++-EXCEPTION (lambda () (cog-set-value! wnull (*-store-atom-*) (Concept "boffo")))
-	(lambda (key funcname msg)
-		(format #t "Yes, we got the exception as expected\n")
-		(set! caught #t)))
-
-(test-assert "Failed to catch exception" caught)
 
 ; ----------------------------
 ; Multiple targets
@@ -67,15 +68,6 @@
 (cog-set-value! wmulti (*-store-atom-*) (Concept "boffo"))
 (cog-set-value! wmulti (*-close-*))
 
-(set! caught #f)
-(catch 'C++-EXCEPTION (lambda () (cog-set-value! wmulti (*-store-atom-*) (Concept "boffo")))
-	(lambda (key funcname msg)
-		(format #t "Yes, we got the exception as expected\n")
-		(set! caught #t)))
-
-(test-assert "Failed to catch exception" caught)
-
-
 ; ----------------------------
 ; Assorted permutations -- just one reader
 
@@ -88,14 +80,6 @@
 (cog-set-value! rnull (*-fetch-atom-*) (Concept "b3"))
 (cog-set-value! rnull (*-fetch-atom-*) (Concept "b4"))
 (cog-set-value! rnull (*-close-*))
-
-(set! caught #f)
-(catch 'C++-EXCEPTION (lambda () (cog-set-value! rnull (*-fetch-atom-*) (Concept "boffo")))
-	(lambda (key funcname msg)
-		(format #t "Yes, we got the exception as expected\n")
-		(set! caught #t)))
-
-(test-assert "Failed to catch exception" caught)
 
 ; ----------------------------
 ; Multiple readers
@@ -115,16 +99,6 @@
 (cog-set-value! rmulti (*-fetch-atom-*) (Concept "b5"))
 (cog-set-value! rmulti (*-fetch-atom-*) (Concept "b6"))
 (cog-set-value! rmulti (*-close-*))
-
-(set! caught #f)
-(catch 'C++-EXCEPTION (lambda () (cog-set-value! rmulti (*-fetch-atom-*) (Concept "boffo")))
-	(lambda (key funcname msg)
-		(format #t "Yes, we got the exception as expected\n")
-		(set! caught #t)))
-
-(test-assert "Failed to catch exception" caught)
-
-
 
 (test-end tname)
 
