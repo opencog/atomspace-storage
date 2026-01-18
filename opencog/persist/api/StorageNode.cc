@@ -52,11 +52,11 @@ StorageNode::~StorageNode()
 
 AtomSpace* StorageNode::get_target_as(const ValuePtr& value) const
 {
-	if (value->is_type(ATOM_SPACE))
-		return AtomSpaceCast(value).get();
-
 	if (nullptr == value or 0 == value->size())
 		return _target_as.get();
+
+	if (value->is_type(ATOM_SPACE))
+		return AtomSpaceCast(value).get();
 
 	ValuePtr vp(value);
 	if (vp->is_type(ATOM))
@@ -66,11 +66,11 @@ AtomSpace* StorageNode::get_target_as(const ValuePtr& value) const
 			vp = h->execute();
 	}
 
-	if (vp->is_type(ATOM_SPACE))
-		return AtomSpaceCast(vp).get();
-
 	if (nullptr == vp or 0 == vp->size())
 		return _target_as.get();
+
+	if (vp->is_type(ATOM_SPACE))
+		return AtomSpaceCast(vp).get();
 
 	throw RuntimeException(TRACE_INFO,
 		"Expected AtomSpace; got %s", value->to_string().c_str());
