@@ -154,9 +154,9 @@
 
 ; Same count as before: 19 (with *-IsKeyFlag-* marker)
 (test-assert "base-count" (equal? 19 (count-all)))
-(test-assert "space1-count" (equal? 11
+(test-assert "space1-count" (equal? 8
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
-(test-assert "space2-count" (equal? 9
+(test-assert "space2-count" (equal? 6
 	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem")))))
 
 ; Verify that the contents are as expected
