@@ -14,7 +14,7 @@
 ; but, for convenience, we just use Postgres for now.
 (define sto (PostgresStorageNode
 	"postgres:///opencog_test?user=opencog_tester&password=cheese"))
-(cog-open sto)
+(cog-set-value! sto (*-open-*))
 (cog-erase! sto)
 
 (define fvof (FetchValueOf (Concept "a") (Predicate "foo") sto))
@@ -36,7 +36,7 @@
 (test-assert "Reset" (equal? fv (cog-execute! fvof)))
 
 (cog-erase! sto)
-(cog-close sto)
+(cog-set-value! sto (*-close-*))
 (test-end tname)
 
 (opencog-test-end)

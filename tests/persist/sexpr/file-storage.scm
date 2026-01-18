@@ -32,27 +32,27 @@
 
 ; Store some individual Atoms, and then store everything.
 (define wfsn (FileStorageNode fname))
-(cog-open wfsn)
+(cog-set-value! wfsn (*-open-*))
 
 ; Store just one Atom.
-(store-atom wa wfsn)
+(cog-set-value! wfsn (*-store-atom-*) wa)
 
 ; Store just one value on an Atom. Store it three times;
 ; it will show up in the file three times.
 (cog-set-value! wa (Predicate "num") (FloatValue 11 22 33))
-(store-value wa (Predicate "num") wfsn)
-(store-value wa (Predicate "num") wfsn)
-(store-value wa (Predicate "num") wfsn)
+(cog-set-value! wfsn (*-store-value-*) wa (Predicate "num"))
+(cog-set-value! wfsn (*-store-value-*) wa (Predicate "num"))
+(cog-set-value! wfsn (*-store-value-*) wa (Predicate "num"))
 
 ; The file write might not occur until after the `barrier` call.
 ; File writes are buffered by the operating system.
-(barrier wfsn)
+(cog-set-value! wfsn (*-barrier-*) (cog-atomspace))
 
 ; Now store everything. This will appear after the writes above,
 ; and will duplicate some of the earlier data.  During file read,
 ; later data in the file will take precedence over earlier data.
-(store-atomspace wfsn)
-(cog-close wfsn)
+(cog-set-value! wfsn (*-store-atomspace-*) (cog-atomspace))
+(cog-set-value! wfsn (*-close-*))
 
 (cog-atomspace-clear)
 
@@ -60,9 +60,9 @@
 
 ; Load everything from the file.
 (define rfsn (FileStorageNode fname))
-(cog-open rfsn)
-(load-atomspace rfsn)
-(cog-close rfsn)
+(cog-set-value! rfsn (*-open-*))
+(cog-set-value! rfsn (*-load-atomspace-*) (cog-atomspace))
+(cog-set-value! rfsn (*-close-*))
 
 ; Verify the load
 (cog-prt-atomspace)
