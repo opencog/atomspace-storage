@@ -55,7 +55,7 @@ AtomSpace* StorageNode::get_target_as(const ValuePtr& value) const
 	if (value->is_type(ATOM_SPACE))
 		return AtomSpaceCast(value).get();
 
-	if (nullptr == vp or 0 == vp->size())
+	if (nullptr == value or 0 == value->size())
 		return _target_as.get();
 
 	ValuePtr vp(value);
@@ -155,7 +155,7 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			COLL("*-open-*");
 			AtomSpace* as = get_target_as(value);
 			if (nullptr == as) as = getAtomSpace();
-			__target_as = AtomSpaceCast(as->shared_from_this());
+			_target_as = AtomSpaceCast(as->shared_from_this());
 			open();
 			return;
 		}
