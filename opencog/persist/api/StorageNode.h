@@ -369,7 +369,6 @@ protected:
 		// ???
 		"*-load-frames-*",
 		"*-connected?-*",
-		"*-load-frames-*",
 		"*-monitor-*"
 	};
 };
