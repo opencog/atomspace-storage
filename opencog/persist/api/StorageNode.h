@@ -47,6 +47,7 @@ class StorageNode : public ObjectCRTP<StorageNode>, protected BackingStore
 	friend class ReadWriteProxy;
 	friend class ObjectCRTP<StorageNode>;
 protected:
+	AtomSpacePtr _target_as;
 
 	// Friendship cannot be inherited in c++. So we pass through selected
 	// functions to derived classes that will need them.

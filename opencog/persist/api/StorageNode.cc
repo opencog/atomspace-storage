@@ -39,7 +39,8 @@ template class ObjectCRTP<StorageNode>;
 // ====================================================================
 
 StorageNode::StorageNode(Type t, std::string uri) :
-	ObjectCRTP<StorageNode>(t, std::move(uri))
+	ObjectCRTP<StorageNode>(t, std::move(uri)),
+	_target_as(nullptr)
 {
 	if (not nameserver().isA(t, STORAGE_NODE))
 		throw RuntimeException(TRACE_INFO, "Bad inheritance!");
@@ -124,21 +125,46 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 	const std::string& pred = key->get_name();
 	switch (dispatch_hash(pred.c_str()))
 	{
-		case p_open:
+		case p_open: {
 			COLL("*-open-*");
+			ValuePtr vp(value);
+			if (vp->is_type(ATOM))
+			{
+				Handle h(HandleCast(value));
+				if (h->is_executable())
+					vp = h->execute();
+			}
+
+			if (vp->is_type(ATOM_SPACE))
+				_target_as = AtomSpaceCast(value);
+			else if (nullptr == vp or 0 == vp->size())
+				_target_as = AtomSpaceCast(getAtomSpace()->shared_from_this());
+			else
+				throw RuntimeException(TRACE_INFO,
+					"Expected *-open-* message expects AtomSpace; got %s",
+					value->to_string().c_str());
+
 			open();
 			return;
+		}
 		case p_close:
 			COLL("*-close-*");
 			close();
+			_target_as = nullptr;
 			return;
 		case p_load_atomspace:
 			COLL("*-load-atomspace-*");
-			load_atomspace(AtomSpaceCast(value).get());
+			if (nullptr == value or 0 == value->size())
+				load_atomspace(_target_as.get());
+			else
+				load_atomspace(AtomSpaceCast(value).get());
 			return;
 		case p_store_atomspace:
 			COLL("*-store-atomspace-*");
-			store_atomspace(AtomSpaceCast(value).get());
+			if (nullptr == value or 0 == value->size())
+				store_atomspace(_target_as.get());
+			else
+				store_atomspace(AtomSpaceCast(value).get());
 			return;
 		case p_load_atoms_of_type: {
 			COLL("*-load-atoms-of-type-*");
@@ -186,7 +212,7 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			}
 			if (not value->is_type(LINK_VALUE)) return;
 			const ValueSeq& vsq(LinkValueCast(value)->value());
-			AtomSpace* as = getAtomSpace();
+			AtomSpace* as = _target_as.get();
 			for (const ValuePtr& vp : vsq)
 			{
 				if (vp->is_type (ATOM_SPACE))
@@ -225,7 +251,7 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			}
 			if (not value->is_type(LINK_VALUE)) return;
 			const ValueSeq& vsq(LinkValueCast(value)->value());
-			AtomSpace* as = getAtomSpace();
+			AtomSpace* as = _target_as.get();
 			for (const ValuePtr& vp : vsq)
 			{
 				if (vp->is_type (ATOM_SPACE))
@@ -275,7 +301,10 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			return;
 		case p_barrier:
 			COLL("*-barrier-*");
-			barrier(AtomSpaceCast(value).get());
+			if (nullptr == value or 0 == value->size())
+				barrier(_target_as.get());
+			else
+				barrier(AtomSpaceCast(value).get());
 			return;
 		case p_store_frames:
 			COLL("*-store-frames-*");
@@ -335,7 +364,7 @@ ValuePtr StorageNode::getValue(const Handle& key) const
 
 void StorageNode::barrier(AtomSpace* as)
 {
-	if (nullptr == as) as = getAtomSpace();
+	if (nullptr == as) as = _target_as.get();
 	as->barrier();
 }
 
@@ -372,7 +401,7 @@ void StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 Handle StorageNode::fetch_atom(const Handle& h, AtomSpace* as)
 {
 	if (nullptr == h) return Handle::UNDEFINED;
-	if (nullptr == as) as = getAtomSpace();
+	if (nullptr == as) as = _target_as.get();
 
 	// Now, get the latest values from the backing store.
 	// The operation here is to CLOBBER the values, NOT to merge them!
@@ -389,7 +418,7 @@ Handle StorageNode::fetch_atom(const Handle& h, AtomSpace* as)
 Handle StorageNode::fetch_value(const Handle& h, const Handle& key,
                                 AtomSpace* as)
 {
-	if (nullptr == as) as = getAtomSpace();
+	if (nullptr == as) as = _target_as.get();
 	Handle lkey = as->add_atom(key);
 	Handle lh = as->add_atom(h);
 	loadValue(lh, lkey);
@@ -399,7 +428,7 @@ Handle StorageNode::fetch_value(const Handle& h, const Handle& key,
 Handle StorageNode::fetch_incoming_set(const Handle& h, bool recursive,
                                        AtomSpace* as)
 {
-	if (nullptr == as) as = getAtomSpace();
+	if (nullptr == as) as = _target_as.get();
 	Handle lh = as->get_atom(h);
 	if (nullptr == lh) return lh;
 
@@ -418,7 +447,7 @@ Handle StorageNode::fetch_incoming_set(const Handle& h, bool recursive,
 Handle StorageNode::fetch_incoming_by_type(const Handle& h, Type t,
                                            AtomSpace* as)
 {
-	if (nullptr == as) as = getAtomSpace();
+	if (nullptr == as) as = _target_as.get();
 	Handle lh = as->get_atom(h);
 	if (nullptr == lh) return lh;
 
@@ -436,7 +465,7 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 	if (not query->is_executable() and not query->is_evaluatable())
 		throw RuntimeException(TRACE_INFO, "Not executable!");
 
-	if (nullptr == as) as = getAtomSpace();
+	if (nullptr == as) as = _target_as.get();
 	Handle lkey = as->add_atom(key);
 	Handle lq = as->add_atom(query);
 	Handle lmeta = metadata;
@@ -448,7 +477,7 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 
 void StorageNode::load_atomspace(AtomSpace* as)
 {
-	if (nullptr == as) as = getAtomSpace();
+	if (nullptr == as) as = _target_as.get();
 	loadAtomSpace(as);
 }
 
@@ -457,13 +486,13 @@ void StorageNode::load_atomspace(AtomSpace* as)
  */
 void StorageNode::store_atomspace(AtomSpace* as)
 {
-	if (nullptr == as) as = getAtomSpace();
+	if (nullptr == as) as = _target_as.get();
 	storeAtomSpace(as);
 }
 
 void StorageNode::fetch_all_atoms_of_type(Type t, AtomSpace* as)
 {
-	if (nullptr == as) as = getAtomSpace();
+	if (nullptr == as) as = _target_as.get();
 	loadType(as, t);
 }
 
