@@ -55,8 +55,9 @@ void WriteThruProxy::open(void)
 	StorageNodeSeq sns = setup();
 	_targets.swap(sns);
 
+	AtomSpacePtr target = AtomSpaceCast(_target_as->shared_from_this());
 	for (const StorageNodePtr& stnp : _targets)
-		stnp->setValue(_open_msg, _target_as);
+		stnp->setValue(_open_msg, target);
 }
 
 void WriteThruProxy::close(void)
