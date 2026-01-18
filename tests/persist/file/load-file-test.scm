@@ -1,3 +1,7 @@
+#! /usr/bin/env guile
+-s
+!#
+
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
 (use-modules (opencog exec))

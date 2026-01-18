@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; read-proxy-test.scm -- Unit test for ReadThru and WriteThru proxies.
 ;
