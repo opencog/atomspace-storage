@@ -50,6 +50,32 @@ StorageNode::~StorageNode()
 {
 }
 
+AtomSpace* StorageNode::get_target_as(const ValuePtr& value) const
+{
+	if (value->is_type(ATOM_SPACE))
+		return AtomSpaceCast(value).get();
+
+	if (nullptr == vp or 0 == vp->size())
+		return _target_as.get();
+
+	ValuePtr vp(value);
+	if (vp->is_type(ATOM))
+	{
+		Handle h(HandleCast(value));
+		if (h->is_executable())
+			vp = h->execute();
+	}
+
+	if (vp->is_type(ATOM_SPACE))
+		return AtomSpaceCast(vp).get();
+
+	if (nullptr == vp or 0 == vp->size())
+		return _target_as.get();
+
+	throw RuntimeException(TRACE_INFO,
+		"Expected AtomSpace; got %s", value->to_string().c_str());
+}
+
 void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 {
 	// The value must be stored only if it is not one of the values
@@ -127,23 +153,9 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 	{
 		case p_open: {
 			COLL("*-open-*");
-			ValuePtr vp(value);
-			if (vp->is_type(ATOM))
-			{
-				Handle h(HandleCast(value));
-				if (h->is_executable())
-					vp = h->execute();
-			}
-
-			if (vp->is_type(ATOM_SPACE))
-				_target_as = AtomSpaceCast(value);
-			else if (nullptr == vp or 0 == vp->size())
-				_target_as = AtomSpaceCast(getAtomSpace()->shared_from_this());
-			else
-				throw RuntimeException(TRACE_INFO,
-					"Expected *-open-* message expects AtomSpace; got %s",
-					value->to_string().c_str());
-
+			AtomSpace* as = get_target_as(value);
+			if (nullptr == as) as = getAtomSpace();
+			__target_as = AtomSpaceCast(as->shared_from_this());
 			open();
 			return;
 		}
@@ -154,17 +166,11 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			return;
 		case p_load_atomspace:
 			COLL("*-load-atomspace-*");
-			if (nullptr == value or 0 == value->size())
-				load_atomspace(_target_as.get());
-			else
-				load_atomspace(AtomSpaceCast(value).get());
+			load_atomspace(get_target_as(value));
 			return;
 		case p_store_atomspace:
 			COLL("*-store-atomspace-*");
-			if (nullptr == value or 0 == value->size())
-				store_atomspace(_target_as.get());
-			else
-				store_atomspace(AtomSpaceCast(value).get());
+			store_atomspace(get_target_as(value));
 			return;
 		case p_load_atoms_of_type: {
 			COLL("*-load-atoms-of-type-*");
@@ -301,10 +307,7 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			return;
 		case p_barrier:
 			COLL("*-barrier-*");
-			if (nullptr == value or 0 == value->size())
-				barrier(_target_as.get());
-			else
-				barrier(AtomSpaceCast(value).get());
+			barrier(get_target_as(value));
 			return;
 		case p_store_frames:
 			COLL("*-store-frames-*");
@@ -370,7 +373,7 @@ void StorageNode::barrier(AtomSpace* as)
 
 void StorageNode::store_atom(const Handle& h)
 {
-	if (_atom_space->get_read_only())
+	if (_target_as->get_read_only())
 		throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
 
 	storeAtom(h);
@@ -378,7 +381,7 @@ void StorageNode::store_atom(const Handle& h)
 
 void StorageNode::store_value(const Handle& h, const Handle& key)
 {
-	if (_atom_space->get_read_only())
+	if (_target_as->get_read_only())
 		throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
 
 	storeValue(h, key);
@@ -387,7 +390,7 @@ void StorageNode::store_value(const Handle& h, const Handle& key)
 void StorageNode::update_value(const Handle& h, const Handle& key,
                                const ValuePtr& delta)
 {
-	if (_atom_space->get_read_only())
+	if (_target_as->get_read_only())
 		throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
 
 	updateValue(h, key, delta);
