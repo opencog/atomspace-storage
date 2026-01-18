@@ -35,6 +35,10 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+class StorageNode;
+extern template class ObjectCRTP<StorageNode>;
+
 class StorageNode : public ObjectCRTP<StorageNode>, protected BackingStore
 {
 	// The write-thru proxies need to call into the BackingStore

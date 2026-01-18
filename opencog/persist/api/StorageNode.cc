@@ -34,6 +34,8 @@
 
 using namespace opencog;
 
+template class ObjectCRTP<StorageNode>;
+
 // ====================================================================
 
 StorageNode::StorageNode(Type t, std::string uri) :
