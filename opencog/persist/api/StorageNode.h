@@ -41,6 +41,7 @@ class StorageNode : public ObjectCRTP<StorageNode>, protected BackingStore
 	// directly. We declare them as friends.
 	friend class WriteThruProxy;
 	friend class ReadWriteProxy;
+	friend class ObjectCRTP<StorageNode>;
 protected:
 
 	// Friendship cannot be inherited in c++. So we pass through selected
@@ -330,7 +331,7 @@ public:
 	void remove_atom(const AtomSpacePtr& as, Handle h, bool recursive=false)
 		{ remove_atom(as.get(), h, recursive); }
 
-private:
+protected:
 	static constexpr const char* _messages[] = {
 		"*-open-*",
 		"*-close-*",
