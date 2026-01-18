@@ -74,23 +74,21 @@
 
 ; Dump to files
 (define fsn (FileStorageNode fbase))
-(cog-open fsn)
-(store-atomspace)
-(cog-close fsn)
+(cog-set-value! fsn (*-open-*))
+(cog-set-value! fsn (*-store-atomspace-*) (cog-atomspace))
+(cog-set-value! fsn (*-close-*))
 
 ; So, let's save the other two parts.
 (define as-one (cog-value (ConceptNode "foo") (Predicate "real life")))
 (define as-two (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
 (define fsa (FileStorageNode fsub1))
 (define fsb (FileStorageNode fsub2))
-(cog-open fsa)
-(cog-open fsb)
-(cog-set-atomspace! as-one)
-(store-atomspace fsa)
-(cog-close fsa)
-(cog-set-atomspace! as-two)
-(store-atomspace fsb)
-(cog-close fsb)
+(cog-set-value! fsa (*-open-*))
+(cog-set-value! fsb (*-open-*))
+(cog-set-value! fsa (*-store-atomspace-*) as-one)
+(cog-set-value! fsa (*-close-*))
+(cog-set-value! fsb (*-store-atomspace-*) as-two)
+(cog-set-value! fsb (*-close-*))
 
 ; Return to home base.
 (cog-set-atomspace! base-space)
@@ -118,9 +116,9 @@
 (define gsa (FileStorageNode fsub1))
 (define gsb (FileStorageNode fsub2))
 
-(cog-open gsn)
-(load-atomspace)
-(cog-close gsn)
+(cog-set-value! gsn (*-open-*))
+(cog-set-value! gsn (*-load-atomspace-*) (cog-atomspace))
+(cog-set-value! gsn (*-close-*))
 
 (format #t "Loaded Atom counts ~A ~A ~A\n"
 	(count-all)
@@ -139,14 +137,12 @@
 ; Now, restore the two batches of episodic memories.
 (define as-one (cog-value (ConceptNode "foo") (Predicate "real life")))
 (define as-two (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
-(cog-open gsa)
-(cog-open gsb)
-(cog-set-atomspace! as-one)
-(load-atomspace gsa)
-(cog-close gsa)
-(cog-set-atomspace! as-two)
-(load-atomspace gsb)
-(cog-close gsb)
+(cog-set-value! gsa (*-open-*))
+(cog-set-value! gsb (*-open-*))
+(cog-set-value! gsa (*-load-atomspace-*) as-one)
+(cog-set-value! gsa (*-close-*))
+(cog-set-value! gsb (*-load-atomspace-*) as-two)
+(cog-set-value! gsb (*-close-*))
 
 ; Return to home base.
 (cog-set-atomspace! base-space)
