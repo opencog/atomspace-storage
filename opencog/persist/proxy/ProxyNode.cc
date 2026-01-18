@@ -25,6 +25,8 @@
 
 using namespace opencog;
 
+Handle ProxyNode::_open_msg;
+
 ProxyNode::ProxyNode(const std::string&& name)
 	: StorageNode(PROXY_NODE, std::move(name))
 {
@@ -54,6 +56,9 @@ void ProxyNode::init(void)
 	have_loadType = false;
 	have_loadAtomSpace = false;
 	have_storeAtomSpace = false;
+
+	if (nullptr == _open_msg)
+		_open_msg = _msgs.find("*-open-*")->second;
 }
 
 void ProxyNode::proxy_open(void)

@@ -56,7 +56,7 @@ void WriteThruProxy::open(void)
 	_targets.swap(sns);
 
 	for (const StorageNodePtr& stnp : _targets)
-		stnp->open();
+		stnp->setValue(_open_msg, _target_as);
 }
 
 void WriteThruProxy::close(void)

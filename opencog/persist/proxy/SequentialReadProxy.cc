@@ -57,7 +57,7 @@ void SequentialReadProxy::open(void)
 	_readers.swap(rdrs);
 
 	for (const StorageNodePtr& stnp :_readers)
-		stnp->open();
+		stnp->setValue(_open_msg, _target_as);
 }
 
 void SequentialReadProxy::close(void)

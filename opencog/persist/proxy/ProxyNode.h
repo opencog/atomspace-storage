@@ -37,6 +37,7 @@ private:
 	void init(void);
 
 protected:
+	static Handle _open_msg;
 	StorageNodeSeq _parts;
 
 public:
