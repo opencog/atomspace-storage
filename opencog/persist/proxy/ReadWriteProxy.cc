@@ -69,8 +69,9 @@ void ReadWriteProxy::open(void)
 	_reader = rwpair[0];
 	_writer = rwpair[1];
 
-	_reader->open();
-	_writer->open();
+	AtomSpacePtr target = AtomSpaceCast(_target_as->shared_from_this());
+	_reader->setValue(_open_msg, target);
+	_writer->setValue(_open_msg, target);
 }
 
 void ReadWriteProxy::close(void)

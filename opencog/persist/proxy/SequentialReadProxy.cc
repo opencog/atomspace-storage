@@ -56,8 +56,9 @@ void SequentialReadProxy::open(void)
 	StorageNodeSeq rdrs = setup();
 	_readers.swap(rdrs);
 
+	AtomSpacePtr target = AtomSpaceCast(_target_as->shared_from_this());
 	for (const StorageNodePtr& stnp :_readers)
-		stnp->open();
+		stnp->setValue(_open_msg, target);
 }
 
 void SequentialReadProxy::close(void)
