@@ -383,7 +383,9 @@ void StorageNode::barrier(AtomSpace* as)
 void StorageNode::store_atom(const Handle& h)
 {
 	if (_target_as->get_read_only())
-		throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
+		throw RuntimeException(TRACE_INFO,
+			"Attempt to store to read-only target AtomSpace %s",
+			_target_as->to_string().c_str());
 
 	storeAtom(h);
 }
