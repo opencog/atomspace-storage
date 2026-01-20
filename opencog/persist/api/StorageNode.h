@@ -81,6 +81,11 @@ public:
 	virtual void open(void) = 0;
 
 	/**
+	 * Open a read-only connection to the indicated URI.
+	 */
+	virtual void open_read_only(void);
+
+	/**
 	 * Close an active connection.
 	 */
 	virtual void close(void) = 0;
@@ -340,6 +345,7 @@ public:
 protected:
 	static constexpr const char* _messages[] = {
 		"*-open-*",
+		"*-open-ro-*",
 		"*-close-*",
 		"*-load-atomspace-*",
 		"*-store-atomspace-*",

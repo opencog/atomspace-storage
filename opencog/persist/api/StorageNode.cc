@@ -101,6 +101,8 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 	// branching, instead of string compare.
 	static constexpr uint32_t p_open =
 		dispatch_hash("*-open-*");
+	static constexpr uint32_t p_open_ro =
+		dispatch_hash("*-open-ro-*");
 	static constexpr uint32_t p_close =
 		dispatch_hash("*-close-*");
 
@@ -166,6 +168,14 @@ void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 			if (nullptr == as) as = getAtomSpace();
 			_target_as = as;
 			open();
+			return;
+		}
+		case p_open_ro: {
+			COLL("*-open-ro-*");
+			AtomSpace* as = get_target_as(value);
+			if (nullptr == as) as = getAtomSpace();
+			_target_as = as;
+			open_read_only();
 			return;
 		}
 		case p_close:
@@ -537,6 +547,12 @@ void StorageNode::proxy_close(void)
 {
 	throw RuntimeException(TRACE_INFO,
 		"This StorageNode does not implement proxying!");
+}
+
+void StorageNode::open_read_only(void)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not support read-only opening!");
 }
 
 void StorageNode::set_proxy(const Handle&)
