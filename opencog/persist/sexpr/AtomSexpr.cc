@@ -282,8 +282,24 @@ Handle Sexpr::decode_atom(const std::string& s,
 		l1 = l;
 		r1 = r;
 		const std::string name = get_node_name(s, l1, r1, atype, line_cnt);
+		l = r1 + 1;
 
-		AtomSpacePtr asp(createAtomSpace());
+		// A list of zero or more Atoms can follow the AtomSpace name.
+		// These are the parents. They must be passed to the ctor.
+		// Same string decode logic as handling Links, above.
+		HandleSeq outgoing;
+		do {
+			l1 = l;
+			r1 = r;
+			get_next_expr(s, l1, r1, line_cnt);
+			if (l1 == r1) break;
+
+			outgoing.push_back(decode_atom(s, l1, r1, line_cnt, ascache));
+
+			l = r1 + 1;
+		} while (l < r);
+
+		AtomSpacePtr asp(createAtomSpace(outgoing));
 		asp->set_name(name);
 		Handle h(asp);
 		return h;
