@@ -23,6 +23,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/parallel/TriggerLink.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/version.h>
@@ -569,9 +570,19 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//      { "type": "NumberNode", "name": "2" }] })
 	if (execu == act)
 	{
-		ADD_ATOM;
-
-		ValuePtr vp = h->execute();
+		// try..catch is needed because the Atom might be a TriggerLink
+		// which will force execution, but then throw an exception with
+		// the result of execution in it.
+		ValuePtr vp;
+		try
+		{
+			ADD_ATOM;
+			vp = h->execute();
+		}
+		catch (const ValueReturnException& ex)
+		{
+			vp = ex._value;
+		}
 		std::string result = js_mode ? Json::encode_value(vp) : Sexpr::encode_value(vp);
 		RETURNSTR(result);
 	}
