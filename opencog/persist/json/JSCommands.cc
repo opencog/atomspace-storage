@@ -583,7 +583,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		{
 			vp = ex._value;
 		}
-		std::string result = js_mode ? Json::encode_value(vp) : Sexpr::encode_value(vp);
+		std::string result = Json::encode_value(vp);
 		RETURNSTR(result);
 	}
 
