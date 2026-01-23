@@ -146,8 +146,14 @@ std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 	}
 
 	else
+	if (nameserver().isA(typ, VOID_VALUE))
 	{
-		txt += "Error: don't know how to print this";
+		txt += "\"\"";
+	}
+
+	else
+	{
+		txt += "\"Error: don't know how to print this\"";
 	}
 
 	txt += "]}";
