@@ -146,6 +146,17 @@ std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 	}
 
 	else
+	if (nameserver().isA(typ, BOOL_VALUE))
+	{
+		// Hack-a-licious. Use the native printer, for now.
+		// XXX FIXME later.
+		BoolValuePtr bv(BoolValueCast(v));
+		txt += "\"";
+		txt += bv->to_string();
+		txt += "\"";
+	}
+
+	else
 	if (nameserver().isA(typ, VOID_VALUE))
 	{
 		txt += "\"\"";
