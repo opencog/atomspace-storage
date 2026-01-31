@@ -607,6 +607,11 @@ ValuePtr Json::decode_value(const std::string& s,
 		{
 			l++;
 			ValuePtr vp = decode_value(s, l, r);
+
+			// Bad clients can (and do) send mal-formed JSON.
+			// This includes the empty list [] and expressions
+			// with a trailing comma. Skip out of those.
+			if (nullptr == vp) break;
 			vv.push_back(vp);
 
 			// Get to the next elt
