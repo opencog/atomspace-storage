@@ -26,6 +26,7 @@
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/VoidValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -105,7 +106,8 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 
 	// What kind of value is it?
 	// Increment pos by one to point just after the open-paren.
-	size_t vos = stv.find_first_of(" \n\t", ++pos);
+	// (VoidValue) will not have whitespace before the close-paren.
+	size_t vos = stv.find_first_of(" \n\t)", ++pos);
 	if (std::string::npos == vos)
 		throw SyntaxException(TRACE_INFO, "Badly formatted Value %s",
 			stv.substr(pos).c_str());
@@ -265,6 +267,12 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 
 		pos = ++p;
 		return valueserver().create(vtype, sv);
+	}
+
+	if (nameserver().isA(vtype, VOID_VALUE))
+	{
+		pos = vos + 1;
+		return createVoidValue();
 	}
 
 	throw SyntaxException(TRACE_INFO, "Unsupported decode of Value %s",
