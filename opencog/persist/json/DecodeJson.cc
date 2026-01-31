@@ -548,6 +548,12 @@ ValuePtr Json::decode_value(const std::string& s,
 			l++;
 			r = s.find_first_of(",]", l);
 			if (std::string::npos == r) break;
+
+			// Bad clients can (and do) send mal-formed JSON.
+			// This includes the empty list [] and expressions
+			// with a trailing comma. Skip out of those.
+			if (r == l) break;
+
 			std::stringstream ss;
 			ss << s.substr(l, r-l);
 			double d;
@@ -574,6 +580,12 @@ ValuePtr Json::decode_value(const std::string& s,
 		while (std::string::npos != l)
 		{
 			l++;
+
+			// Bad clients can (and do) send mal-formed JSON.
+			// This includes the empty list [] and expressions
+			// with a trailing comma. Skip out of those.
+			if (']' == s[l]) break;
+
 			std::stringstream ss;
 			ss << s.substr(l);
 			std::string uq;
